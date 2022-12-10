@@ -5,6 +5,7 @@ import '../_index.dart';
 class DataCollection<T> {
   final SortAction<T>? defaultSort;
   final StateCallback<DataCollectionState>? onStateChanged;
+  final StateCallback<DataCollectionState>? onActualize;
 
   DataCollectionState<T> _state;
   DataCollectionState<T> get state => _state;
@@ -17,6 +18,7 @@ class DataCollection<T> {
     Iterable<MatchAction<T>> initialMatchers = const [],
     Iterable<FilterAction<T>> initialFilters = const [],
     this.onStateChanged,
+    this.onActualize,
   }) : _state = DataCollectionState.initial(
           data: data,
           originalData: data,
@@ -30,6 +32,7 @@ class DataCollection<T> {
     required DataCollectionState<T> state,
     this.defaultSort,
     this.onStateChanged,
+    this.onActualize,
   }) : _state = state;
 
   DataCollectionState<T> _emitState(DataCollectionState<T> state) {
@@ -43,7 +46,9 @@ class DataCollection<T> {
   }
 
   DataCollectionState<T> actualize() {
-    return _emitState(_actualize());
+    final state = _emitState(_actualize());
+    onActualize?.call(state);
+    return state;
   }
 
   DataCollectionState<T> addMatcher(MatchAction<T> matcher) {

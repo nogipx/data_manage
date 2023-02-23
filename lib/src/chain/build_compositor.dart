@@ -20,7 +20,7 @@ class Chain<T> {
     print(result);
   }
 
-  Future<void> run({
+  Future<T> run({
     required T initialData,
     StepListener? listener,
   }) async {
@@ -38,5 +38,7 @@ class Chain<T> {
         rethrow;
       }
     }
+
+    return transaction;
   }
 }

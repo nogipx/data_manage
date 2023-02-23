@@ -1,6 +1,6 @@
 name: data_manage
 description: Data structures for advanced processing of your data.
-version: 1.0.0
+version: 1.1.0
 repository: https://github.com/nogipx/data_manage
 
 environment:

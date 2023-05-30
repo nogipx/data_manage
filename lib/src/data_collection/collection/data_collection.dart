@@ -4,8 +4,8 @@ import '../_index.dart';
 
 class DataCollection<T> {
   final SortAction<T>? defaultSort;
-  final StateCallback<DataCollectionState>? onStateChanged;
-  final StateCallback<DataCollectionState>? onActualize;
+  final StateCallback<DataCollectionState<T>>? onStateChanged;
+  final StateCallback<DataCollectionState<T>>? onActualize;
 
   DataCollectionState<T> _state;
   DataCollectionState<T> get state => _state;

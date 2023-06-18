@@ -1,11 +1,11 @@
 import '../_index.dart';
 
-class NumberMatchAction<T> extends MatchAction<T> {
+class NumRangeMatchAction<T> extends MatchAction<T> {
   final num? min;
   final num? max;
   final num? Function(T)? numExtractor;
 
-  NumberMatchAction({
+  NumRangeMatchAction({
     required super.key,
     this.min,
     this.max,
@@ -13,13 +13,13 @@ class NumberMatchAction<T> extends MatchAction<T> {
   }) : super(
           isEnabled: min != null || max != null,
           predicate: (item) {
-            final sku = numExtractor?.call(item);
-            if (sku == null) {
+            final number = numExtractor?.call(item);
+            if (number == null) {
               return false;
             }
 
-            final isGreaterMin = min != null ? sku >= min : null;
-            final isLowerMax = max != null ? sku <= max : null;
+            final isGreaterMin = min != null ? number >= min : null;
+            final isLowerMax = max != null ? number <= max : null;
 
             if (min != null && max == null) {
               return isGreaterMin!;

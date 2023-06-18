@@ -146,22 +146,7 @@ class DataCollection<T> {
     );
   }
 
-  DataCollectionUpdatedState<T> dryRunState({
-    Set<MatchAction<T>>? newMatchers,
-    Set<FilterAction<T>>? newFilters,
-    SortAction<T>? newSort,
-    DataCollectionSortResetMode? resetSort,
-  }) =>
-      _chainProcessData(
-        useOriginalData: true,
-        newMatchers: newMatchers != null
-            ? IMap.fromEntries(newMatchers.map((e) => MapEntry(e.key, e)))
-            : null,
-        newFilters: newFilters != null
-            ? IMap.fromEntries(newFilters.map((e) => MapEntry(e.key, e)))
-            : null,
-        newSort: newSort ?? getSortToApply(resetSort),
-      );
+
 
   DataCollectionState<T> _addMatchers(Iterable<MatchAction<T>> data) {
     final matchers = state.matchers.unlockLazy;
@@ -257,6 +242,23 @@ class DataCollection<T> {
     );
     return actualState;
   }
+
+  DataCollectionUpdatedState<T> dryRunState({
+    Set<MatchAction<T>>? newMatchers,
+    Set<FilterAction<T>>? newFilters,
+    SortAction<T>? newSort,
+    DataCollectionSortResetMode? resetSort,
+  }) =>
+      _chainProcessData(
+        useOriginalData: true,
+        newMatchers: newMatchers != null
+            ? IMap.fromEntries(newMatchers.map((e) => MapEntry(e.key, e)))
+            : null,
+        newFilters: newFilters != null
+            ? IMap.fromEntries(newFilters.map((e) => MapEntry(e.key, e)))
+            : null,
+        newSort: newSort ?? getSortToApply(resetSort),
+      );
 
   DataCollectionUpdatedState<T> _chainProcessData({
     DataCollectionState<T>? fromState,

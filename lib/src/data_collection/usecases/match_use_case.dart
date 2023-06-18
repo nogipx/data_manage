@@ -49,7 +49,7 @@ class MatchUseCase<T> implements UseCase<MatchUseCaseResult<T>> {
     return MatchUseCaseResult(
       originalData: data,
       matchedData: data,
-      appliedMatchers: matchers,
+      appliedMatchers: const [],
     );
   }
 
@@ -77,21 +77,15 @@ class MatchUseCase<T> implements UseCase<MatchUseCaseResult<T>> {
     final orMatchers =
         matchers.where((e) => e.type == MatchActionType.or).toList();
 
-    final andMatchers =
-        matchers.where((e) => e.type == MatchActionType.and).toList();
-
-    final passOrList = orMatchers.map((e) => e.predicate(value));
-    final passOr = passOrList.any((e) => e);
-
+    final passOr = orMatchers.any((e) => e.predicate(value));
     if (passOr) {
       return true;
     }
 
-    final matchAndList = andMatchers.map((e) => e.predicate(value));
+    final andMatchers =
+        matchers.where((e) => e.type == MatchActionType.and).toList();
 
-    final matchesAnd =
-        matchAndList.isNotEmpty ? matchAndList.every((e) => e) : false;
-
+    final matchesAnd = andMatchers.every((e) => e.predicate(value));
     if (matchesAnd) {
       return true;
     }

@@ -25,7 +25,7 @@ class FilterUseCase<T> implements UseCase<FilterUseCaseResult<T>> {
   FilterUseCaseResult<T> run() {
     final enabledFilters = filters.where((e) => e.isEnabled);
 
-    if (enabledFilters.isNotEmpty) {
+    if (data.isNotEmpty && enabledFilters.isNotEmpty) {
       bool composedPredicate(T item) =>
           enabledFilters.every((e) => e.predicate(item));
 
@@ -43,7 +43,7 @@ class FilterUseCase<T> implements UseCase<FilterUseCaseResult<T>> {
     return FilterUseCaseResult(
       originalData: data,
       filteredData: data,
-      appliedFilters: enabledFilters,
+      appliedFilters: const [],
     );
   }
 }

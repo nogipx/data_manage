@@ -1,14 +1,40 @@
+import 'dart:developer' as dev;
+
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 import '../_index.dart';
 
 class DataCollection<T> {
   final SortAction<T>? defaultSort;
-  final StateCallback<DataCollectionState<T>>? onStateChanged;
-  final StateCallback<DataCollectionState<T>>? onActualize;
 
   DataCollectionState<T> _state;
   DataCollectionState<T> get state => _state;
+
+  StateCallback<DataCollectionState<T>>? _onStateChanged;
+  set stateChangeListener(StateCallback<DataCollectionState<T>>? handler) {
+    if (_onStateChanged != null) {
+      dev.log(
+        'Warning: data collection already has state change listener. '
+        'It will be overridden by new listener.',
+        name: 'DataCollection<$T>',
+        level: 900,
+      );
+    }
+    _onStateChanged = handler;
+  }
+
+  StateCallback<DataCollectionState<T>>? _onActualize;
+  set actualizeListener(StateCallback<DataCollectionState<T>>? handler) {
+    if (_onActualize != null) {
+      dev.log(
+        'Warning: data collection already has actualize listener. '
+        'It will be overridden by new listener.',
+        name: 'DataCollection<$T>',
+        level: 900,
+      );
+    }
+    _onActualize = handler;
+  }
 
   bool get isLoading => state is DataCollectionLoadingState;
 
@@ -17,8 +43,8 @@ class DataCollection<T> {
     this.defaultSort,
     Iterable<MatchAction<T>> initialMatchers = const [],
     Iterable<FilterAction<T>> initialFilters = const [],
-    this.onStateChanged,
-    this.onActualize,
+    StateCallback<DataCollectionState<T>>? onStateChanged,
+    StateCallback<DataCollectionState<T>>? onActualize,
   }) : _state = DataCollectionState.initial(
           data: data,
           originalData: data,
@@ -31,13 +57,13 @@ class DataCollection<T> {
   DataCollection.fromState({
     required DataCollectionState<T> state,
     this.defaultSort,
-    this.onStateChanged,
-    this.onActualize,
+    StateCallback<DataCollectionState<T>>? onStateChanged,
+    StateCallback<DataCollectionState<T>>? onActualize,
   }) : _state = state;
 
   DataCollectionState<T> _emitState(DataCollectionState<T> state) {
     _state = state;
-    onStateChanged?.call(_state);
+    _onStateChanged?.call(_state);
     return this.state;
   }
 
@@ -47,7 +73,7 @@ class DataCollection<T> {
 
   DataCollectionState<T> actualize() {
     final state = _emitState(_actualize());
-    onActualize?.call(state);
+    _onActualize?.call(state);
     return state;
   }
 

@@ -7,10 +7,16 @@ import '../_index.dart';
 class DataCollection<T> {
   final SortAction<T>? defaultSort;
 
+  /// Controls to automatically pass
+  /// new state to [actualizeListener] callback.
+  final bool autoActualize;
+
   DataCollectionState<T> _state;
+
   DataCollectionState<T> get state => _state;
 
   StateCallback<DataCollectionState<T>>? _onStateChanged;
+
   set stateChangeListener(StateCallback<DataCollectionState<T>>? handler) {
     if (_onStateChanged != null) {
       dev.log(
@@ -24,6 +30,7 @@ class DataCollection<T> {
   }
 
   StateCallback<DataCollectionState<T>>? _onActualize;
+
   set actualizeListener(StateCallback<DataCollectionState<T>>? handler) {
     if (_onActualize != null) {
       dev.log(
@@ -45,6 +52,7 @@ class DataCollection<T> {
     Iterable<FilterAction<T>> initialFilters = const [],
     StateCallback<DataCollectionState<T>>? onStateChanged,
     StateCallback<DataCollectionState<T>>? onActualize,
+    this.autoActualize = true,
   }) : _state = DataCollectionState.initial(
           data: data,
           originalData: data,
@@ -59,22 +67,28 @@ class DataCollection<T> {
     this.defaultSort,
     StateCallback<DataCollectionState<T>>? onStateChanged,
     StateCallback<DataCollectionState<T>>? onActualize,
+    this.autoActualize = true,
   }) : _state = state;
 
   DataCollectionState<T> _emitState(DataCollectionState<T> state) {
     _state = state;
     _onStateChanged?.call(_state);
+    if (autoActualize) {
+      _onActualize?.call(this.state);
+    }
     return this.state;
-  }
-
-  DataCollectionState<T> updateOriginalData(Iterable<T> data) {
-    return _emitState(_updateOriginalData(data));
   }
 
   DataCollectionState<T> actualize() {
     final state = _emitState(_actualize());
-    _onActualize?.call(state);
+    if (!autoActualize) {
+      _onActualize?.call(state);
+    }
     return state;
+  }
+
+  DataCollectionState<T> updateOriginalData(Iterable<T> data) {
+    return _emitState(_updateOriginalData(data));
   }
 
   DataCollectionState<T> addMatcher(MatchAction<T> matcher) {
@@ -146,7 +160,22 @@ class DataCollection<T> {
     );
   }
 
-
+  DataCollectionUpdatedState<T> dryRunState({
+    Set<MatchAction<T>>? newMatchers,
+    Set<FilterAction<T>>? newFilters,
+    SortAction<T>? newSort,
+    DataCollectionSortResetMode? resetSort,
+  }) =>
+      _chainProcessData(
+        useOriginalData: true,
+        newMatchers: newMatchers != null
+            ? IMap.fromEntries(newMatchers.map((e) => MapEntry(e.key, e)))
+            : null,
+        newFilters: newFilters != null
+            ? IMap.fromEntries(newFilters.map((e) => MapEntry(e.key, e)))
+            : null,
+        newSort: newSort ?? _getSortToApply(resetSort),
+      );
 
   DataCollectionState<T> _addMatchers(Iterable<MatchAction<T>> data) {
     final matchers = state.matchers.unlockLazy;
@@ -220,7 +249,7 @@ class DataCollection<T> {
     if (mode != null) {
       final newState = _chainProcessData(
         useOriginalData: mode == DataCollectionSortResetMode.originalSort,
-        newSort: getSortToApply(mode),
+        newSort: _getSortToApply(mode),
       );
       return newState;
     } else {
@@ -242,23 +271,6 @@ class DataCollection<T> {
     );
     return actualState;
   }
-
-  DataCollectionUpdatedState<T> dryRunState({
-    Set<MatchAction<T>>? newMatchers,
-    Set<FilterAction<T>>? newFilters,
-    SortAction<T>? newSort,
-    DataCollectionSortResetMode? resetSort,
-  }) =>
-      _chainProcessData(
-        useOriginalData: true,
-        newMatchers: newMatchers != null
-            ? IMap.fromEntries(newMatchers.map((e) => MapEntry(e.key, e)))
-            : null,
-        newFilters: newFilters != null
-            ? IMap.fromEntries(newFilters.map((e) => MapEntry(e.key, e)))
-            : null,
-        newSort: newSort ?? getSortToApply(resetSort),
-      );
 
   DataCollectionUpdatedState<T> _chainProcessData({
     DataCollectionState<T>? fromState,
@@ -367,7 +379,7 @@ class DataCollection<T> {
     return filterResult;
   }
 
-  SortAction<T>? getSortToApply([DataCollectionSortResetMode? mode]) {
+  SortAction<T>? _getSortToApply([DataCollectionSortResetMode? mode]) {
     final sortToApply = () {
       if (mode == DataCollectionSortResetMode.originalSort) {
         return null;

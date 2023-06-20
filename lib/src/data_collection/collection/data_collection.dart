@@ -17,6 +17,7 @@ class DataCollection<T> {
 
   StateCallback<DataCollectionState<T>>? _onStateChanged;
 
+  bool get hasStateChangeListener => _onStateChanged != null;
   set stateChangeListener(StateCallback<DataCollectionState<T>>? handler) {
     if (_onStateChanged != null) {
       dev.log(
@@ -31,6 +32,7 @@ class DataCollection<T> {
 
   StateCallback<DataCollectionState<T>>? _onActualize;
 
+  bool get hasActualizeListener => _onActualize != null;
   set actualizeListener(StateCallback<DataCollectionState<T>>? handler) {
     if (_onActualize != null) {
       dev.log(
@@ -53,12 +55,14 @@ class DataCollection<T> {
     StateCallback<DataCollectionState<T>>? onStateChanged,
     StateCallback<DataCollectionState<T>>? onActualize,
     this.autoActualize = true,
-  }) : _state = DataCollectionState.initial(
+  })  : _state = DataCollectionState.initial(
           data: data,
           originalData: data,
           matchers: _preprocessMatchers(initialMatchers.toList()),
           filters: _preprocessFilters(initialFilters.toList()),
-        ) {
+        ),
+        _onActualize = onActualize,
+        _onStateChanged = onStateChanged {
     actualize();
   }
 
@@ -74,9 +78,10 @@ class DataCollection<T> {
     _state = state;
     _onStateChanged?.call(_state);
     if (autoActualize) {
-      _onActualize?.call(this.state);
+      _state = _chainProcessData(fromState: _state);
+      _onActualize?.call(_state);
     }
-    return this.state;
+    return _state;
   }
 
   DataCollectionState<T> actualize() {

@@ -75,6 +75,13 @@ class Tree<T> {
     firstEdges.remove(second);
   }
 
+  void clear() {
+    _nodes.clear();
+    _nodeData.clear();
+    _edges.clear();
+    _parents.clear();
+  }
+
   // EXTRA DATA OPERATIONS
 
   T? getNodeData(String key) => _nodeData[key];

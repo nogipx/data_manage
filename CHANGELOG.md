@@ -1,3 +1,6 @@
+# [1.2.2]
+* add method to clear tree data
+
 # [1.2.1]
 * fix bug with data collection state listeners
 

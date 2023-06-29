@@ -94,7 +94,7 @@ class MatchUseCase<T> implements UseCase<MatchUseCaseResult<T>> {
   }
 
   /// Возвращает количество элементов, подходящих под матчеры.
-  Future<int> countMatchedItems() async {
+  int countMatchedItems() {
     final enabledMatchers = matchers.where((e) => e.isEnabled);
 
     int counter = 0;

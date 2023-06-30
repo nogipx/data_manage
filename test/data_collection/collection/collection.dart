@@ -1,4 +1,5 @@
 import 'package:data_manage/data_manage.dart';
+import 'package:data_manage/src/data_collection/collection/data_collection_listener.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -28,8 +29,10 @@ void main() {
           predicate: (e) => e == 9,
         ),
       ],
-      onStateChanged: (_) {},
-      onActualize: (_) {},
+      listener: SimpleCollectionListener(
+        actualizeListener: (_) {},
+        stateListener: (_) {},
+      ),
     );
 
     sut.actualize();
@@ -40,8 +43,7 @@ void main() {
     expect(state.hasFilters, equals(true));
     expect(state.hasMatchers, equals(true));
     expect(state.sort, isNull);
-    expect(sut.hasActualizeListener, isTrue);
-    expect(sut.hasStateChangeListener, isTrue);
+    expect(sut.hasCollectionListener, isTrue);
   });
 
   test('Auto actualization applies all settings', () {
@@ -75,8 +77,10 @@ void main() {
           predicate: (e) => e == 9,
         ),
       ],
-      onActualize: (e) => actualizedState = e,
-      onStateChanged: (e) => newState = e,
+      listener: SimpleCollectionListener(
+        actualizeListener: (e) => actualizedState = e,
+        stateListener: (e) => newState = e,
+      ),
     );
 
     final newData = [1, 2, 3, 4, 10, 11, 12, 13];

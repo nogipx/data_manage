@@ -1,5 +1,4 @@
-import 'dart:developer' as dev;
-
+import 'package:data_manage/src/data_collection/collection/data_collection_listener.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 import '../_index.dart';
@@ -8,42 +7,16 @@ class DataCollection<T> {
   final SortAction<T>? defaultSort;
 
   /// Controls to automatically pass
-  /// new state to [actualizeListener] callback.
+  /// new state to listeners.
   final bool autoActualize;
 
   DataCollectionState<T> _state;
 
   DataCollectionState<T> get state => _state;
 
-  StateCallback<DataCollectionState<T>>? _onStateChanged;
+  DataCollectionListener? _listener;
 
-  bool get hasStateChangeListener => _onStateChanged != null;
-  set stateChangeListener(StateCallback<DataCollectionState<T>>? handler) {
-    if (_onStateChanged != null) {
-      dev.log(
-        'Warning: data collection already has state change listener. '
-        'It will be overridden by new listener.',
-        name: 'DataCollection<$T>',
-        level: 900,
-      );
-    }
-    _onStateChanged = handler;
-  }
-
-  StateCallback<DataCollectionState<T>>? _onActualize;
-
-  bool get hasActualizeListener => _onActualize != null;
-  set actualizeListener(StateCallback<DataCollectionState<T>>? handler) {
-    if (_onActualize != null) {
-      dev.log(
-        'Warning: data collection already has actualize listener. '
-        'It will be overridden by new listener.',
-        name: 'DataCollection<$T>',
-        level: 900,
-      );
-    }
-    _onActualize = handler;
-  }
+  bool get hasCollectionListener => _listener != null;
 
   bool get isLoading => state is DataCollectionLoadingState;
 
@@ -52,17 +25,15 @@ class DataCollection<T> {
     this.defaultSort,
     Iterable<MatchAction<T>> initialMatchers = const [],
     Iterable<FilterAction<T>> initialFilters = const [],
-    StateCallback<DataCollectionState<T>>? onStateChanged,
-    StateCallback<DataCollectionState<T>>? onActualize,
     this.autoActualize = true,
+    DataCollectionListener<T>? listener,
   })  : _state = DataCollectionState.initial(
           data: data,
           originalData: data,
           matchers: _preprocessMatchers(initialMatchers.toList()),
           filters: _preprocessFilters(initialFilters.toList()),
         ),
-        _onActualize = onActualize,
-        _onStateChanged = onStateChanged {
+        _listener = listener {
     actualize();
   }
 
@@ -76,10 +47,10 @@ class DataCollection<T> {
 
   DataCollectionState<T> _emitState(DataCollectionState<T> state) {
     _state = state;
-    _onStateChanged?.call(_state);
+    _listener?.onStateChanged(_state);
     if (autoActualize) {
       _state = _chainProcessData(fromState: _state);
-      _onActualize?.call(_state);
+      _listener?.onActualize(_state);
     }
     return _state;
   }
@@ -87,7 +58,7 @@ class DataCollection<T> {
   DataCollectionState<T> actualize() {
     final state = _emitState(_actualize());
     if (!autoActualize) {
-      _onActualize?.call(state);
+      _listener?.onActualize(_state);
     }
     return state;
   }
@@ -295,27 +266,30 @@ class DataCollection<T> {
 
     final hasMatchersChanged =
         !newState.matchers.equalItemsToIMap(currentState.matchers);
+
     final hasFiltersChanged =
         !newState.filters.equalItemsToIMap(currentState.filters);
 
     if (hasMatchersChanged || useOriginalData) {
-      final matchResult = _match(
+      final matchResult = MatchUseCase(
         data: newState.data,
         matchers: newState.matchers.values,
-      );
+      ).run();
       newState = newState.copyWith(
         data: matchResult.matchedData,
       );
     }
+
     if (hasFiltersChanged || useOriginalData) {
-      final filterResult = _filter(
+      final filterResult = FilterUseCase(
         data: newState.data,
         filters: newState.filters.values,
-      );
+      ).run();
       newState = newState.copyWith(
         data: filterResult.filteredData,
       );
     }
+
     if (newState.sort != null) {
       final sortResult = _sort(
         data: newState.data,
@@ -359,29 +333,6 @@ class DataCollection<T> {
       originalData: data,
       sortedData: data,
     );
-  }
-
-  MatchUseCaseResult<T> _match({
-    required Iterable<T> data,
-    required Iterable<MatchAction<T>> matchers,
-  }) {
-    final matchResult = MatchUseCase(
-      data: data,
-      matchers: matchers,
-    ).run();
-
-    return matchResult;
-  }
-
-  FilterUseCaseResult<T> _filter({
-    required Iterable<T> data,
-    required Iterable<FilterAction<T>> filters,
-  }) {
-    final filterResult = FilterUseCase(
-      data: data,
-      filters: filters,
-    ).run();
-    return filterResult;
   }
 
   SortAction<T>? _getSortToApply([DataCollectionSortResetMode? mode]) {

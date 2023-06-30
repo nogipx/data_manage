@@ -1,3 +1,6 @@
+# [1.2.3]
+* add data collection listener
+
 # [1.2.2]
 * add method to clear tree data
 

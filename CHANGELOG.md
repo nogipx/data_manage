@@ -1,3 +1,6 @@
+# [1.2.4]
+* add typedefs for decoupling for business cases
+
 # [1.2.3]
 * add data collection listener
 

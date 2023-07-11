@@ -12,8 +12,8 @@ class DataCollectionState<T> with _$DataCollectionState<T> {
   const factory DataCollectionState.initial({
     required Iterable<T> originalData,
     required Iterable<T> data,
-    required IMap<String, FilterAction<T>> filters,
-    required IMap<String, MatchAction<T>> matchers,
+    @Default(IMapConst({})) IMap<String, FilterAction<T>> filters,
+    @Default(IMapConst({})) IMap<String, MatchAction<T>> matchers,
     SortAction<T>? sort,
   }) = DataCollectionInitialState<T>;
 

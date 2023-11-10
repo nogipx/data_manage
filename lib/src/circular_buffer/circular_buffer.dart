@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-/// A [CircularBufferNotifier] with a fixed capacity supporting all [List] operations
+/// A [CircularBuffer] with a fixed capacity supporting all [List] operations
 ///
 /// ```dart
 /// final buffer = CircularBuffer<int>(3)..add(1)..add(2);
@@ -17,9 +17,9 @@ import 'dart:collection';
 /// buffer.add(4);
 /// print(buffer.first); // 2
 /// ```
-class CircularBufferNotifier<T> with ListMixin<T> {
-  /// Creates a [CircularBufferNotifier] with a `capacity`
-  CircularBufferNotifier({
+class CircularBuffer<T> with ListMixin<T> {
+  /// Creates a [CircularBuffer] with a `capacity`
+  CircularBuffer({
     required this.capacity,
     this.changeListener,
   })  : assert(capacity > 1, 'CircularBuffer must have a positive capacity.'),
@@ -28,7 +28,7 @@ class CircularBufferNotifier<T> with ListMixin<T> {
   final void Function(List<T> value)? changeListener;
   final List<T> _buf;
 
-  /// Maximum number of elements of [CircularBufferNotifier]
+  /// Maximum number of elements of [CircularBuffer]
   final int capacity;
 
   int _start = 0;
@@ -37,7 +37,7 @@ class CircularBufferNotifier<T> with ListMixin<T> {
     changeListener?.call(this);
   }
 
-  /// Resets the [CircularBufferNotifier].
+  /// Resets the [CircularBuffer].
   ///
   /// [capacity] is unaffected.
   void reset() {
@@ -87,15 +87,15 @@ class CircularBufferNotifier<T> with ListMixin<T> {
     _notifyListeners();
   }
 
-  /// Number of used elements of [CircularBufferNotifier]
+  /// Number of used elements of [CircularBuffer]
   @override
   int get length => _buf.length;
 
-  /// The [CircularBufferNotifier] `isFilled` if the [length]
+  /// The [CircularBuffer] `isFilled` if the [length]
   /// is equal to the [capacity].
   bool get isFilled => _buf.length == capacity;
 
-  /// The [CircularBufferNotifier] `isUnfilled` if the [length] is
+  /// The [CircularBuffer] `isUnfilled` if the [length] is
   /// less than the [capacity].
   bool get isUnfilled => _buf.length < capacity;
 

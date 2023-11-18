@@ -1,3 +1,7 @@
+# [1.2.5]
+* separate tree interfaces
+* not allow to change hierarchy of present tree while adding edges
+
 # [1.2.4]
 * add typedefs for decoupling for business cases
 

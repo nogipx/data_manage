@@ -1,23 +1,26 @@
-import 'dart:developer' as dev;
-
 import '_index.dart';
 
-class Tree<T> {
+class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
+  @override
   final Node root;
 
   final Map<String, Node> _nodes = {};
+  @override
   Map<String, Node> get nodes => Map.unmodifiable(_nodes);
 
   final Map<String, T> _nodeData = {};
+  @override
   Map<String, T> get nodeData => Map.unmodifiable(_nodeData);
 
   final Map<Node, Set<Node>> _edges = {};
+  @override
   Map<Node, Set<Node>> get edges => Map.unmodifiable(_edges);
 
   final Map<Node, Node> _parents = {};
+  @override
   Map<Node, Node> get parents => Map.unmodifiable(_parents);
 
-  Tree({
+  TreeImpl({
     required this.root,
     Map<String, Node> nodes = const {},
     Map<String, T> nodesData = const {},
@@ -33,27 +36,40 @@ class Tree<T> {
 
   // ADD OPERATIONS
 
+  @override
   void addNode(Node node) {
+    if (containsNode(node.key)) {
+      throw Exception('Tree already contains node "${node.key}"');
+    }
+
     _nodes[node.key] = node;
     _edges[node] = {};
   }
 
-  void addEdge(Node first, Node second) {
-    if (!containsNode(first.key)) {
-      addNode(first);
+  @override
+  void addEdge(Node parent, Node child) {
+    if (!containsNode(parent.key)) {
+      addNode(parent);
     }
-    if (!containsNode(second.key)) {
-      addNode(second);
+    if (!containsNode(child.key)) {
+      addNode(child);
     }
 
-    _parents[second] = first;
+    if (getNodeParent(child) != null) {
+      throw Exception(
+        'Node "${child.key}" already have parent "${parent.key}"',
+      );
+    }
 
-    final firstEdges = _edges.putIfAbsent(first, () => {});
-    firstEdges.add(second);
+    _parents[child] = parent;
+
+    final firstEdges = _edges.putIfAbsent(parent, () => {});
+    firstEdges.add(child);
   }
 
   // REMOVE OPERATIONS
 
+  @override
   void removeNode(Node node) {
     _guardGraphContainsNode(node);
     _nodes.remove(node);
@@ -65,6 +81,7 @@ class Tree<T> {
     _parents.removeWhere((key, value) => value == node);
   }
 
+  @override
   void removeEdge(Node first, Node second) {
     _guardGraphContainsNode(first, extra: '(parent)');
     _guardGraphContainsNode(second, extra: '(child)');
@@ -75,6 +92,7 @@ class Tree<T> {
     firstEdges.remove(second);
   }
 
+  @override
   void clear() {
     _nodes.clear();
     _nodeData.clear();
@@ -84,23 +102,30 @@ class Tree<T> {
 
   // EXTRA DATA OPERATIONS
 
+  @override
   T? getNodeData(String key) => _nodeData[key];
 
+  @override
   void updateNodeData(String key, T data) => _nodeData[key] = data;
 
   // ACCESS OPERATIONS
 
+  @override
   Node? getNodeByKey(String key) => _nodes[key];
 
+  @override
   bool containsNode(String nodeKey) => _nodes.containsKey(nodeKey);
 
+  @override
   Node? getNodeParent(Node node) => _parents[node];
 
+  @override
   Set<Node> getNodeEdges(Node node) => _edges[node] ?? {};
 
   // METHODS
 
   /// ## Обход в ширину.
+  @override
   int visitBreadth(VisitCallback visit, {Node? startNode}) {
     final visited = <Node, bool>{};
     final queue = [startNode ?? root];
@@ -131,6 +156,7 @@ class Tree<T> {
   }
 
   /// ## Обход в глубину.
+  @override
   void visitDepth(VisitCallback visit, {Node? startNode}) {
     final visited = <Node, bool>{};
     final stack = <Node>[];
@@ -156,6 +182,7 @@ class Tree<T> {
   }
 
   /// ## Рекурсивный обход в глубину с сохранением обратного пути.
+  @override
   void visitDepthBacktrack(BacktrackCallback visit) {
     _visitDepthBacktrack(root, visit, [root]);
   }
@@ -179,12 +206,14 @@ class Tree<T> {
 
   /// ## Возвращает список всех связанных вершин с заданной.
   /// От корня до заданной вершины.
+  @override
   Set<Node> getPathToNode(Node node) {
     return getVerticalPathBetweenNodes(root, node);
   }
 
   /// ## Возвращает список всех связанных вершин с заданной.
   /// От корня до листьев.
+  @override
   Set<Node> getFullVerticalPath(Node node) {
     final upwardPath = getVerticalPathBetweenNodes(root, node);
     visitDepth(
@@ -210,6 +239,7 @@ class Tree<T> {
   /// Можно передать уже просчитанные глубины вершин.
   /// Если просчитанные глубины не переданы,
   /// то глубина для каждой вершины вычисляется.
+  @override
   Set<Node> getVerticalPathBetweenNodes(
     Node first,
     Node second, {
@@ -247,6 +277,7 @@ class Tree<T> {
   }
 
   /// ## Возвращает список детей родителя данной вершины.
+  @override
   Set<Node> getSiblings(Node node) {
     final parent = getNodeParent(node);
 
@@ -265,6 +296,7 @@ class Tree<T> {
   ///
   /// Если [startNode] не указан, то возвращает
   /// список всех листьев дерева.
+  @override
   Set<Node> getLeaves({
     Node? startNode,
   }) {
@@ -289,6 +321,7 @@ class Tree<T> {
   /// Выполняет обход в ширину в поисках вершины.
   /// При нахождении совпадения прерывает обход
   /// и возвращает глубину вершины.
+  @override
   int getNodeLevel(Node node) {
     bool found = false;
     final level = visitBreadth((n) {
@@ -305,6 +338,7 @@ class Tree<T> {
   ///
   /// Выполняет проход учитывая обратный путь.
   /// Для каждой вершины сохраняет ее глубину.
+  @override
   Map<Node, int> getDepths() {
     final result = <Node, int>{};
     visitDepthBacktrack((path) {
@@ -318,20 +352,23 @@ class Tree<T> {
     return result;
   }
 
-  void printTree() {
+  @override
+  String get graphString {
+    final buffer = StringBuffer();
+
     visitDepthBacktrack((path) {
       if (path.isNotEmpty) {
         final level = path.length - 1;
         final node = path.last;
         final data = getNodeData(node.key);
-        dev.log(
-          '${'|  ' * level}$node ${data != null ? '[data: $data]' : ''}',
-          name: 'Tree.print',
-          level: 800,
-        );
+        final msg =
+            '${'|  ' * level}$node ${data != null ? '[data: $data]' : ''}';
+        buffer.writeln(msg);
       }
       return VisitResult.continueVisit;
     });
+
+    return buffer.toString();
   }
 
   void _guardGraphContainsNode(Node node, {String extra = ''}) {
@@ -339,13 +376,4 @@ class Tree<T> {
       throw Exception('Graph does not contains $node. $extra');
     }
   }
-
-  /// ## Клонирует дерево.
-  Tree clone() => Tree(
-        root: root,
-        nodes: nodes,
-        edges: edges,
-        nodesData: nodeData,
-        parents: parents,
-      );
 }

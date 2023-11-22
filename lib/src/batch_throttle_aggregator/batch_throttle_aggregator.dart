@@ -17,6 +17,9 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
   Timer? _timer;
   final List<T> _data = [];
 
+  bool _isInProgress = false;
+  bool get isConfirmInProgress => _isInProgress;
+
   @override
   void forceConfirm() {
     _onConfirm();
@@ -24,6 +27,10 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
 
   @override
   void add(T data) {
+    if (_isInProgress) {
+      throw Exception('Batch confirming in progress');
+    }
+
     _data.add(data);
 
     if (_timer != null) {
@@ -36,10 +43,13 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
     );
   }
 
-  void _onConfirm() {
+  void _onConfirm() async {
     final batch = AggregatedBatch(data: List.of(_data));
     _data.clear();
-    onConfirmBatch(batch);
+
+    _isInProgress = true;
+    await onConfirmBatch(batch);
+    _isInProgress = false;
 
     _resetTimer();
   }

@@ -1,18 +1,19 @@
 import 'package:data_manage/src/batch_throttle_aggregator/_index.dart';
 import 'package:test/test.dart';
 
+import 'data/delegates.dart';
+
+TestAsyncDelegate _asyncDelegate() => TestAsyncDelegate();
+TestSyncDelegate _syncDelegate() => TestSyncDelegate();
+
 void main() {
   test(
     'Positive behavior',
     () async {
-      AggregatedBatch? resultBatch;
+      final delegate = _syncDelegate();
 
       final sut = BatchThrottleAggregator<String>(
-        durationIdleBeforeConfirm: const Duration(milliseconds: 15),
-        onConfirmBatch: (batch) {
-          resultBatch = batch;
-          print(resultBatch?.data);
-        },
+        delegate: delegate,
       );
 
       sut.add('1');
@@ -22,29 +23,24 @@ void main() {
       sut.add('3');
 
       await Future.delayed(const Duration(milliseconds: 15));
-      expect(resultBatch, isNotNull);
-      expect(resultBatch?.data.length, equals(3));
+      expect(delegate.resultBatch, isNotNull);
+      expect(delegate.resultBatch?.data.length, equals(3));
 
       sut.add('other');
       await Future.delayed(const Duration(milliseconds: 15));
 
-      expect(resultBatch, isNotNull);
-      expect(resultBatch?.data.length, equals(1));
+      expect(delegate.resultBatch, isNotNull);
+      expect(delegate.resultBatch?.data.length, equals(1));
     },
   );
 
   test(
     'Add new data while confirm in progress is illegal',
     () async {
-      AggregatedBatch? resultBatch;
+      final delegate = _asyncDelegate();
 
       final sut = BatchThrottleAggregator<String>(
-        durationIdleBeforeConfirm: const Duration(milliseconds: 15),
-        onConfirmBatch: (batch) async {
-          resultBatch = batch;
-          print(resultBatch?.data);
-          await Future.delayed(const Duration(milliseconds: 20));
-        },
+        delegate: delegate,
       );
 
       sut.add('1');
@@ -54,8 +50,8 @@ void main() {
       sut.add('3');
 
       await Future.delayed(const Duration(milliseconds: 15));
-      expect(resultBatch, isNotNull);
-      expect(resultBatch?.data.length, equals(3));
+      expect(delegate.resultBatch, isNotNull);
+      expect(delegate.resultBatch?.data.length, equals(3));
 
       expect(() => sut.add('other'), throwsException);
     },
@@ -64,15 +60,10 @@ void main() {
   test(
     'Positive behavior after waiting for confirming batch',
     () async {
-      AggregatedBatch? resultBatch;
+      final delegate = _asyncDelegate();
 
       final sut = BatchThrottleAggregator<String>(
-        durationIdleBeforeConfirm: const Duration(milliseconds: 15),
-        onConfirmBatch: (batch) async {
-          resultBatch = batch;
-          print(resultBatch?.data);
-          await Future.delayed(const Duration(milliseconds: 20));
-        },
+        delegate: delegate,
       );
 
       sut.add('1');
@@ -82,15 +73,15 @@ void main() {
       sut.add('3');
 
       await Future.delayed(const Duration(milliseconds: 15));
-      expect(resultBatch, isNotNull);
-      expect(resultBatch?.data.length, equals(3));
+      expect(delegate.resultBatch, isNotNull);
+      expect(delegate.resultBatch?.data.length, equals(3));
 
       await Future.delayed(const Duration(milliseconds: 20));
       sut.add('other');
       await Future.delayed(const Duration(milliseconds: 15));
 
-      expect(resultBatch, isNotNull);
-      expect(resultBatch?.data.length, equals(1));
+      expect(delegate.resultBatch, isNotNull);
+      expect(delegate.resultBatch?.data.length, equals(1));
     },
   );
 }

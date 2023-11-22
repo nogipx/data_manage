@@ -1,3 +1,7 @@
+# [1.3.3]
+* fix: wrap confirming wit try/catch
+* feat: make delegate for throttle aggregator
+
 # [1.3.2]
 * feat: add waiting for confirming batch
 

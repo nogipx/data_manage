@@ -1,16 +1,26 @@
 import 'dart:async';
 
+import 'package:data_manage/data_manage.dart';
 import 'package:data_manage/src/batch_throttle_aggregator/_index.dart';
 
-typedef OnConfirmBatchThrottleAggregator<T> = FutureOr<void> Function(
-    AggregatedBatch<T> batch);
-
 abstract class IBatchThrottleAggregator<T> {
-  Duration get durationIdleBeforeConfirm;
+  IBatchThrottleDelegate<T> get delegate;
 
-  OnConfirmBatchThrottleAggregator<T> get onConfirmBatch;
+  bool get isConfirmInProgress;
 
   void add(T data);
 
   void forceConfirm();
+}
+
+abstract class IBatchThrottleDelegate<T> {
+  Duration get durationIdleBeforeConfirm;
+
+  bool willConfirm();
+
+  void onAddData(T data);
+
+  FutureOr<void> onConfirmBatch(AggregatedBatch<T> batch);
+
+  void onError(Object? error, StackTrace trace);
 }

@@ -4,21 +4,18 @@ import 'package:data_manage/src/batch_throttle_aggregator/_index.dart';
 
 class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
   BatchThrottleAggregator({
-    required this.durationIdleBeforeConfirm,
-    required this.onConfirmBatch,
+    required this.delegate,
   });
 
   @override
-  final Duration durationIdleBeforeConfirm;
+  final IBatchThrottleDelegate<T> delegate;
 
   @override
-  final OnConfirmBatchThrottleAggregator<T> onConfirmBatch;
+  bool get isConfirmInProgress => _isInProgress;
+  bool _isInProgress = false;
 
   Timer? _timer;
   final List<T> _data = [];
-
-  bool _isInProgress = false;
-  bool get isConfirmInProgress => _isInProgress;
 
   @override
   void forceConfirm() {
@@ -32,26 +29,37 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
     }
 
     _data.add(data);
+    delegate.onAddData(data);
 
     if (_timer != null) {
       _resetTimer();
     }
 
     _timer = Timer(
-      durationIdleBeforeConfirm,
+      delegate.durationIdleBeforeConfirm,
       _onConfirm,
     );
   }
 
   void _onConfirm() async {
     final batch = AggregatedBatch(data: List.of(_data));
-    _data.clear();
 
-    _isInProgress = true;
-    await onConfirmBatch(batch);
-    _isInProgress = false;
+    try {
+      if (!delegate.willConfirm()) {
+        return;
+      }
 
-    _resetTimer();
+      _isInProgress = true;
+      await delegate.onConfirmBatch(batch);
+
+      _data.clear();
+    } on Object catch (error, trace) {
+      delegate.onError(error, trace);
+      rethrow;
+    } finally {
+      _isInProgress = false;
+      _resetTimer();
+    }
   }
 
   void _resetTimer() {

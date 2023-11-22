@@ -18,9 +18,9 @@ abstract class IBatchThrottleDelegate<T> {
 
   bool willConfirm();
 
-  void onAddData(T data);
+  FutureOr<void> confirmBatch(AggregatedBatch<T> batch);
 
-  FutureOr<void> onConfirmBatch(AggregatedBatch<T> batch);
+  void onAddDataToBatch(T data);
 
-  void onError(Object? error, StackTrace trace);
+  void onConfirmingError(Object? error, StackTrace trace);
 }

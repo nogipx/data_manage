@@ -1,3 +1,6 @@
+# [1.3.4]
+* feat!: rename delegate methods
+
 # [1.3.3]
 * fix: wrap confirming wit try/catch
 * feat: make delegate for throttle aggregator

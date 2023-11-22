@@ -29,7 +29,7 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
     }
 
     _data.add(data);
-    delegate.onAddData(data);
+    delegate.onAddDataToBatch(data);
 
     if (_timer != null) {
       _resetTimer();
@@ -50,11 +50,11 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
       }
 
       _isInProgress = true;
-      await delegate.onConfirmBatch(batch);
+      await delegate.confirmBatch(batch);
 
       _data.clear();
     } on Object catch (error, trace) {
-      delegate.onError(error, trace);
+      delegate.onConfirmingError(error, trace);
       rethrow;
     } finally {
       _isInProgress = false;

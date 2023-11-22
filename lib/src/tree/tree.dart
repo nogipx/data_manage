@@ -124,7 +124,7 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
 
   // METHODS
 
-  /// ## Обход в ширину.
+  /// ## Breadth-first search (BFS)
   @override
   int visitBreadth(VisitCallback visit, {Node? startNode}) {
     final visited = <Node, bool>{};
@@ -155,7 +155,7 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     return startNode != null ? -1 : level;
   }
 
-  /// ## Обход в глубину.
+  /// ## Depth-first search (DFS)
   @override
   void visitDepth(VisitCallback visit, {Node? startNode}) {
     final visited = <Node, bool>{};
@@ -181,7 +181,7 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     }
   }
 
-  /// ## Рекурсивный обход в глубину с сохранением обратного пути.
+  /// ## Recursive depth-first search with backtracking.
   @override
   void visitDepthBacktrack(BacktrackCallback visit) {
     _visitDepthBacktrack(root, visit, [root]);
@@ -204,15 +204,15 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     }
   }
 
-  /// ## Возвращает список всех связанных вершин с заданной.
-  /// От корня до заданной вершины.
+  /// ## Returns a list of all connected vertices from the given one.
+  /// From the root to the specified vertex.
   @override
   Set<Node> getPathToNode(Node node) {
     return getVerticalPathBetweenNodes(root, node);
   }
 
-  /// ## Возвращает список всех связанных вершин с заданной.
-  /// От корня до листьев.
+  /// ## Returns a list of all connected vertices from the given one.
+  /// From the root to the leaves.
   @override
   Set<Node> getFullVerticalPath(Node node) {
     final upwardPath = getVerticalPathBetweenNodes(root, node);
@@ -227,18 +227,18 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     return upwardPath;
   }
 
-  /// ## Возвращает путь между двумя вершинами поддерева.
+  /// ## Returns the path between two vertices within a subtree.
   ///
-  /// Определяет какая вершина находится выше.
-  /// Затем поднимается вверх по графу до нахождения родительской вершины.
+  /// Determines which vertex is higher.
+  /// Then moves up the graph until reaching the parent vertex.
   /// ---
-  /// Если в процессе прохода родительская вершина не найдена
-  /// (например, у корня нет родителей),
-  /// то останавливается и возвращает пустой путь.
+  /// If during the process the parent vertex is not found
+  /// (for example, the root has no parents),
+  /// it stops and returns an empty path.
   /// ---
-  /// Можно передать уже просчитанные глубины вершин.
-  /// Если просчитанные глубины не переданы,
-  /// то глубина для каждой вершины вычисляется.
+  /// Pre-calculated depths of vertices can be passed.
+  /// If pre-calculated depths are not passed,
+  /// the depth for each vertex is computed.
   @override
   Set<Node> getVerticalPathBetweenNodes(
     Node first,
@@ -276,7 +276,7 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     return path.toSet();
   }
 
-  /// ## Возвращает список детей родителя данной вершины.
+  /// ## Returns a list of children of the parent of the given vertex.
   @override
   Set<Node> getSiblings(Node node) {
     final parent = getNodeParent(node);
@@ -289,13 +289,13 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     return const {};
   }
 
-  /// ## Возвращает список листьев.
+  /// ## Returns a list of leaves.
   ///
-  /// Если [startNode] указан, то возвращает список листьев,
-  /// для которых [startNode] является общим родителем.
+  /// If [startNode] is specified, it returns a list of leaves
+  /// for which [startNode] is the common ancestor.
   ///
-  /// Если [startNode] не указан, то возвращает
-  /// список всех листьев дерева.
+  /// If [startNode] is not specified, it returns
+  /// a list of all leaves in the tree.
   @override
   Set<Node> getLeaves({
     Node? startNode,
@@ -316,11 +316,11 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     return result;
   }
 
-  /// ## Возвращает глубину заданной вершины.
+  /// ## Returns the depth of the specified vertex.
   ///
-  /// Выполняет обход в ширину в поисках вершины.
-  /// При нахождении совпадения прерывает обход
-  /// и возвращает глубину вершины.
+  /// Performs a breadth-first search to find the vertex.
+  /// Upon finding a match, it stops the search
+  /// and returns the depth of the vertex.
   @override
   int getNodeLevel(Node node) {
     bool found = false;
@@ -334,10 +334,10 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     return found ? level : -1;
   }
 
-  /// ## Возвращает глубину всех вершин графа.
+  /// ## Returns the depth of all vertices in the graph.
   ///
-  /// Выполняет проход учитывая обратный путь.
-  /// Для каждой вершины сохраняет ее глубину.
+  /// Performs a traversal considering the reverse path.
+  /// Saves the depth of each vertex.
   @override
   Map<Node, int> getDepths() {
     final result = <Node, int>{};

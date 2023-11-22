@@ -1,3 +1,6 @@
+# [1.3.0]
+* add batch throttling aggregator
+
 # [1.2.5]
 * separate tree interfaces
 * not allow to change hierarchy of present tree while adding edges

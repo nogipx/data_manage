@@ -24,11 +24,7 @@ class TestAsyncDelegate implements IBatchThrottleDelegate<String> {
   }
 
   @override
-  void onConfirmingError(
-    Object? error,
-    StackTrace trace,
-    AggregatedBatch<String> batch,
-  ) {}
+  void onConfirmingError(Object? error, StackTrace trace) {}
 }
 
 class TestSyncDelegate implements IBatchThrottleDelegate<String> {
@@ -52,9 +48,5 @@ class TestSyncDelegate implements IBatchThrottleDelegate<String> {
   }
 
   @override
-  void onConfirmingError(
-    Object? error,
-    StackTrace trace,
-    AggregatedBatch<String> batch,
-  ) {}
+  void onConfirmingError(Object? error, StackTrace trace) {}
 }

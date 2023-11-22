@@ -22,9 +22,5 @@ abstract class IBatchThrottleDelegate<T> {
 
   void onAddDataToBatch(T data);
 
-  void onConfirmingError(
-    Object? error,
-    StackTrace trace,
-    AggregatedBatch<T> batch,
-  );
+  void onConfirmingError(Object? error, StackTrace trace);
 }

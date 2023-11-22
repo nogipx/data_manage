@@ -32,7 +32,7 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
     delegate.onAddDataToBatch(data);
 
     if (_timer != null) {
-      _resetTimer();
+      _clearTimer();
     }
 
     _timer = Timer(
@@ -42,29 +42,30 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
   }
 
   void _onConfirm() async {
-    final dataToConfirm = List.of(_data);
-    _data.clear();
-    final batch = AggregatedBatch(data: dataToConfirm);
+    AggregatedBatch<T> batch = AggregatedBatch(data: []);
 
     try {
       if (!delegate.willConfirm()) {
         return;
       }
-
       _isInProgress = true;
+
+      final dataToConfirm = List.of(_data);
+      _data.clear();
+      batch = AggregatedBatch(data: dataToConfirm);
+
       await delegate.confirmBatch(batch);
     } on Object catch (error, trace) {
-      _data.addAll(dataToConfirm);
-      delegate.onConfirmingError(error, trace, batch);
+      delegate.onConfirmingError(error, trace);
       rethrow;
     } finally {
       _isInProgress = false;
-      _resetTimer();
+      _clearTimer();
     }
   }
 
-  void _resetTimer() {
-    _timer!.cancel();
+  void _clearTimer() {
+    _timer?.cancel();
     _timer = null;
   }
 }

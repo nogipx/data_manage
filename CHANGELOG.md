@@ -1,3 +1,6 @@
+# [1.3.7]
+* fix: do not try to save not confirmed batch
+
 # [1.3.6]
 * fix: pass batch when error happened
 

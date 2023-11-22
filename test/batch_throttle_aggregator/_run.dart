@@ -1,5 +1,4 @@
 import 'package:data_manage/src/batch_throttle_aggregator/_index.dart';
-import 'package:data_manage/src/batch_throttle_aggregator/batch_throttle_agregator.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,3 +1,6 @@
+# [1.3.1]
+* fix: exports
+
 # [1.3.0]
 * add batch throttling aggregator
 

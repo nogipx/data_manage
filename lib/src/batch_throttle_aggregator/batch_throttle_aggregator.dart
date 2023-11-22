@@ -42,7 +42,9 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
   }
 
   void _onConfirm() async {
-    final batch = AggregatedBatch(data: List.of(_data));
+    final dataToConfirm = List.of(_data);
+    _data.clear();
+    final batch = AggregatedBatch(data: dataToConfirm);
 
     try {
       if (!delegate.willConfirm()) {
@@ -51,9 +53,8 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
 
       _isInProgress = true;
       await delegate.confirmBatch(batch);
-
-      _data.clear();
     } on Object catch (error, trace) {
+      _data.addAll(dataToConfirm);
       delegate.onConfirmingError(error, trace);
       rethrow;
     } finally {

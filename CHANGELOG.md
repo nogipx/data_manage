@@ -1,3 +1,6 @@
+# [1.3.5]
+* fix: careful handle confirming batch
+
 # [1.3.4]
 * feat!: rename delegate methods
 

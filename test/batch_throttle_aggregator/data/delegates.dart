@@ -19,12 +19,16 @@ class TestAsyncDelegate implements IBatchThrottleDelegate<String> {
   }
 
   @override
-  void onConfirmingError(Object? error, StackTrace trace) {}
-
-  @override
   bool willConfirm() {
     return true;
   }
+
+  @override
+  void onConfirmingError(
+    Object? error,
+    StackTrace trace,
+    AggregatedBatch<String> batch,
+  ) {}
 }
 
 class TestSyncDelegate implements IBatchThrottleDelegate<String> {
@@ -43,10 +47,14 @@ class TestSyncDelegate implements IBatchThrottleDelegate<String> {
   }
 
   @override
-  void onConfirmingError(Object? error, StackTrace trace) {}
-
-  @override
   bool willConfirm() {
     return true;
   }
+
+  @override
+  void onConfirmingError(
+    Object? error,
+    StackTrace trace,
+    AggregatedBatch<String> batch,
+  ) {}
 }

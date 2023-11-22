@@ -1,3 +1,6 @@
+# [1.3.6]
+* fix: pass batch when error happened
+
 # [1.3.5]
 * fix: careful handle confirming batch
 

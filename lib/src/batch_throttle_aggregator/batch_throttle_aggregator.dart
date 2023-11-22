@@ -55,7 +55,7 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
       await delegate.confirmBatch(batch);
     } on Object catch (error, trace) {
       _data.addAll(dataToConfirm);
-      delegate.onConfirmingError(error, trace);
+      delegate.onConfirmingError(error, trace, batch);
       rethrow;
     } finally {
       _isInProgress = false;

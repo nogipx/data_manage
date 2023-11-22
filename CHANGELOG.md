@@ -1,3 +1,6 @@
+# [1.3.2]
+* feat: add waiting for confirming batch
+
 # [1.3.1]
 * fix: exports
 

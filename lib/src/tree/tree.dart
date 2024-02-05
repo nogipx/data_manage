@@ -124,6 +124,40 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
 
   // METHODS
 
+  @override
+  TreeEditable<T> selectRoot(String key) {
+    _guardGraphContainsNode(Node(key));
+    final root = getNodeByKey(key)!;
+    final tree = TreeImpl<T>(root: root);
+
+    final currentPath = [root];
+    _visitDepthBacktrack(
+      root,
+      (path) {
+        if (path.length < 2) {
+          return VisitResult.continueVisit;
+        }
+
+        final parent = path[path.length - 2];
+        if (!tree.containsNode(parent.key)) {
+          tree.addNode(parent);
+        }
+
+        final child = path[path.length - 1];
+        if (!tree.containsNode(child.key)) {
+          tree.addNode(child);
+        }
+
+        tree.addEdge(parent, child);
+
+        return VisitResult.continueVisit;
+      },
+      currentPath,
+    );
+
+    return tree;
+  }
+
   /// ## Breadth-first search (BFS)
   @override
   int visitBreadth(VisitCallback visit, {Node? startNode}) {

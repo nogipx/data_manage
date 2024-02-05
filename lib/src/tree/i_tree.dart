@@ -37,6 +37,8 @@ abstract class TreeEditable<Data> implements Tree<Data>, TreeReadable<Data> {
 }
 
 abstract class TreeReadable<Data> implements Tree<Data> {
+  TreeEditable<Data> selectRoot(String key);
+
   Map<Node, int> getDepths();
 
   Set<Node> getFullVerticalPath(Node node);

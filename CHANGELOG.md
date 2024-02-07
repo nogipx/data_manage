@@ -1,3 +1,7 @@
+# [1.3.8]
+* feat(tree): add subtree selection
+* feat(tree): save edges list for node only if node has children
+
 # [1.3.7]
 * fix: do not try to save not confirmed batch
 

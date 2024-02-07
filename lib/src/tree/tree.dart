@@ -43,7 +43,6 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
     }
 
     _nodes[node.key] = node;
-    _edges[node] = {};
   }
 
   @override
@@ -82,14 +81,17 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
   }
 
   @override
-  void removeEdge(Node first, Node second) {
-    _guardGraphContainsNode(first, extra: '(parent)');
-    _guardGraphContainsNode(second, extra: '(child)');
+  void removeEdge(Node parent, Node child) {
+    _guardGraphContainsNode(parent, extra: '(parent)');
+    _guardGraphContainsNode(child, extra: '(child)');
 
-    _parents.remove(second);
+    _parents.remove(child);
 
-    final firstEdges = _edges.putIfAbsent(first, () => {});
-    firstEdges.remove(second);
+    final firstEdges = _edges.putIfAbsent(parent, () => {});
+    firstEdges.remove(child);
+    if (firstEdges.isEmpty) {
+      _edges.remove(parent);
+    }
   }
 
   @override
@@ -159,6 +161,8 @@ class TreeImpl<T> implements TreeReadable<T>, TreeEditable<T> {
   }
 
   /// ## Breadth-first search (BFS)
+  /// Walk by nodes levels and returns level
+  /// of tree where visit stopped.
   @override
   int visitBreadth(VisitCallback visit, {Node? startNode}) {
     final visited = <Node, bool>{};

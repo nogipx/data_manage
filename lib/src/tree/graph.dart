@@ -1,6 +1,8 @@
+import 'package:data_manage/data_manage.dart';
+
 import '_index.dart';
 
-class Tree<T> implements ITree<T>, IGraphEditable<T> {
+class Graph<T> implements ITree<T>, IGraphEditable<T> {
   @override
   final Node root;
 
@@ -20,7 +22,7 @@ class Tree<T> implements ITree<T>, IGraphEditable<T> {
   @override
   Map<Node, Node> get parents => Map.unmodifiable(_parents);
 
-  Tree({
+  Graph({
     required this.root,
     Map<String, Node> nodes = const {},
     Map<String, T> nodesData = const {},

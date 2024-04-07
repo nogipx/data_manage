@@ -14,7 +14,7 @@ abstract class IGraphData<T> {
   String get graphString;
 }
 
-abstract class IGraphEditable<Data> implements IGraphData<Data>, ITree<Data> {
+abstract class IGraphEditable<Data> implements IGraphData<Data>, IGraph<Data> {
   void addEdge(Node first, Node second);
 
   void addNode(Node node);

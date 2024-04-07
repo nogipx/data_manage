@@ -1,6 +1,6 @@
 import '_index.dart';
 
-class Tree<T> implements ITree<T>, IGraphEditable<T> {
+class Graph<T> implements IGraph<T>, IGraphEditable<T> {
   @override
   final Node root;
 
@@ -20,12 +20,15 @@ class Tree<T> implements ITree<T>, IGraphEditable<T> {
   @override
   Map<Node, Node> get parents => Map.unmodifiable(_parents);
 
-  Tree({
+  final bool allowManyParents;
+
+  Graph({
     required this.root,
     Map<String, Node> nodes = const {},
     Map<String, T> nodesData = const {},
     Map<Node, Set<Node>> edges = const {},
     Map<Node, Node> parents = const {},
+    this.allowManyParents = false,
   }) {
     addNode(root);
     _nodes.addAll(nodes);
@@ -54,9 +57,10 @@ class Tree<T> implements ITree<T>, IGraphEditable<T> {
       addNode(child);
     }
 
-    if (getNodeParent(child) != null) {
+    final existedParent = getNodeParent(child);
+    if (!allowManyParents && existedParent != null) {
       throw Exception(
-        'Node "${child.key}" already have parent "${parent.key}"',
+        'Node "${child.key}" already have parent "${existedParent.key}"',
       );
     }
 
@@ -130,7 +134,7 @@ class Tree<T> implements ITree<T>, IGraphEditable<T> {
   IGraphEditable<T> selectRoot(String key) {
     _guardGraphContainsNode(Node(key));
     final root = getNodeByKey(key)!;
-    final tree = Tree<T>(root: root);
+    final tree = Graph<T>(root: root);
 
     final currentPath = [root];
     _visitDepthBacktrack(
@@ -175,6 +179,10 @@ class Tree<T> implements ITree<T>, IGraphEditable<T> {
 
       while (levelSize-- != 0) {
         final node = queue.removeAt(0);
+
+        if (visited[node] == true) {
+          continue;
+        }
 
         visited[node] = true;
         final visitResult = visit(node);

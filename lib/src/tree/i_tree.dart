@@ -1,6 +1,6 @@
 import '_index.dart';
 
-abstract class ITree<Data> implements IGraphData<Data> {
+abstract class IGraph<Data> implements IGraphData<Data> {
   IGraphEditable<Data> selectRoot(String key);
 
   Map<Node, int> getDepths();

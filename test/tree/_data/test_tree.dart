@@ -13,7 +13,7 @@ abstract class StringTreeTest {
   static const root2Box1Leaf1 = Node('root-2_box-1_leaf-1');
 
   static IGraphEditable<String> _create() {
-    final tree = Tree<String>(root: root);
+    final tree = Graph<String>(root: root);
     tree
           ..addEdge(root, root1)
           ..addEdge(root1, root1Box1)
@@ -33,6 +33,6 @@ abstract class StringTreeTest {
     return tree;
   }
 
-  static ITree<String> testReadableTree() => _create();
+  static IGraph<String> testReadableTree() => _create();
   static IGraphEditable<String> testEditableTree() => _create();
 }

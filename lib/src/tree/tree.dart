@@ -75,7 +75,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
   @override
   void removeNode(Node node) {
     _guardGraphContainsNode(node);
-    _nodes.remove(node);
+    _nodes.remove(node.key);
     _edges.remove(node) ?? {};
     for (final edges in _edges.values) {
       edges.remove(node);

@@ -37,4 +37,21 @@ void main() {
       );
     },
   );
+
+  test(
+    'Remove node',
+    () {
+      final sut = StringTreeTest.testEditableTree();
+      sut.removeNode(StringTreeTest.root2);
+
+      expect(
+        sut.containsNode(StringTreeTest.root2.key),
+        equals(false),
+      );
+      expect(
+        sut.containsNode(StringTreeTest.root2Box1.key),
+        equals(true),
+      );
+    },
+  );
 }

@@ -6,4 +6,5 @@ The available data structures include:
 
 * CircularBuffer
 * DataCollection
-* Tree
+* Graph
+* BatchThrottleAggregator

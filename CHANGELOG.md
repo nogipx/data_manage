@@ -1,3 +1,7 @@
+# [2.0.0]
+* feat!: breaking change: rename Tree to IGraph
+* chore: update dependencies
+
 # [1.3.8]
 * feat(tree): add subtree selection
 * feat(tree): save edges list for node only if node has children

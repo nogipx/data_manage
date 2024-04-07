@@ -12,7 +12,7 @@ class FilterAction<T> {
   });
 
   @override
-  operator ==(Object? other) =>
+  operator ==(Object other) =>
       other is FilterAction<T> &&
       key == other.key &&
       predicate == other.predicate;

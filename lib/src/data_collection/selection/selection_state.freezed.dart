@@ -12,7 +12,7 @@ part of 'selection_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$SelectionState<T> {
@@ -63,22 +63,25 @@ class _$SelectionStateCopyWithImpl<T, $Res, $Val extends SelectionState<T>>
 }
 
 /// @nodoc
-abstract class _$$SelectionUpdatedStateCopyWith<T, $Res>
+abstract class _$$SelectionUpdatedStateImplCopyWith<T, $Res>
     implements $SelectionStateCopyWith<T, $Res> {
-  factory _$$SelectionUpdatedStateCopyWith(_$SelectionUpdatedState<T> value,
-          $Res Function(_$SelectionUpdatedState<T>) then) =
-      __$$SelectionUpdatedStateCopyWithImpl<T, $Res>;
+  factory _$$SelectionUpdatedStateImplCopyWith(
+          _$SelectionUpdatedStateImpl<T> value,
+          $Res Function(_$SelectionUpdatedStateImpl<T>) then) =
+      __$$SelectionUpdatedStateImplCopyWithImpl<T, $Res>;
   @override
   @useResult
   $Res call({Set<T> selected, Set<T> staging});
 }
 
 /// @nodoc
-class __$$SelectionUpdatedStateCopyWithImpl<T, $Res>
-    extends _$SelectionStateCopyWithImpl<T, $Res, _$SelectionUpdatedState<T>>
-    implements _$$SelectionUpdatedStateCopyWith<T, $Res> {
-  __$$SelectionUpdatedStateCopyWithImpl(_$SelectionUpdatedState<T> _value,
-      $Res Function(_$SelectionUpdatedState<T>) _then)
+class __$$SelectionUpdatedStateImplCopyWithImpl<T, $Res>
+    extends _$SelectionStateCopyWithImpl<T, $Res,
+        _$SelectionUpdatedStateImpl<T>>
+    implements _$$SelectionUpdatedStateImplCopyWith<T, $Res> {
+  __$$SelectionUpdatedStateImplCopyWithImpl(
+      _$SelectionUpdatedStateImpl<T> _value,
+      $Res Function(_$SelectionUpdatedStateImpl<T>) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -87,7 +90,7 @@ class __$$SelectionUpdatedStateCopyWithImpl<T, $Res>
     Object? selected = null,
     Object? staging = null,
   }) {
-    return _then(_$SelectionUpdatedState<T>(
+    return _then(_$SelectionUpdatedStateImpl<T>(
       selected: null == selected
           ? _value._selected
           : selected // ignore: cast_nullable_to_non_nullable
@@ -102,8 +105,8 @@ class __$$SelectionUpdatedStateCopyWithImpl<T, $Res>
 
 /// @nodoc
 
-class _$SelectionUpdatedState<T> extends SelectionUpdatedState<T> {
-  const _$SelectionUpdatedState(
+class _$SelectionUpdatedStateImpl<T> extends SelectionUpdatedState<T> {
+  const _$SelectionUpdatedStateImpl(
       {required final Set<T> selected, required final Set<T> staging})
       : _selected = selected,
         _staging = staging,
@@ -131,10 +134,10 @@ class _$SelectionUpdatedState<T> extends SelectionUpdatedState<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$SelectionUpdatedState<T> &&
+            other is _$SelectionUpdatedStateImpl<T> &&
             const DeepCollectionEquality().equals(other._selected, _selected) &&
             const DeepCollectionEquality().equals(other._staging, _staging));
   }
@@ -148,16 +151,15 @@ class _$SelectionUpdatedState<T> extends SelectionUpdatedState<T> {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$SelectionUpdatedStateCopyWith<T, _$SelectionUpdatedState<T>>
-      get copyWith =>
-          __$$SelectionUpdatedStateCopyWithImpl<T, _$SelectionUpdatedState<T>>(
-              this, _$identity);
+  _$$SelectionUpdatedStateImplCopyWith<T, _$SelectionUpdatedStateImpl<T>>
+      get copyWith => __$$SelectionUpdatedStateImplCopyWithImpl<T,
+          _$SelectionUpdatedStateImpl<T>>(this, _$identity);
 }
 
 abstract class SelectionUpdatedState<T> extends SelectionState<T> {
   const factory SelectionUpdatedState(
       {required final Set<T> selected,
-      required final Set<T> staging}) = _$SelectionUpdatedState<T>;
+      required final Set<T> staging}) = _$SelectionUpdatedStateImpl<T>;
   const SelectionUpdatedState._() : super._();
 
   @override
@@ -166,6 +168,6 @@ abstract class SelectionUpdatedState<T> extends SelectionState<T> {
   Set<T> get staging;
   @override
   @JsonKey(ignore: true)
-  _$$SelectionUpdatedStateCopyWith<T, _$SelectionUpdatedState<T>>
+  _$$SelectionUpdatedStateImplCopyWith<T, _$SelectionUpdatedStateImpl<T>>
       get copyWith => throw _privateConstructorUsedError;
 }

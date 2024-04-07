@@ -12,7 +12,7 @@ part of 'data_collection_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$DataCollectionState<T> {
@@ -187,12 +187,12 @@ class _$DataCollectionStateCopyWithImpl<T, $Res,
 }
 
 /// @nodoc
-abstract class _$$DataCollectionInitialStateCopyWith<T, $Res>
+abstract class _$$DataCollectionInitialStateImplCopyWith<T, $Res>
     implements $DataCollectionStateCopyWith<T, $Res> {
-  factory _$$DataCollectionInitialStateCopyWith(
-          _$DataCollectionInitialState<T> value,
-          $Res Function(_$DataCollectionInitialState<T>) then) =
-      __$$DataCollectionInitialStateCopyWithImpl<T, $Res>;
+  factory _$$DataCollectionInitialStateImplCopyWith(
+          _$DataCollectionInitialStateImpl<T> value,
+          $Res Function(_$DataCollectionInitialStateImpl<T>) then) =
+      __$$DataCollectionInitialStateImplCopyWithImpl<T, $Res>;
   @override
   @useResult
   $Res call(
@@ -204,13 +204,13 @@ abstract class _$$DataCollectionInitialStateCopyWith<T, $Res>
 }
 
 /// @nodoc
-class __$$DataCollectionInitialStateCopyWithImpl<T, $Res>
+class __$$DataCollectionInitialStateImplCopyWithImpl<T, $Res>
     extends _$DataCollectionStateCopyWithImpl<T, $Res,
-        _$DataCollectionInitialState<T>>
-    implements _$$DataCollectionInitialStateCopyWith<T, $Res> {
-  __$$DataCollectionInitialStateCopyWithImpl(
-      _$DataCollectionInitialState<T> _value,
-      $Res Function(_$DataCollectionInitialState<T>) _then)
+        _$DataCollectionInitialStateImpl<T>>
+    implements _$$DataCollectionInitialStateImplCopyWith<T, $Res> {
+  __$$DataCollectionInitialStateImplCopyWithImpl(
+      _$DataCollectionInitialStateImpl<T> _value,
+      $Res Function(_$DataCollectionInitialStateImpl<T>) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -222,7 +222,7 @@ class __$$DataCollectionInitialStateCopyWithImpl<T, $Res>
     Object? matchers = null,
     Object? sort = freezed,
   }) {
-    return _then(_$DataCollectionInitialState<T>(
+    return _then(_$DataCollectionInitialStateImpl<T>(
       originalData: null == originalData
           ? _value.originalData
           : originalData // ignore: cast_nullable_to_non_nullable
@@ -249,8 +249,9 @@ class __$$DataCollectionInitialStateCopyWithImpl<T, $Res>
 
 /// @nodoc
 
-class _$DataCollectionInitialState<T> extends DataCollectionInitialState<T> {
-  const _$DataCollectionInitialState(
+class _$DataCollectionInitialStateImpl<T>
+    extends DataCollectionInitialState<T> {
+  const _$DataCollectionInitialStateImpl(
       {required this.originalData,
       required this.data,
       this.filters = const IMapConst({}),
@@ -277,10 +278,10 @@ class _$DataCollectionInitialState<T> extends DataCollectionInitialState<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$DataCollectionInitialState<T> &&
+            other is _$DataCollectionInitialStateImpl<T> &&
             const DeepCollectionEquality()
                 .equals(other.originalData, originalData) &&
             const DeepCollectionEquality().equals(other.data, data) &&
@@ -302,9 +303,10 @@ class _$DataCollectionInitialState<T> extends DataCollectionInitialState<T> {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$DataCollectionInitialStateCopyWith<T, _$DataCollectionInitialState<T>>
-      get copyWith => __$$DataCollectionInitialStateCopyWithImpl<T,
-          _$DataCollectionInitialState<T>>(this, _$identity);
+  _$$DataCollectionInitialStateImplCopyWith<T,
+          _$DataCollectionInitialStateImpl<T>>
+      get copyWith => __$$DataCollectionInitialStateImplCopyWithImpl<T,
+          _$DataCollectionInitialStateImpl<T>>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -435,7 +437,7 @@ abstract class DataCollectionInitialState<T> extends DataCollectionState<T> {
       required final Iterable<T> data,
       final IMap<String, FilterAction<T>> filters,
       final IMap<String, MatchAction<T>> matchers,
-      final SortAction<T>? sort}) = _$DataCollectionInitialState<T>;
+      final SortAction<T>? sort}) = _$DataCollectionInitialStateImpl<T>;
   const DataCollectionInitialState._() : super._();
 
   @override
@@ -450,17 +452,18 @@ abstract class DataCollectionInitialState<T> extends DataCollectionState<T> {
   SortAction<T>? get sort;
   @override
   @JsonKey(ignore: true)
-  _$$DataCollectionInitialStateCopyWith<T, _$DataCollectionInitialState<T>>
+  _$$DataCollectionInitialStateImplCopyWith<T,
+          _$DataCollectionInitialStateImpl<T>>
       get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$DataCollectionLoadingStateCopyWith<T, $Res>
+abstract class _$$DataCollectionLoadingStateImplCopyWith<T, $Res>
     implements $DataCollectionStateCopyWith<T, $Res> {
-  factory _$$DataCollectionLoadingStateCopyWith(
-          _$DataCollectionLoadingState<T> value,
-          $Res Function(_$DataCollectionLoadingState<T>) then) =
-      __$$DataCollectionLoadingStateCopyWithImpl<T, $Res>;
+  factory _$$DataCollectionLoadingStateImplCopyWith(
+          _$DataCollectionLoadingStateImpl<T> value,
+          $Res Function(_$DataCollectionLoadingStateImpl<T>) then) =
+      __$$DataCollectionLoadingStateImplCopyWithImpl<T, $Res>;
   @override
   @useResult
   $Res call(
@@ -472,13 +475,13 @@ abstract class _$$DataCollectionLoadingStateCopyWith<T, $Res>
 }
 
 /// @nodoc
-class __$$DataCollectionLoadingStateCopyWithImpl<T, $Res>
+class __$$DataCollectionLoadingStateImplCopyWithImpl<T, $Res>
     extends _$DataCollectionStateCopyWithImpl<T, $Res,
-        _$DataCollectionLoadingState<T>>
-    implements _$$DataCollectionLoadingStateCopyWith<T, $Res> {
-  __$$DataCollectionLoadingStateCopyWithImpl(
-      _$DataCollectionLoadingState<T> _value,
-      $Res Function(_$DataCollectionLoadingState<T>) _then)
+        _$DataCollectionLoadingStateImpl<T>>
+    implements _$$DataCollectionLoadingStateImplCopyWith<T, $Res> {
+  __$$DataCollectionLoadingStateImplCopyWithImpl(
+      _$DataCollectionLoadingStateImpl<T> _value,
+      $Res Function(_$DataCollectionLoadingStateImpl<T>) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -490,7 +493,7 @@ class __$$DataCollectionLoadingStateCopyWithImpl<T, $Res>
     Object? matchers = null,
     Object? sort = freezed,
   }) {
-    return _then(_$DataCollectionLoadingState<T>(
+    return _then(_$DataCollectionLoadingStateImpl<T>(
       originalData: null == originalData
           ? _value.originalData
           : originalData // ignore: cast_nullable_to_non_nullable
@@ -517,8 +520,9 @@ class __$$DataCollectionLoadingStateCopyWithImpl<T, $Res>
 
 /// @nodoc
 
-class _$DataCollectionLoadingState<T> extends DataCollectionLoadingState<T> {
-  const _$DataCollectionLoadingState(
+class _$DataCollectionLoadingStateImpl<T>
+    extends DataCollectionLoadingState<T> {
+  const _$DataCollectionLoadingStateImpl(
       {required this.originalData,
       required this.data,
       required this.filters,
@@ -543,10 +547,10 @@ class _$DataCollectionLoadingState<T> extends DataCollectionLoadingState<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$DataCollectionLoadingState<T> &&
+            other is _$DataCollectionLoadingStateImpl<T> &&
             const DeepCollectionEquality()
                 .equals(other.originalData, originalData) &&
             const DeepCollectionEquality().equals(other.data, data) &&
@@ -568,9 +572,10 @@ class _$DataCollectionLoadingState<T> extends DataCollectionLoadingState<T> {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$DataCollectionLoadingStateCopyWith<T, _$DataCollectionLoadingState<T>>
-      get copyWith => __$$DataCollectionLoadingStateCopyWithImpl<T,
-          _$DataCollectionLoadingState<T>>(this, _$identity);
+  _$$DataCollectionLoadingStateImplCopyWith<T,
+          _$DataCollectionLoadingStateImpl<T>>
+      get copyWith => __$$DataCollectionLoadingStateImplCopyWithImpl<T,
+          _$DataCollectionLoadingStateImpl<T>>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -701,7 +706,7 @@ abstract class DataCollectionLoadingState<T> extends DataCollectionState<T> {
       required final Iterable<T> data,
       required final IMap<String, FilterAction<T>> filters,
       required final IMap<String, MatchAction<T>> matchers,
-      final SortAction<T>? sort}) = _$DataCollectionLoadingState<T>;
+      final SortAction<T>? sort}) = _$DataCollectionLoadingStateImpl<T>;
   const DataCollectionLoadingState._() : super._();
 
   @override
@@ -716,17 +721,18 @@ abstract class DataCollectionLoadingState<T> extends DataCollectionState<T> {
   SortAction<T>? get sort;
   @override
   @JsonKey(ignore: true)
-  _$$DataCollectionLoadingStateCopyWith<T, _$DataCollectionLoadingState<T>>
+  _$$DataCollectionLoadingStateImplCopyWith<T,
+          _$DataCollectionLoadingStateImpl<T>>
       get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$DataCollectionUpdatedStateCopyWith<T, $Res>
+abstract class _$$DataCollectionUpdatedStateImplCopyWith<T, $Res>
     implements $DataCollectionStateCopyWith<T, $Res> {
-  factory _$$DataCollectionUpdatedStateCopyWith(
-          _$DataCollectionUpdatedState<T> value,
-          $Res Function(_$DataCollectionUpdatedState<T>) then) =
-      __$$DataCollectionUpdatedStateCopyWithImpl<T, $Res>;
+  factory _$$DataCollectionUpdatedStateImplCopyWith(
+          _$DataCollectionUpdatedStateImpl<T> value,
+          $Res Function(_$DataCollectionUpdatedStateImpl<T>) then) =
+      __$$DataCollectionUpdatedStateImplCopyWithImpl<T, $Res>;
   @override
   @useResult
   $Res call(
@@ -738,13 +744,13 @@ abstract class _$$DataCollectionUpdatedStateCopyWith<T, $Res>
 }
 
 /// @nodoc
-class __$$DataCollectionUpdatedStateCopyWithImpl<T, $Res>
+class __$$DataCollectionUpdatedStateImplCopyWithImpl<T, $Res>
     extends _$DataCollectionStateCopyWithImpl<T, $Res,
-        _$DataCollectionUpdatedState<T>>
-    implements _$$DataCollectionUpdatedStateCopyWith<T, $Res> {
-  __$$DataCollectionUpdatedStateCopyWithImpl(
-      _$DataCollectionUpdatedState<T> _value,
-      $Res Function(_$DataCollectionUpdatedState<T>) _then)
+        _$DataCollectionUpdatedStateImpl<T>>
+    implements _$$DataCollectionUpdatedStateImplCopyWith<T, $Res> {
+  __$$DataCollectionUpdatedStateImplCopyWithImpl(
+      _$DataCollectionUpdatedStateImpl<T> _value,
+      $Res Function(_$DataCollectionUpdatedStateImpl<T>) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -756,7 +762,7 @@ class __$$DataCollectionUpdatedStateCopyWithImpl<T, $Res>
     Object? matchers = null,
     Object? sort = freezed,
   }) {
-    return _then(_$DataCollectionUpdatedState<T>(
+    return _then(_$DataCollectionUpdatedStateImpl<T>(
       originalData: null == originalData
           ? _value.originalData
           : originalData // ignore: cast_nullable_to_non_nullable
@@ -783,8 +789,9 @@ class __$$DataCollectionUpdatedStateCopyWithImpl<T, $Res>
 
 /// @nodoc
 
-class _$DataCollectionUpdatedState<T> extends DataCollectionUpdatedState<T> {
-  const _$DataCollectionUpdatedState(
+class _$DataCollectionUpdatedStateImpl<T>
+    extends DataCollectionUpdatedState<T> {
+  const _$DataCollectionUpdatedStateImpl(
       {required this.originalData,
       required this.data,
       required this.filters,
@@ -809,10 +816,10 @@ class _$DataCollectionUpdatedState<T> extends DataCollectionUpdatedState<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$DataCollectionUpdatedState<T> &&
+            other is _$DataCollectionUpdatedStateImpl<T> &&
             const DeepCollectionEquality()
                 .equals(other.originalData, originalData) &&
             const DeepCollectionEquality().equals(other.data, data) &&
@@ -834,9 +841,10 @@ class _$DataCollectionUpdatedState<T> extends DataCollectionUpdatedState<T> {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$DataCollectionUpdatedStateCopyWith<T, _$DataCollectionUpdatedState<T>>
-      get copyWith => __$$DataCollectionUpdatedStateCopyWithImpl<T,
-          _$DataCollectionUpdatedState<T>>(this, _$identity);
+  _$$DataCollectionUpdatedStateImplCopyWith<T,
+          _$DataCollectionUpdatedStateImpl<T>>
+      get copyWith => __$$DataCollectionUpdatedStateImplCopyWithImpl<T,
+          _$DataCollectionUpdatedStateImpl<T>>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -967,7 +975,7 @@ abstract class DataCollectionUpdatedState<T> extends DataCollectionState<T> {
       required final Iterable<T> data,
       required final IMap<String, FilterAction<T>> filters,
       required final IMap<String, MatchAction<T>> matchers,
-      final SortAction<T>? sort}) = _$DataCollectionUpdatedState<T>;
+      final SortAction<T>? sort}) = _$DataCollectionUpdatedStateImpl<T>;
   const DataCollectionUpdatedState._() : super._();
 
   @override
@@ -982,6 +990,7 @@ abstract class DataCollectionUpdatedState<T> extends DataCollectionState<T> {
   SortAction<T>? get sort;
   @override
   @JsonKey(ignore: true)
-  _$$DataCollectionUpdatedStateCopyWith<T, _$DataCollectionUpdatedState<T>>
+  _$$DataCollectionUpdatedStateImplCopyWith<T,
+          _$DataCollectionUpdatedStateImpl<T>>
       get copyWith => throw _privateConstructorUsedError;
 }

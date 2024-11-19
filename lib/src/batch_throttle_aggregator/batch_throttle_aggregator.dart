@@ -19,7 +19,7 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
 
   @override
   void forceConfirm() {
-    _onConfirm();
+    _onConfirm(forced: true);
   }
 
   @override
@@ -41,11 +41,11 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
     );
   }
 
-  void _onConfirm() async {
+  void _onConfirm({bool forced = false}) async {
     AggregatedBatch<T> batch = AggregatedBatch(data: []);
 
     try {
-      if (!delegate.willConfirm()) {
+      if (!delegate.willConfirm() && !forced) {
         return;
       }
       _isInProgress = true;

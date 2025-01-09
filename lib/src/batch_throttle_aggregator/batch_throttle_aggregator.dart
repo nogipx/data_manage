@@ -45,7 +45,8 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
     AggregatedBatch<T> batch = AggregatedBatch(data: []);
 
     try {
-      if (!delegate.willConfirm() && !forced) {
+      final willConfirm = await delegate.willConfirm();
+      if (!willConfirm && !forced) {
         return;
       }
       _isInProgress = true;

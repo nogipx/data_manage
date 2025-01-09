@@ -1,3 +1,7 @@
+# [2.0.2]
+- fix: add async to willConfirm in throttle
+- feat: add force confirming
+
 # [2.0.0]
 * feat!: breaking change: rename Tree to IGraph
 * chore: update dependencies

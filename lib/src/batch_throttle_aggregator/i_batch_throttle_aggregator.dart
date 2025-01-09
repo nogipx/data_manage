@@ -16,7 +16,7 @@ abstract class IBatchThrottleAggregator<T> {
 abstract class IBatchThrottleDelegate<T> {
   Duration get durationIdleBeforeConfirm;
 
-  bool willConfirm();
+  FutureOr<bool> willConfirm();
 
   FutureOr<void> confirmBatch(AggregatedBatch<T> batch);
 

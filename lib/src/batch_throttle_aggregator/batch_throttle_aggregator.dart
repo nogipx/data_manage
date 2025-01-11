@@ -25,7 +25,7 @@ class BatchThrottleAggregator<T> implements IBatchThrottleAggregator<T> {
   @override
   void add(T data) {
     if (_isInProgress) {
-      throw Exception('Batch confirming in progress');
+      throw StateError('Batch confirming in progress');
     }
 
     _data.add(data);

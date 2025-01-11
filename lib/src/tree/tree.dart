@@ -1,3 +1,4 @@
+import 'dart:collection';
 import '_index.dart';
 
 class Graph<T> implements IGraph<T>, IGraphEditable<T> {
@@ -30,6 +31,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
     Map<Node, Node> parents = const {},
     this.allowManyParents = false,
   }) {
+    // Если в переданных nodes уже есть root, то при желании можно проверить,
+    // чтобы не перезаписать _nodes[root.key]. Пока что просто добавляем вручную:
     addNode(root);
     _nodes.addAll(nodes);
     _nodeData.addAll(nodesData);
@@ -37,14 +40,15 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
     _parents.addAll(parents);
   }
 
+  // ==================================
   // ADD OPERATIONS
+  // ==================================
 
   @override
   void addNode(Node node) {
     if (containsNode(node.key)) {
-      throw Exception('Tree already contains node "${node.key}"');
+      throw StateError('Graph already contains node "${node.key}"');
     }
-
     _nodes[node.key] = node;
   }
 
@@ -57,43 +61,55 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
       addNode(child);
     }
 
-    final existedParent = getNodeParent(child);
-    if (!allowManyParents && existedParent != null) {
-      throw Exception(
-        'Node "${child.key}" already have parent "${existedParent.key}"',
+    final existingParent = getNodeParent(child);
+    if (!allowManyParents && existingParent != null) {
+      throw StateError(
+        'Node "${child.key}" already has a parent "${existingParent.key}"',
       );
     }
 
     _parents[child] = parent;
-
-    final firstEdges = _edges.putIfAbsent(parent, () => {});
-    firstEdges.add(child);
+    // Явно указываем тип Set<Node> при создании:
+    final childSet = _edges.putIfAbsent(parent, () => <Node>{});
+    childSet.add(child);
   }
 
+  // ==================================
   // REMOVE OPERATIONS
+  // ==================================
 
   @override
   void removeNode(Node node) {
-    _guardGraphContainsNode(node);
+    _assertNodeExists(node);
     _nodes.remove(node.key);
-    _edges.remove(node) ?? {};
+
+    // Удаляем исходящие рёбра (children)
+    _edges.remove(node);
+
+    // Удаляем во всех остальных списках children
     for (final edges in _edges.values) {
       edges.remove(node);
     }
+
+    // Удаляем родителя, если был
     _parents.remove(node);
+
+    // Удаляем записи, где этот node являлся родителем
     _parents.removeWhere((key, value) => value == node);
   }
 
   @override
   void removeEdge(Node parent, Node child) {
-    _guardGraphContainsNode(parent, extra: '(parent)');
-    _guardGraphContainsNode(child, extra: '(child)');
+    _assertNodeExists(parent, extra: '(parent)');
+    _assertNodeExists(child, extra: '(child)');
 
+    // Удаляем связь parent->child из _parents
     _parents.remove(child);
 
-    final firstEdges = _edges.putIfAbsent(parent, () => {});
-    firstEdges.remove(child);
-    if (firstEdges.isEmpty) {
+    // Удаляем child из edges родителя
+    final childSet = _edges.putIfAbsent(parent, () => <Node>{});
+    childSet.remove(child);
+    if (childSet.isEmpty) {
       _edges.remove(parent);
     }
   }
@@ -106,7 +122,9 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
     _parents.clear();
   }
 
+  // ==================================
   // EXTRA DATA OPERATIONS
+  // ==================================
 
   @override
   T? getNodeData(String key) => _nodeData[key];
@@ -114,7 +132,9 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
   @override
   void updateNodeData(String key, T data) => _nodeData[key] = data;
 
+  // ==================================
   // ACCESS OPERATIONS
+  // ==================================
 
   @override
   Node? getNodeByKey(String key) => _nodes[key];
@@ -128,11 +148,13 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
   @override
   Set<Node> getNodeEdges(Node node) => _edges[node] ?? {};
 
+  // ==================================
   // METHODS
+  // ==================================
 
   @override
   IGraphEditable<T> selectRoot(String key) {
-    _guardGraphContainsNode(Node(key));
+    _assertNodeExists(Node(key));
     final root = getNodeByKey(key)!;
     final tree = Graph<T>(root: root);
 
@@ -165,43 +187,49 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
   }
 
   /// ## Breadth-first search (BFS)
-  /// Walk by nodes levels and returns level
-  /// of tree where visit stopped.
+  /// Возвращает "уровень" (глубину) вершины, на которой поиск был прерван,
+  /// либо полный уровень "глубины", если обход завершён.
   @override
   int visitBreadth(VisitCallback visit, {Node? startNode}) {
     final visited = <Node, bool>{};
-    final queue = [startNode ?? root];
+    // Вместо List используем Queue, чтобы не делать removeAt(0).
+    final queue = Queue<Node>();
+    queue.add(startNode ?? root);
+
     int level = -1;
 
     while (queue.isNotEmpty) {
-      int levelSize = queue.length;
+      final levelSize = queue.length;
       level++;
 
-      while (levelSize-- != 0) {
-        final node = queue.removeAt(0);
+      // Обрабатываем все узлы текущего уровня
+      for (int i = 0; i < levelSize; i++) {
+        final node = queue.removeFirst();
 
         if (visited[node] == true) {
           continue;
         }
-
         visited[node] = true;
-        final visitResult = visit(node);
 
+        final visitResult = visit(node);
         if (visitResult == VisitResult.breakVisit) {
           return level;
-        } else {
-          for (final child in _edges[node] ?? {}) {
-            if (visited[child] != true) {
-              queue.add(child);
-            }
+        }
+
+        // Добавляем детей в очередь
+        for (final child in _edges[node] ?? {}) {
+          if (visited[child] != true) {
+            queue.add(child);
           }
         }
       }
     }
+
+    // Если стартовая нода была не root и ничего не нашли - возвращаем -1;
     return startNode != null ? -1 : level;
   }
 
-  /// ## Depth-first search (DFS)
+  /// ## Depth-first search (DFS) (итеративный вариант).
   @override
   void visitDepth(VisitCallback visit, {Node? startNode}) {
     final visited = <Node, bool>{};
@@ -210,24 +238,26 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
 
     while (stack.isNotEmpty) {
       final node = stack.removeLast();
+      if (visited[node] == true) {
+        continue;
+      }
+      visited[node] = true;
 
-      if (visited[node] != true) {
-        visited[node] = true;
-        final visitResult = visit(node);
-        if (visitResult == VisitResult.breakVisit) {
-          break;
-        }
+      final visitResult = visit(node);
+      if (visitResult == VisitResult.breakVisit) {
+        break;
+      }
 
-        for (final child in _edges[node] ?? {}) {
-          if (visited[child] != true) {
-            stack.add(child);
-          }
+      // Добавляем в стек всех детей
+      for (final child in _edges[node] ?? {}) {
+        if (visited[child] != true) {
+          stack.add(child);
         }
       }
     }
   }
 
-  /// ## Recursive depth-first search with backtracking.
+  /// ## Рекурсивный DFS с backtracking.
   @override
   void visitDepthBacktrack(BacktrackCallback visit) {
     _visitDepthBacktrack(root, visit, [root]);
@@ -238,53 +268,41 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
     BacktrackCallback<T> callback,
     List<Node> state,
   ) {
-    final isSolution = callback(state);
-    if (isSolution == VisitResult.breakVisit) {
+    final result = callback(state);
+    if (result == VisitResult.breakVisit) {
       return;
     }
 
     for (final child in _edges[node] ?? {}) {
       state.add(child);
       _visitDepthBacktrack(child, callback, state);
-      state.remove(child);
+      state.removeLast();
     }
   }
 
-  /// ## Returns a list of all connected vertices from the given one.
-  /// From the root to the specified vertex.
+  /// ## Возвращает путь от корня до конкретной вершины [node].
   @override
   Set<Node> getPathToNode(Node node) {
     return getVerticalPathBetweenNodes(root, node);
   }
 
-  /// ## Returns a list of all connected vertices from the given one.
-  /// From the root to the leaves.
+  /// ## Возвращает все вершины от корня до листьев, включая путь до [node].
   @override
   Set<Node> getFullVerticalPath(Node node) {
     final upwardPath = getVerticalPathBetweenNodes(root, node);
     visitDepth(
-      startNode: node,
-      (node) {
-        upwardPath.add(node);
+      (current) {
+        upwardPath.add(current);
         return VisitResult.continueVisit;
       },
+      startNode: node,
     );
-
     return upwardPath;
   }
 
-  /// ## Returns the path between two vertices within a subtree.
+  /// ## Возвращает путь между двумя вершинами внутри одной "ветки".
   ///
-  /// Determines which vertex is higher.
-  /// Then moves up the graph until reaching the parent vertex.
-  /// ---
-  /// If during the process the parent vertex is not found
-  /// (for example, the root has no parents),
-  /// it stops and returns an empty path.
-  /// ---
-  /// Pre-calculated depths of vertices can be passed.
-  /// If pre-calculated depths are not passed,
-  /// the depth for each vertex is computed.
+  /// При отсутствии общего родителя возвращается пустой путь.
   @override
   Set<Node> getVerticalPathBetweenNodes(
     Node first,
@@ -306,7 +324,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
     }
 
     Node current = child;
-    final List<Node> path = [current];
+    final path = <Node>[current];
 
     while (current != parent) {
       final tempParent = getNodeParent(current);
@@ -322,34 +340,23 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
     return path.toSet();
   }
 
-  /// ## Returns a list of children of the parent of the given vertex.
+  /// ## Возвращает "сиблингов" (братьев и сестёр по общему родителю) для [node].
   @override
   Set<Node> getSiblings(Node node) {
     final parent = getNodeParent(node);
-
     if (parent != null) {
-      final siblings = getNodeEdges(parent);
-      return siblings;
+      // Возвращаем всех детей того же родителя
+      return getNodeEdges(parent);
     }
-
     return const {};
   }
 
-  /// ## Returns a list of leaves.
-  ///
-  /// If [startNode] is specified, it returns a list of leaves
-  /// for which [startNode] is the common ancestor.
-  ///
-  /// If [startNode] is not specified, it returns
-  /// a list of all leaves in the tree.
+  /// ## Возвращает множество всех листьев, либо всех листьев поддерева [startNode].
   @override
-  Set<Node> getLeaves({
-    Node? startNode,
-  }) {
+  Set<Node> getLeaves({Node? startNode}) {
     final start = startNode ?? root;
     final result = <Node>{};
     visitBreadth(
-      startNode: start,
       (node) {
         final nodeEdges = getNodeEdges(node);
         if (nodeEdges.isEmpty) {
@@ -357,33 +364,28 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
         }
         return VisitResult.continueVisit;
       },
+      startNode: start,
     );
-
     return result;
   }
 
-  /// ## Returns the depth of the specified vertex.
-  ///
-  /// Performs a breadth-first search to find the vertex.
-  /// Upon finding a match, it stops the search
-  /// and returns the depth of the vertex.
+  /// ## Возвращает уровень вершины [node]. Если вершина не найдена, возвращается -1.
   @override
   int getNodeLevel(Node node) {
     bool found = false;
-    final level = visitBreadth((n) {
-      if (n == node) {
-        found = true;
-        return VisitResult.breakVisit;
-      }
-      return VisitResult.continueVisit;
-    });
+    final level = visitBreadth(
+      (n) {
+        if (n == node) {
+          found = true;
+          return VisitResult.breakVisit;
+        }
+        return VisitResult.continueVisit;
+      },
+    );
     return found ? level : -1;
   }
 
-  /// ## Returns the depth of all vertices in the graph.
-  ///
-  /// Performs a traversal considering the reverse path.
-  /// Saves the depth of each vertex.
+  /// ## Возвращает Map<Node, int> — уровни для всех вершин.
   @override
   Map<Node, int> getDepths() {
     final result = <Node, int>{};
@@ -401,25 +403,26 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T> {
   @override
   String get graphString {
     final buffer = StringBuffer();
-
     visitDepthBacktrack((path) {
       if (path.isNotEmpty) {
         final level = path.length - 1;
         final node = path.last;
         final data = getNodeData(node.key);
-        final msg =
-            '${'|  ' * level}$node ${data != null ? '[data: $data]' : ''}';
-        buffer.writeln(msg);
+        buffer.writeln(
+          '${'|  ' * level}$node${data != null ? ' [data: $data]' : ''}',
+        );
       }
       return VisitResult.continueVisit;
     });
-
     return buffer.toString();
   }
 
-  void _guardGraphContainsNode(Node node, {String extra = ''}) {
+  // ==================================
+  // Вспомогательный метод проверки
+  // ==================================
+  void _assertNodeExists(Node node, {String extra = ''}) {
     if (!_nodes.containsKey(node.key)) {
-      throw Exception('Graph does not contains $node. $extra');
+      throw StateError('Graph does not contain the node "$node". $extra');
     }
   }
 }

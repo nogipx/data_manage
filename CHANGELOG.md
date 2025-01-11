@@ -1,3 +1,6 @@
+# [2.0.3]
+- fix: use Queue for BFS to improve perfomance
+
 # [2.0.2]
 - fix: add async to willConfirm in throttle
 - feat: add force confirming

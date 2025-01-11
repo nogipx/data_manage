@@ -16,7 +16,7 @@ void main() {
           );
           print(sut.graphString);
         },
-        throwsException,
+        throwsStateError,
       );
     },
   );
@@ -33,7 +33,7 @@ void main() {
           );
           print(sut.graphString);
         },
-        throwsException,
+        throwsStateError,
       );
     },
   );

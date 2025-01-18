@@ -4,9 +4,10 @@ version: 2.0.3
 repository: https://github.com/nogipx/data_manage
 
 environment:
-  sdk: '>=2.17.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  equatable: ^2.0.7
   fast_immutable_collections: ^10.2.2
   freezed_annotation: ^2.4.1
 

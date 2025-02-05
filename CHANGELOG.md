@@ -1,3 +1,6 @@
+# [2.0.4]
+- fix: empty matchers produce negative match now
+
 # [2.0.3]
 - fix: use Queue for BFS to improve perfomance
 

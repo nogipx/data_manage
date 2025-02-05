@@ -1,6 +1,6 @@
 name: data_manage
 description: Data structures and typedefs for convenient and advanced processing of your data.
-version: 2.0.3
+version: 2.0.4
 repository: https://github.com/nogipx/data_manage
 
 environment:

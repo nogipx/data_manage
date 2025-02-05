@@ -1,3 +1,6 @@
+# [2.1.0]
+- fix: separate exports
+
 # [2.0.4]
 - fix: empty matchers produce negative match now
 

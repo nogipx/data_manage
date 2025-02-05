@@ -1,6 +1,6 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
-library data_manage;
-
-export 'src/_index.dart';
+export 'src/_shared/_index.dart';
+export 'src/batch_throttle_aggregator/_index.dart';
+export 'src/chain/_index.dart';
+export 'src/circular_buffer/_index.dart';
+export 'src/data_collection/_index.dart';
+export 'src/tree/_index.dart';

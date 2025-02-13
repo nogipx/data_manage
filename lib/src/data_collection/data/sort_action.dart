@@ -23,7 +23,7 @@ class SortAction<T> {
       );
 
   @override
-  operator ==(Object other) =>
+  bool operator ==(Object other) =>
       other is SortAction<T> && comparator == other.comparator;
 
   @override

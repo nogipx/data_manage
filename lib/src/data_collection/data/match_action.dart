@@ -42,7 +42,7 @@ class MatchAction<T> {
         isEnabled = false;
 
   @override
-  operator ==(Object other) => other is MatchAction<T> && key == other.key;
+  bool operator ==(Object other) => other is MatchAction<T> && key == other.key;
 
   @override
   int get hashCode => Object.hashAll([key]);

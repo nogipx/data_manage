@@ -15,8 +15,8 @@ void main() {
            root
           /    \
         node1  node2
-        /  \      \
-    node3  node4  node5
+        /  \     
+    node3  node4 
     */
 
     setUp(() {
@@ -57,7 +57,6 @@ void main() {
 
         // 2. Все узлы одной ветви должны быть посещены до перехода к другой
         final node1Subtree = {visitOrder['node1']!, visitOrder['node3']!, visitOrder['node4']!};
-        final node2Subtree = {visitOrder['node2']!};
 
         // Проверяем, что либо все узлы поддерева node1 идут до node2,
         // либо все после - но не вперемешку

@@ -1,273 +1,359 @@
-# 🚀 Advanced Graph Utils Usage
+# 🚀 Advanced Graph Usage Guide
 
-## 🎯 Architecture
+## 🎯 Architecture Overview
 
-The library is built on several abstraction layers:
+The graph implementation is built on a layered architecture with clear separation of concerns:
 
 ```
 IGraphData<T>           # Base interface for data access
     ↓
-IGraphEditable<T>       # Interface for graph modification
+IGraph<T>              # Core graph operations
     ↓
-IGraphIterable<T>       # Interface for graph iteration
+IGraphEditable<T>      # Mutable graph operations
     ↓
-Graph<T>               # Full implementation with all features
+IGraphIterable<T>      # Advanced traversal capabilities
+    ↓
+Graph<T>              # Concrete implementation
 ```
 
-The interfaces are designed to separate concerns:
-- `IGraphData<T>` - Read-only access to graph structure and data
-- `IGraphEditable<T>` - Mutations and graph modifications
-- `IGraphIterable<T>` - Advanced traversal and iteration capabilities
+### Interface Responsibilities
 
-## 🔄 Iterators
-
-### Basic Iterators
+#### IGraphData<T>
 ```dart
-// Depth-First Iterator
-for (final node in graph.depthNodes) { ... }
-
-// Breadth-First Iterator
-for (final node in graph.breadthNodes) { ... }
-
-// Level Iterator
-for (final level in graph.levels) { ... }
-
-// Leaves Iterator
-for (final leaf in graph.leaves) { ... }
+// Basic structure access
+Map<String, Node> get nodes;
+Map<Node, Set<Node>> get edges;
+Map<Node, Node> get parents;
+Map<String, T> get nodeData;
 ```
 
-### Special Iterators
+#### IGraph<T>
 ```dart
-// Path Iterator
-for (final node in graph.pathBetween(start, end)) { ... }
-
-// Subtree Iterator
-for (final node in graph.subtree(root)) { ... }
-
-// Backtrack Iterator (with full path)
-for (final path in graph.paths) { ... }
+// Core operations
+Set<Node> getNodeEdges(Node node);
+Node? getNodeParent(Node node);
+Set<Node> getSiblings(Node node);
+Set<Node> getLeaves({Node? startNode});
 ```
 
-### Iterator Composition
+#### IGraphEditable<T>
 ```dart
-// Filtering
-final filtered = graph.filtered(
-  graph.depthIterator,
-  (node) => graph.getNodeData(node.key) != null
-);
-
-// Transformation
-final mapped = graph.mapped(
-  graph.levelIterator,
-  (nodes) => nodes.length
-);
-
-// Combination
-final result = graph.mapped(
-  graph.filtered(
-    graph.depthIterator,
-    (node) => graph.getNodeData(node.key) != null
-  ),
-  (node) => graph.getNodeData(node.key)!
-);
+// Mutation operations
+void addNode(Node node);
+void addEdge(Node parent, Node child);
+void removeNode(Node node);
+void removeEdge(Node parent, Node child);
+void updateNodeData(String key, T data);
 ```
 
-### Advanced Iterator Combinations
+## 🔄 Traversal Mechanisms
 
-Итераторы можно комбинировать различными способами для решения сложных задач:
-
+### Visitor Pattern Implementation
 ```dart
-// Поиск листьев на определенном уровне
-final leavesAtLevel = graph.filtered(
-  graph.leavesIterator,
-  (node) => graph.getNodeLevel(node) == targetLevel
-);
+// Visit callback type
+typedef VisitCallback = VisitResult Function(Node node);
 
-// Обход только узлов с определенными данными
-final nodesWithData = graph.filtered(
-  graph.breadthIterator,
-  (node) => graph.getNodeData(node.key) is SpecificType
-);
+// Visit result options
+enum VisitResult {
+  continueVisit,
+  breakVisit,
+}
 
-// Трансформация путей в строки
-final pathStrings = graph.mapped(
-  graph.backtrackIterator,
-  (path) => path.map((n) => n.key).join(' -> ')
-);
-
-// Сложная фильтрация с несколькими условиями
-final complexFiltered = graph.filtered(
-  graph.depthIterator,
-  (node) {
-    final parent = graph.getNodeParent(node);
-    final children = graph.getNodeEdges(node);
-    return parent != null && 
-           children.length > 2 && 
-           graph.getNodeData(node.key) != null;
-  }
-);
-
-// Комбинация фильтрации и маппинга для анализа
-final analysis = graph.mapped(
-  graph.filtered(
-    graph.levelIterator,
-    (nodes) => nodes.length > 3
-  ),
-  (nodes) => {
-    'level': graph.getNodeLevel(nodes.first),
-    'count': nodes.length,
-    'withData': nodes.where((n) => 
-      graph.getNodeData(n.key) != null
-    ).length
-  }
-);
-
-// Поиск специфических паттернов в дереве
-final patterns = graph.mapped(
-  graph.filtered(
-    graph.backtrackIterator,
-    (path) => path.length >= 3 && _matchesPattern(path)
-  ),
-  (path) => PathPattern(
-    start: path.first,
-    end: path.last,
-    length: path.length
-  )
-);
+// Usage example
+graph.visitDepth((node) {
+  if (someCondition) return VisitResult.breakVisit;
+  return VisitResult.continueVisit;
+});
 ```
 
-Такие комбинации особенно полезны для:
-- Сложного анализа структуры дерева
-- Поиска специфических паттернов
-- Трансформации данных
-- Валидации структуры
-- Сбора статистики
+### Traversal Strategies
 
-## 🔍 Analysis Algorithms
-
-### Structural Analysis
+#### Depth-First Traversal
 ```dart
-// Find Lowest Common Ancestor
-final lca = graph.findLowestCommonAncestor(nodeA, nodeB);
+void _visitDepthFirst(Node start, bool Function(Node) visitor) {
+  final stack = <Node>[start];
+  final visited = <Node>{};
 
-// Check Balance
-if (graph.isBalanced()) { ... }
+  while (stack.isNotEmpty) {
+    final node = stack.removeLast();
+    if (visited.contains(node)) continue;
 
-// Find Central Nodes
-final centers = graph.findCentralNodes();
-```
-
-### Tree Comparison
-```dart
-// Isomorphism Check (O(n * log n))
-if (tree1.isIsomorphicTo(tree2)) { ... }
-
-// Edit Distance (O(n²))
-final distance = tree1.calculateEditDistance(tree2);
-```
-
-### Pattern Detection
-```dart
-// Find Repeating Subtrees (O(n * h))
-final patterns = graph.findRepeatingSubtrees();
-
-// Find Node Chains (O(n * k))
-final chains = graph.findPatterns(length);
-```
-
-## 🎨 Visualization Customization
-
-```dart
-// Custom Mermaid Styles
-final style = GraphStyle(
-  nodeShape: 'rounded-box',
-  edgeStyle: '===>',
-  graphDirection: 'LR',
-  showNodeData: true
-);
-
-// Generate Diagram
-final diagram = graph.toMermaid(style);
-```
-
-## 🔧 Extending Functionality
-
-### Creating Custom Iterator
-```dart
-class CustomIterator extends BaseGraphIterator<Node> {
-  CustomIterator(super.graph);
-
-  @override
-  bool moveNext() {
-    // Your implementation
+    visited.add(node);
+    if (!visitor(node)) return;
+    stack.addAll(getNodeEdges(node).toList().reversed);
   }
 }
 ```
 
-### Adding New Algorithms
+#### Breadth-First Traversal
 ```dart
-extension GraphAlgorithms<T> on Graph<T> {
-  void customAlgorithm() {
-    // Your implementation
+int visitBreadth(VisitCallback visit, {Node? startNode}) {
+  final levels = _getLevelsMap();
+  int maxLevel = -1;
+
+  for (final entry in levels.entries) {
+    for (final node in entry.value) {
+      if (visit(node) == VisitResult.breakVisit) {
+        return entry.key;
+      }
+    }
+    maxLevel = entry.key;
   }
+
+  return maxLevel;
 }
 ```
 
-## ⚡️ Performance Optimization
+## 🔍 Path Operations
 
-### Operation Complexity
-- Node addition: O(1)
-- Edge addition: O(1)
-- Node lookup: O(1)
-- DFS/BFS traversal: O(V + E)
-- Path finding: O(h), where h is tree height
-- Isomorphism check: O(n * log n)
-- Edit distance: O(n²)
-
-### Best Practices
-1. Use `pathBetween()` instead of `getPathToNode()` for frequent operations
-2. Cache `getDepths()` results if structure doesn't change
-3. Avoid frequent `isBalanced()` calls on large trees
-4. Use `subtree()` instead of filtering the whole tree
-
-## 🔬 Debugging
-
-### Structure Output
+### Path Finding Algorithms
 ```dart
-// Text representation
-print(graph.graphString);
-
-// Mermaid diagram
-print(graph.toMermaid());
-
-// Structure analysis
-print(graph.analyzeStructure());
-```
-
-### Validation
-```dart
-// Check node existence
-graph._assertNodeExists(node);
-
-// Check for cycles
-if (graph.isAncestor(child, parent)) {
-  throw StateError('Cycle detected');
+// Get path to specific node
+Set<Node> getPathToNode(Node node) {
+  final result = <Node>{};
+  var current = node;
+  
+  while (current != root) {
+    result.add(current);
+    final parent = getNodeParent(current);
+    if (parent == null) break;
+    current = parent;
+  }
+  result.add(root);
+  
+  return result;
 }
 ```
 
-## 🎯 Implementation Details
+### Lowest Common Ancestor
+```dart
+Node? findLowestCommonAncestor(Node first, Node second) {
+  if (first == second) return first;
+  
+  final depths = getDepths();
+  final firstDepth = depths[first] ?? 0;
+  final secondDepth = depths[second] ?? 0;
+  
+  // Equalize depths and find LCA
+  // See implementation for details
+}
+```
+
+## 🎨 Performance Optimizations
+
+### Caching Strategy
+```dart
+// Cache invalidation on structure changes
+void _invalidateCache() {
+  _cachedLevels = null;
+  _cachedDepths = null;
+}
+
+// Cached computations
+Map<Node, int> getDepths() {
+  if (_cachedDepths != null) return _cachedDepths!;
+  // Compute and cache depths
+}
+```
 
 ### Memory Management
-- All collections use efficient Dart implementations
-- Immutable getters prevent accidental modifications
-- Smart caching for frequently accessed data
+- Efficient use of Sets and Maps for O(1) lookups
+- Smart caching of frequently accessed data
+- Proper cleanup in remove operations
+
+### Operation Complexities
+- Node/Edge operations: O(1)
+- Path finding: O(h) where h is height
+- Traversal: O(n) where n is node count
+- Level computation: O(n)
+
+## 📦 Node Data Management
+
+### Available Managers
+
+#### SimpleNodeDataManager
+```dart
+/// Basic implementation with direct storage
+class SimpleNodeDataManager<T> implements INodeDataManager<T> {
+  final Map<String, T> _data = {};
+  final _metrics = _DataManagerMetrics();
+
+  @override
+  T? get(String key) {
+    final value = _data[key];
+    value != null ? _metrics.hit() : _metrics.miss();
+    return value;
+  }
+
+  @override
+  void set(String key, T data) => _data[key] = data;
+  
+  @override
+  void remove(String key) => _data.remove(key);
+}
+```
+
+#### LRUNodeDataManager
+```dart
+/// Manager with LRU (Least Recently Used) caching strategy
+class LRUNodeDataManager<T> implements INodeDataManager<T> {
+  final int maxSize;
+  final _data = <String, T>{};
+  final _lruList = <String>[];
+  
+  @override
+  T? get(String key) {
+    final value = _data[key];
+    if (value != null) {
+      // Move to most recently used
+      _lruList.remove(key);
+      _lruList.add(key);
+    }
+    return value;
+  }
+
+  @override
+  void set(String key, T data) {
+    if (_data.length >= maxSize && !_data.containsKey(key)) {
+      // Remove least recently used
+      final lru = _lruList.removeAt(0);
+      _data.remove(lru);
+    }
+    _data[key] = data;
+    _lruList.add(key);
+  }
+}
+```
+
+### Performance Characteristics
+
+#### SimpleNodeDataManager
+- Get/Set operations: O(1)
+- Memory usage: O(n) where n is number of nodes
+- Best for: Small to medium graphs with frequent access to all nodes
+- No memory limits
+
+#### LRUNodeDataManager
+- Get/Set operations: O(1)
+- Memory usage: O(k) where k is maxSize
+- Best for: Large graphs with locality of reference
+- Automatic memory management
+
+### Metrics and Monitoring
+```dart
+// Get detailed cache metrics
+final metrics = graph.getDataCacheMetrics();
+
+// Available metrics
+{
+  'size': current_cache_size,
+  'maxSize': maximum_cache_size,      // For LRU only
+  'hits': cache_hits_count,
+  'misses': cache_misses_count,
+  'hitRate': hits_to_total_ratio,
+  'utilizationRate': size_to_max_ratio // For LRU only
+}
+```
+
+### Custom Implementation
+```dart
+class CustomNodeDataManager<T> implements INodeDataManager<T> {
+  @override
+  Map<String, T> get data => _yourDataStorage;
+
+  @override
+  T? get(String key) {
+    // Your get implementation
+  }
+
+  @override
+  void set(String key, T data) {
+    // Your set implementation
+  }
+
+  @override
+  void remove(String key) {
+    // Your remove implementation
+  }
+
+  @override
+  void clear() {
+    // Your clear implementation
+  }
+
+  @override
+  Map<String, dynamic> getMetrics() {
+    // Your metrics implementation
+  }
+}
+```
+
+## �� Advanced Features
+
+### Subtree Extraction
+```dart
+IGraphEditable<T> extractSubtree(String key, {bool copy = true}) {
+  if (!copy) {
+    return _SubtreeView<T>(
+      originalGraph: this,
+      subtreeRoot: getNodeByKey(key)!,
+    );
+  }
+  // Create new graph copy
+}
+```
+
+### Multiple Parents Support
+```dart
+Graph<T>({
+  bool allowManyParents = false,
+}) {
+  // Enables DAG-like structures
+}
+```
+
+## 🎯 Best Practices
+
+### Structure Modification
+```dart
+// Always check existence
+void addEdge(Node parent, Node child) {
+  if (!containsNode(parent.key)) {
+    addNode(parent);
+  }
+  // ... rest of implementation
+}
+
+// Proper cleanup
+void removeNode(Node node) {
+  _nodes.remove(node.key);
+  _edges.remove(node);
+  for (final edges in _edges.values) {
+    edges.remove(node);
+  }
+  // ... rest of cleanup
+}
+```
+
+### Error Handling
+```dart
+void _assertNodeExists(Node node, {String extra = ''}) {
+  if (!_nodes.containsKey(node.key)) {
+    throw StateError('Graph does not contain the node "$node". $extra');
+  }
+}
+```
+
+## 📚 Implementation Notes
 
 ### Thread Safety
 - All operations are synchronous
-- No static mutable state
-- Safe to use in isolates
+- No shared mutable state
+- Safe for use in isolates
 
-### Error Handling
-- Clear error messages
-- State validation before operations
-- Proper cleanup on failures
+### Extension Points
+- Custom node data managers
+- Traversal strategy extensions
+- View implementations
+
+For implementation details, see the source code documentation.

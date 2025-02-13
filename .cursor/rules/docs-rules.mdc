@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+---
+- Документацию во всех Markdown файлах во всем проекте всегда пиши на техническом английском
+  - например в [CHANGELOG.md](mdc:CHANGELOG.md), [README.md](mdc:lib/src/graph/README.md)

@@ -1,161 +1,175 @@
-# 🌳 Graph Utils
+# 🌳 Graph Implementation
 
-A powerful and flexible library for working with directed graphs in Dart/Flutter.
+A robust and efficient implementation of directed graph data structure in Dart, with focus on tree-like structures.
 
 ## ⚡️ Quick Start
 
 ```dart
-// Create a graph
+// Create a graph with root node
 final graph = Graph<String>(root: Node('root'));
 
-// Add nodes and edges
-graph.addNode(Node('A'));
-graph.addNode(Node('B'));
-graph.addEdge(Node('root'), Node('A'));
-graph.addEdge(Node('root'), Node('B'));
+// Add nodes and build structure
+final nodeA = Node('A');
+final nodeB = Node('B');
+graph.addEdge(graph.root, nodeA);
+graph.addEdge(graph.root, nodeB);
 
 // Add data to nodes
-graph.updateNodeData('A', 'Some data for A');
+graph.updateNodeData('A', 'Node A Data');
 ```
 
 ## 🎯 Core Features
 
-### Basic Operations
-- Add/remove nodes and edges
-- Store data in nodes
-- Find parents and children
-- Basic graph navigation
-
+### Graph Structure Operations
 ```dart
-// Basic navigation
-final parent = graph.getNodeParent(node);
-final children = graph.getNodeEdges(node);
-final siblings = graph.getSiblings(node);
+// Basic structure manipulation
+graph.addNode(Node('C'));
+graph.addEdge(nodeA, Node('C'));
+graph.removeNode(nodeB);
+graph.removeEdge(nodeA, nodeC);
+
+// Structure queries
+final parent = graph.getNodeParent(nodeA);
+final children = graph.getNodeEdges(nodeA);
+final siblings = graph.getSiblings(nodeA);
 final leaves = graph.getLeaves();
 ```
 
-### Iterators and Traversal
-The library provides convenient iterators for graph traversal:
+### Traversal Methods
+The graph supports multiple traversal strategies:
 
 ```dart
 // Depth-first traversal
-for (final node in graph.depthNodes) {
+graph.visitDepth((node) {
   print(node.key);
-}
+  return VisitResult.continueVisit;
+});
 
 // Breadth-first traversal
-for (final node in graph.breadthNodes) {
+graph.visitBreadth((node) {
   print(node.key);
-}
+  return VisitResult.continueVisit;
+});
 
-// Level-by-level traversal
-for (final level in graph.levels) {
-  print('Level nodes: ${level.map((n) => n.key).join(', ')}');
-}
+// Backtracking traversal
+graph.visitDepthBacktrack((path) {
+  print('Path: ${path.map((n) => n.key).join(' -> ')}');
+  return VisitResult.continueVisit;
+});
 ```
 
-## 🚀 Advanced Features
-
-### Structure Analysis
+### Path Finding
 ```dart
-// Get graph statistics
-final stats = graph.analyzeStructure();
-print('Graph depth: ${stats['maxDepth']}');
-print('Average branching: ${stats['averageBranching']}');
-print('Total nodes: ${stats['totalNodes']}');
+// Get path to specific node
+final pathToNode = graph.getPathToNode(targetNode);
+
+// Get path between nodes
+final path = graph.getVerticalPathBetweenNodes(nodeA, nodeB);
+
+// Get full vertical path (including subtree)
+final fullPath = graph.getFullVerticalPath(nodeA);
 ```
 
-### Pattern Matching
+### Node Data Management
 ```dart
-// Find repeating subgraphs
-final repeating = graph.findRepeatingSubgraphs();
-for (final entry in repeating.entries) {
-  print('Pattern found in nodes: ${entry.value.map((n) => n.key).join(', ')}');
-}
+// Update node data
+graph.updateNodeData('A', 'Updated data');
 
-// Find node chains
-for (final pattern in graph.findPatterns(3)) {
-  print('Chain: ${pattern.map((n) => n.key).join(' -> ')}');
-}
+// Get node data
+final data = graph.getNodeData('A');
+
+// Clear all data
+graph.clear();
 ```
 
-### Graph Comparison
-```dart
-// Check for isomorphism
-if (graph1.isIsomorphicTo(graph2)) {
-  print('Graphs are structurally identical');
-}
-
-// Calculate edit distance
-final distance = graph1.calculateEditDistance(graph2);
-print('Need $distance operations to transform the graph');
-```
-
-## 🎨 Visualization
-
-The library supports Mermaid diagram generation:
+### Node Data Managers
+The graph supports different strategies for managing node data:
 
 ```dart
-// Generate diagram
-final diagram = graph.toMermaid(GraphStyle.roundedStyle);
+// Simple manager (default)
+final graph = Graph<String>(
+  root: Node('root'),
+  nodeDataManager: SimpleNodeDataManager<String>(),
+);
 
-// Generate HTML with diagram
-final html = graph.toMermaidHtml(GraphStyle.leftToRight);
+// LRU Cache manager
+final graph = Graph<String>(
+  root: Node('root'),
+  nodeDataManager: LRUNodeDataManager<String>(maxSize: 100),
+);
+
+// Get cache metrics
+final metrics = graph.getDataCacheMetrics();
+print('Cache hits: ${metrics['hits']}');
+print('Cache misses: ${metrics['misses']}');
+print('Hit rate: ${metrics['hitRate']}');
 ```
 
-## 🔧 Extensibility
+## �� Advanced Features
 
-The library is built on interfaces, making it easy to extend:
-
+### Subtree Operations
 ```dart
-class CustomGraph<T> extends Graph<T> {
-  CustomGraph({required super.root});
+// Extract subtree as a new graph
+final subtree = graph.extractSubtree('A', copy: true);
 
-  // Add your methods
-  void customOperation() {
-    // ...
-  }
-}
+// Create a view on existing subtree
+final view = graph.extractSubtree('A', copy: false);
 ```
+
+### Graph Analysis
+```dart
+// Find lowest common ancestor
+final lca = graph.findLowestCommonAncestor(nodeA, nodeB);
+
+// Check ancestor relationship
+final isAncestor = graph.isAncestor(
+  ancestor: nodeA, 
+  descendant: nodeB
+);
+
+// Get node levels
+final level = graph.getNodeLevel(nodeA);
+final depths = graph.getDepths();
+```
+
+### String Representation
+```dart
+// Get hierarchical string representation
+print(graph.graphString);
+/* Output example:
+Node(root)
+|  Node(A)
+|  |  Node(C)
+|  Node(B)
+*/
+```
+
+## 🎨 Implementation Details
+
+### Graph Properties
+- Directed graph structure
+- Optional support for multiple parents
+- Efficient node data management
+- Cached computations for performance
+- Thread-safe operations
+
+### Performance Considerations
+- O(1) for most basic operations
+- Cached levels and depths
+- Efficient traversal implementations
+- Smart memory management
 
 ## 📦 Installation
 
 ```yaml
 dependencies:
-  graph_utils: ^1.0.0
+  data_manage: ^2.2.0
 ```
 
-## 🎓 Use Cases
+## 🔧 Advanced Usage
 
-### Organization Structure
-```dart
-final org = Graph<Employee>(root: Node('CEO'));
-org.addEdge(Node('CEO'), Node('CTO'));
-org.addEdge(Node('CEO'), Node('CFO'));
-```
-
-### File System
-```dart
-final fs = Graph<FileData>(root: Node('/'));
-fs.addEdge(Node('/'), Node('/home'));
-fs.addEdge(Node('/home'), Node('/home/user'));
-```
-
-### App Navigation
-```dart
-final nav = Graph<ScreenData>(root: Node('main'));
-nav.addEdge(Node('main'), Node('settings'));
-nav.addEdge(Node('settings'), Node('profile'));
-```
-
-## 🤝 Contributing
-
-We're open to suggestions and improvements! Feel free to create issues and pull requests.
+For advanced features and detailed API documentation, see [ADVANCED.md](ADVANCED.md)
 
 ## 📄 License
 
-MIT License - do whatever you want, just mention the authors 😉
-
-## 📚 Documentation
-
-For advanced usage and technical details, see [ADVANCED.md](ADVANCED.md)
+MIT License

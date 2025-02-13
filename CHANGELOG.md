@@ -1,3 +1,12 @@
+# [2.2.0]
+## Improvements
+- refactor: enhanced graph traversal tests stability
+  - tests now verify algorithm invariants instead of specific traversal order
+  - added parent-child relationship validations
+  - added level structure preservation checks for breadth-first traversal
+  - improved test error messages with detailed descriptions
+- fix: fixed root node display in graph string representation
+
 # [2.1.0]
 - fix: separate exports
 

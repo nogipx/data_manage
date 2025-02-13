@@ -1,3 +1,15 @@
+# [2.2.1]
+## Improvements
+- refactor: improved SubtreeView implementation
+  - moved SubtreeView to a separate part file
+  - fixed initialization to avoid recursion
+  - improved code organization and encapsulation
+  - added comprehensive documentation with usage examples
+- refactor!: removed multiple parents support
+  - graph now strictly enforces single-parent hierarchy
+  - attempting to add a second parent will throw StateError
+  - this change improves data consistency and simplifies tree traversal
+
 # [2.2.0]
 ## Improvements
 - refactor: enhanced graph traversal tests stability

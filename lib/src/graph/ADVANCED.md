@@ -139,6 +139,64 @@ Node? findLowestCommonAncestor(Node first, Node second) {
 }
 ```
 
+## 🌳 Subtree Operations
+
+### Extracting Subtrees
+```dart
+/// Creates a new graph or a view on an existing one, starting from the specified node
+IGraphEditable<T> extractSubtree(String key, {bool copy = true}) {
+  if (!copy) {
+    // Return a view on the existing graph
+    return SubtreeView<T>(
+      originalGraph: this,
+      subtreeRoot: getNodeByKey(key)!,
+    );
+  }
+  // Create a copy of the subtree
+  final tree = Graph<T>(root: newRoot);
+  final subtree = _getSubtree(newRoot);
+  // ... copying nodes and edges
+}
+```
+
+### View Implementation
+The `SubtreeView` class provides a powerful way to work with subtrees while maintaining a connection to the original graph:
+
+```dart
+/// A view on a subtree of an existing graph
+class SubtreeView<T> implements IGraphEditable<T> {
+  final Graph<T> originalGraph;
+  final Node subtreeRoot;
+  final Set<Node> _subtreeNodes;
+
+  // All operations are delegated to the original graph
+  // with validation of node membership in the subtree
+}
+```
+
+Key features of `SubtreeView`:
+1. **Safety**: All operations are restricted to nodes within the subtree
+2. **Consistency**: Changes are immediately reflected in the original graph
+3. **Efficiency**: No copying of data, works directly with the original graph
+4. **Isolation**: Prevents accidental modifications outside the subtree
+
+Example usage:
+```dart
+// Create a view on a subtree
+final view = graph.extractSubtree('A', copy: false);
+
+// Work safely within the subtree
+view.addNode(Node('C'));
+view.addEdge(view.root, Node('C')); // Works ✅
+view.addEdge(Node('outside'), Node('C')); // Throws error ❌
+```
+
+### Use Cases
+1. **Independent Subtree**: When you need to work with a part of the graph independently
+2. **Subtree View**: When you need access to a part of the graph while maintaining connection with the original
+3. **Optimization**: For working with only the necessary part of a large graph
+4. **Safety**: When operations need to be restricted to a specific part of the graph
+
 ## 🎨 Performance Optimizations
 
 ### Caching Strategy
@@ -285,30 +343,6 @@ class CustomNodeDataManager<T> implements INodeDataManager<T> {
   Map<String, dynamic> getMetrics() {
     // Your metrics implementation
   }
-}
-```
-
-## �� Advanced Features
-
-### Subtree Extraction
-```dart
-IGraphEditable<T> extractSubtree(String key, {bool copy = true}) {
-  if (!copy) {
-    return _SubtreeView<T>(
-      originalGraph: this,
-      subtreeRoot: getNodeByKey(key)!,
-    );
-  }
-  // Create new graph copy
-}
-```
-
-### Multiple Parents Support
-```dart
-Graph<T>({
-  bool allowManyParents = false,
-}) {
-  // Enables DAG-like structures
 }
 ```
 

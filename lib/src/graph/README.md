@@ -16,6 +16,11 @@ graph.addEdge(graph.root, nodeB);
 
 // Add data to nodes
 graph.updateNodeData('A', 'Node A Data');
+
+// Work with subtrees
+final subtreeView = graph.extractSubtree('A', copy: false);
+subtreeView.addNode(Node('C'));
+subtreeView.addEdge(subtreeView.root, Node('C'));
 ```
 
 ## 🎯 Core Features
@@ -105,50 +110,11 @@ print('Cache misses: ${metrics['misses']}');
 print('Hit rate: ${metrics['hitRate']}');
 ```
 
-## �� Advanced Features
-
-### Subtree Operations
-```dart
-// Extract subtree as a new graph
-final subtree = graph.extractSubtree('A', copy: true);
-
-// Create a view on existing subtree
-final view = graph.extractSubtree('A', copy: false);
-```
-
-### Graph Analysis
-```dart
-// Find lowest common ancestor
-final lca = graph.findLowestCommonAncestor(nodeA, nodeB);
-
-// Check ancestor relationship
-final isAncestor = graph.isAncestor(
-  ancestor: nodeA, 
-  descendant: nodeB
-);
-
-// Get node levels
-final level = graph.getNodeLevel(nodeA);
-final depths = graph.getDepths();
-```
-
-### String Representation
-```dart
-// Get hierarchical string representation
-print(graph.graphString);
-/* Output example:
-Node(root)
-|  Node(A)
-|  |  Node(C)
-|  Node(B)
-*/
-```
-
 ## 🎨 Implementation Details
 
 ### Graph Properties
-- Directed graph structure
-- Optional support for multiple parents
+- Directed graph structure with strict tree hierarchy
+- Single-parent relationship enforcement
 - Efficient node data management
 - Cached computations for performance
 - Thread-safe operations
@@ -163,7 +129,7 @@ Node(root)
 
 ```yaml
 dependencies:
-  data_manage: ^2.2.0
+  data_manage: ^2.2.1
 ```
 
 ## 🔧 Advanced Usage

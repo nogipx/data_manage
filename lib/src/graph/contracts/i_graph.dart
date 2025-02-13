@@ -1,7 +1,19 @@
 import '../_index.dart';
 
 abstract interface class IGraph<Data> implements IGraphData<Data> {
-  IGraphEditable<Data> selectRoot(String key);
+  /// Создает новый граф, используя указанный узел как корень.
+  ///
+  /// Если [copy] равен true, создается полная копия поддерева.
+  /// Если false - создается view на существующий граф.
+  ///
+  /// ```dart
+  /// // Создать копию поддерева
+  /// final newGraph = graph.extractSubtree('node42', copy: true);
+  ///
+  /// // Создать view на существующее поддерево
+  /// final view = graph.extractSubtree('node42', copy: false);
+  /// ```
+  IGraphEditable<Data> extractSubtree(String key, {bool copy = true});
 
   Map<Node, int> getDepths();
 
@@ -79,7 +91,7 @@ abstract interface class IGraphIterable<T> {
   /// Итератор для обхода листьев
   Iterator<Node> get leavesIterator;
 
-  /// Итератор по уровням (возвращает Set<Node> для каждого уровня)
+  /// Итератор по уровням
   Iterator<Set<Node>> get levelIterator;
 
   /// Создает итератор для обхода пути между узлами

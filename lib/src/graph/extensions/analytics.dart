@@ -163,7 +163,7 @@ extension GraphAnalytics<T> on IGraph<T> {
       final children2 = other.getNodeEdges(node2).toList();
 
       // Базовая стоимость - отличаются ли узлы
-      int cost = node1.key != node2.key ? 1 : 0;
+      final int cost = node1.key != node2.key ? 1 : 0;
 
       // Находим минимальную стоимость сопоставления детей
       final m = children1.length;

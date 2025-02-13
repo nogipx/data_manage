@@ -9,7 +9,7 @@ abstract class Comparators {
     required bool Function(T) isSelected,
     Comparator<T>? comparator,
   }) {
-    int selectedFirstComparator(a, b) {
+    int selectedFirstComparator(T a, T b) {
       final aIsSelected = isSelected(a);
       final bIsSelected = isSelected(b);
       if (aIsSelected && bIsSelected) {

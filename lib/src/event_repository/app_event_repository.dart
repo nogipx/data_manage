@@ -5,15 +5,15 @@ base class AppEvent<T> extends IEventBase<T> {
   const AppEvent({required super.data});
 }
 
-typedef IAppEventsSubscriptions = IEventsSubscriptions<AppEvent>;
-typedef IAppEventRepository = IEventRepository<AppEvent>;
+typedef IAppEventsSubscriptions<T> = IEventsSubscriptions<AppEvent<T>>;
+typedef IAppEventRepository<T> = IEventRepository<AppEvent<T>>;
 
 /// {@template appEventRepository}
 /// Реализация репозитория для управления событиями в приложении.
 /// {@endtemplate}
-class AppEventRepository with EventRepositoryMixin<AppEvent> {}
+class AppEventRepository<T> with EventRepositoryMixin<AppEvent<T>> {}
 
-IAppEventsSubscriptions createAppEventsSubscriptions(
-  IEventRepository<AppEvent> repo,
+IAppEventsSubscriptions<T> createAppEventsSubscriptions<T>(
+  IEventRepository<AppEvent<T>> repo,
 ) =>
     createRepositoryEventsSubscriptions(repo);

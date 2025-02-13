@@ -320,6 +320,85 @@ void main() {
       });
     });
 
+    group('Subtree Operations |', () {
+      test('Extract subtree from root returns full graph copy', () {
+        final subgraph = graph.extractSubtree(root.key, copy: true);
+
+        expect(subgraph.root, equals(root));
+        expect(subgraph.nodes.length, equals(graph.nodes.length));
+        expect(
+          subgraph.nodes.keys,
+          containsAll(['root', 'node1', 'node2', 'node3', 'node4']),
+        );
+
+        // Проверяем, что это действительно копия
+        subgraph.removeNode(node1);
+        expect(graph.containsNode(node1.key), isTrue);
+      });
+
+      test('Extract subtree with node data', () {
+        // Добавляем данные в исходный граф
+        graph.updateNodeData(node1.key, 'data1');
+        graph.updateNodeData(node3.key, 'data3');
+
+        final subgraph = graph.extractSubtree(node1.key, copy: true);
+
+        expect(subgraph.getNodeData(node1.key), equals('data1'));
+        expect(subgraph.getNodeData(node3.key), equals('data3'));
+        expect(subgraph.getNodeData(node2.key), isNull);
+      });
+
+      test('Extract subtree from non-existent node throws error', () {
+        expect(
+          () => graph.extractSubtree('non-existent'),
+          throwsStateError,
+        );
+      });
+
+      test('View modifications affect original graph', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+        final newNode = Node('new_node');
+
+        // Добавление узла через view
+        view.addNode(newNode);
+        view.addEdge(node3, newNode);
+
+        // Проверяем, что изменения отразились в оригинальном графе
+        expect(graph.containsNode(newNode.key), isTrue);
+        expect(graph.getNodeParent(newNode), equals(node3));
+
+        // Удаление узла через view
+        view.removeNode(node4);
+        expect(graph.containsNode(node4.key), isFalse);
+      });
+
+      test('View restricts operations outside subtree', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+
+        // Попытка добавить ребро к узлу вне поддерева
+        expect(
+          () => view.addEdge(node2, Node('new_node')),
+          throwsStateError,
+        );
+
+        // Попытка получить данные узла вне поддерева
+        expect(view.getNodeData(node2.key), isNull);
+
+        // Проверяем, что узлы вне поддерева не видны через view
+        expect(view.nodes.length, equals(3)); // node1, node3, node4
+        expect(view.containsNode(node2.key), isFalse);
+      });
+
+      test('Nested subtree extraction', () {
+        final subgraph = graph.extractSubtree(node1.key, copy: true);
+        final nestedSubgraph = subgraph.extractSubtree(node3.key, copy: true);
+
+        expect(nestedSubgraph.root, equals(node3));
+        expect(nestedSubgraph.nodes.length, equals(1));
+        expect(nestedSubgraph.edges.isEmpty, isTrue);
+      });
+    });
+
     test('Graph string representation', () {
       // Очищаем граф перед тестом
       graph.clear();

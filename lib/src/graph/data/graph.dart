@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:data_manage/src/graph/_index.dart';
 
 import 'node_data_managers/_index.dart';
+part 'subtree_view.dart';
 
 class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   @override
@@ -23,8 +24,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   @override
   Map<Node, Node> get parents => Map.unmodifiable(_parents);
   final Map<Node, Node> _parents = {};
-
-  final bool allowManyParents;
 
   // Кэш для часто используемых вычислений
   // Не используем WeakReference, так как:
@@ -53,7 +52,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     Map<String, T> nodesData = const {},
     Map<Node, Set<Node>> edges = const {},
     Map<Node, Node> parents = const {},
-    this.allowManyParents = false,
     INodeDataManager<T>? nodeDataManager,
   }) : _nodeDataManager = nodeDataManager ?? SimpleNodeDataManager<T>() {
     addNode(root);
@@ -86,7 +84,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     }
 
     final existingParent = getNodeParent(child);
-    if (!allowManyParents && existingParent != null) {
+    if (existingParent != null) {
       throw StateError(
         'Node "${child.key}" already has a parent "${existingParent.key}"',
       );
@@ -170,7 +168,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Node? getNodeParent(Node node) => _parents[node];
 
   @override
-  Set<Node> getNodeEdges(Node node) => _edges[node] ?? {};
+  Set<Node> getNodeEdges(Node node) => _edges[node] ?? <Node>{};
 
   // ==================================
   // METHODS
@@ -183,7 +181,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
     if (!copy) {
       // Возвращаем view на существующий граф
-      return _SubtreeView<T>(
+      return SubtreeView<T>(
         originalGraph: this,
         subtreeRoot: newRoot,
       );
@@ -615,138 +613,4 @@ class _PathNode {
   final Node node;
   final List<Node> path;
   _PathNode(this.node, this.path);
-}
-
-/// View на поддерево существующего графа
-class _SubtreeView<T> implements IGraphEditable<T> {
-  final Graph<T> originalGraph;
-  final Node subtreeRoot;
-  final Set<Node> _subtreeNodes;
-
-  _SubtreeView({
-    required this.originalGraph,
-    required this.subtreeRoot,
-  }) : _subtreeNodes = originalGraph._getSubtree(subtreeRoot);
-
-  @override
-  Node get root => subtreeRoot;
-
-  @override
-  Map<String, Node> get nodes {
-    return Map.fromEntries(
-      _subtreeNodes.map((node) => MapEntry(node.key, node)),
-    );
-  }
-
-  @override
-  Map<String, T> get nodeData {
-    return Map.fromEntries(
-      _subtreeNodes.map((node) {
-        final data = originalGraph.getNodeData(node.key);
-        return data != null ? MapEntry(node.key, data) : null;
-      }).whereType<MapEntry<String, T>>(),
-    );
-  }
-
-  @override
-  Map<Node, Set<Node>> get edges {
-    return Map.fromEntries(
-      _subtreeNodes.map((node) {
-        final children = originalGraph.getNodeEdges(node);
-        return MapEntry(node, children.intersection(_subtreeNodes));
-      }).where((entry) => entry.value.isNotEmpty),
-    );
-  }
-
-  @override
-  Map<Node, Node> get parents {
-    return Map.fromEntries(
-      _subtreeNodes.map((node) {
-        final parent = originalGraph.getNodeParent(node);
-        return parent != null && _subtreeNodes.contains(parent) ? MapEntry(node, parent) : null;
-      }).whereType<MapEntry<Node, Node>>(),
-    );
-  }
-
-  @override
-  void addNode(Node node) => originalGraph.addNode(node);
-
-  @override
-  void addEdge(Node parent, Node child) => originalGraph.addEdge(parent, child);
-
-  @override
-  void removeNode(Node node) => originalGraph.removeNode(node);
-
-  @override
-  void removeEdge(Node parent, Node child) => originalGraph.removeEdge(parent, child);
-
-  @override
-  void clear() {
-    for (final node in List<Node>.from(_subtreeNodes)) {
-      removeNode(node);
-    }
-  }
-
-  @override
-  void updateNodeData(String key, T data) => originalGraph.updateNodeData(key, data);
-
-  @override
-  String get graphString => originalGraph.graphString;
-
-  // Делегируем остальные методы оригинальному графу
-  @override
-  bool containsNode(String nodeKey) => originalGraph.containsNode(nodeKey);
-
-  @override
-  Node? getNodeByKey(String key) => originalGraph.getNodeByKey(key);
-
-  @override
-  T? getNodeData(String key) => originalGraph.getNodeData(key);
-
-  @override
-  Set<Node> getNodeEdges(Node node) => originalGraph.getNodeEdges(node);
-
-  @override
-  Node? getNodeParent(Node node) => originalGraph.getNodeParent(node);
-
-  @override
-  Set<Node> getSiblings(Node node) => originalGraph.getSiblings(node);
-
-  @override
-  Set<Node> getLeaves({Node? startNode}) => originalGraph.getLeaves(startNode: startNode);
-
-  @override
-  int getNodeLevel(Node node) => originalGraph.getNodeLevel(node);
-
-  @override
-  Map<Node, int> getDepths() => originalGraph.getDepths();
-
-  @override
-  Set<Node> getFullVerticalPath(Node node) => originalGraph.getFullVerticalPath(node);
-
-  @override
-  Set<Node> getVerticalPathBetweenNodes(Node first, Node second, {Map<String, int>? depths}) =>
-      originalGraph.getVerticalPathBetweenNodes(first, second, depths: depths);
-
-  @override
-  Set<Node> getPathToNode(Node node) => originalGraph.getPathToNode(node);
-
-  @override
-  bool isAncestor({required Node ancestor, required Node descendant}) =>
-      originalGraph.isAncestor(ancestor: ancestor, descendant: descendant);
-
-  @override
-  int visitBreadth(VisitCallback visit, {Node? startNode}) =>
-      originalGraph.visitBreadth(visit, startNode: startNode);
-
-  @override
-  void visitDepth(VisitCallback visit, {Node? startNode}) =>
-      originalGraph.visitDepth(visit, startNode: startNode);
-
-  @override
-  void visitDepthBacktrack(BacktrackCallback visit) => originalGraph.visitDepthBacktrack(visit);
-
-  @override
-  IGraphEditable<T> extractSubtree(String key, {bool copy = true}) =>
-      originalGraph.extractSubtree(key, copy: copy);
 }

@@ -95,23 +95,10 @@ void main() {
           () => graph.addEdge(parent2, child),
           throwsStateError,
         );
-      });
 
-      test('Add edge to node with existing parent succeeds when allowManyParents=true', () {
-        final graph = Graph<String>(
-          root: root,
-          allowManyParents: true,
-        );
-
-        final parent1 = Node('parent1');
-        final parent2 = Node('parent2');
-        final child = Node('child');
-
-        graph.addEdge(parent1, child);
-        graph.addEdge(parent2, child);
-
-        expect(graph.edges[parent1], contains(child));
-        expect(graph.edges[parent2], contains(child));
+        expect(graph.getNodeParent(child), equals(parent1));
+        expect(graph.getNodeEdges(parent1), contains(child));
+        expect(graph.getNodeEdges(parent2).contains(child), isFalse);
       });
 
       test('Remove edge', () {

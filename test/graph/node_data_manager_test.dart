@@ -10,34 +10,34 @@ void main() {
       manager = SimpleNodeDataManager<String>();
     });
 
-    test('Initial state is empty', () {
+    test('initial_state_is_empty', () {
       expect(manager.data.isEmpty, isTrue);
       expect(manager.getMetrics()['size'], equals(0));
       expect(manager.getMetrics()['hits'], equals(0));
       expect(manager.getMetrics()['misses'], equals(0));
     });
 
-    test('Set and get data', () {
+    test('set_and_get_data', () {
       manager.set('node1', 'data1');
       expect(manager.get('node1'), equals('data1'));
       expect(manager.data['node1'], equals('data1'));
     });
 
-    test('Remove data', () {
+    test('remove_data', () {
       manager.set('node1', 'data1');
       manager.remove('node1');
       expect(manager.get('node1'), isNull);
       expect(manager.data['node1'], isNull);
     });
 
-    test('Clear data', () {
+    test('clear_data', () {
       manager.set('node1', 'data1');
       manager.set('node2', 'data2');
       manager.clear();
       expect(manager.data.isEmpty, isTrue);
     });
 
-    test('Hit/miss metrics', () {
+    test('hit_miss_metrics', () {
       manager.set('node1', 'data1');
 
       // Hit
@@ -62,13 +62,13 @@ void main() {
       manager = LRUNodeDataManager<String>(maxSize: maxSize);
     });
 
-    test('Initial state is empty', () {
+    test('initial_state_is_empty', () {
       expect(manager.data.isEmpty, isTrue);
       expect(manager.getMetrics()['size'], equals(0));
       expect(manager.getMetrics()['maxSize'], equals(maxSize));
     });
 
-    test('Respect max size limit', () {
+    test('respect_max_size_limit', () {
       manager.set('node1', 'data1');
       manager.set('node2', 'data2');
       manager.set('node3', 'data3');
@@ -81,7 +81,7 @@ void main() {
       expect(manager.get('node4'), equals('data4'));
     });
 
-    test('LRU order is maintained', () {
+    test('lru_order_is_maintained', () {
       manager.set('node1', 'data1');
       manager.set('node2', 'data2');
       manager.set('node3', 'data3');
@@ -98,7 +98,7 @@ void main() {
       expect(manager.get('node4'), equals('data4'));
     });
 
-    test('Get updates LRU order', () {
+    test('get_updates_lru_order', () {
       manager.set('node1', 'data1');
       manager.set('node2', 'data2');
       manager.set('node3', 'data3');
@@ -117,7 +117,7 @@ void main() {
       expect(manager.get('node4'), equals('data4'));
     });
 
-    test('Clear resets all state', () {
+    test('clear_resets_all_state', () {
       manager.set('node1', 'data1');
       manager.set('node2', 'data2');
       manager.get('node1'); // Hit
@@ -132,7 +132,7 @@ void main() {
       expect(metrics['size'], equals(0));
     });
 
-    test('Metrics are accurate', () {
+    test('metrics_are_accurate', () {
       manager.set('node1', 'data1');
       manager.set('node2', 'data2');
 
@@ -153,7 +153,7 @@ void main() {
       expect(metrics['utilizationRate'], equals(2 / maxSize));
     });
 
-    test('Get least/most recently used keys', () {
+    test('get_least_most_recently_used_keys', () {
       manager.set('node1', 'data1');
       manager.set('node2', 'data2');
       manager.set('node3', 'data3');

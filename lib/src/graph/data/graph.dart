@@ -67,7 +67,11 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
   @override
   void addNode(Node node) {
+    if (node.key.isEmpty) {
+      throw ArgumentError('Cannot add node with empty key');
+    }
     if (containsNode(node.key)) {
+      if (node == root) return; // Разрешаем повторное добавление корневого узла
       throw StateError('Graph already contains node "${node.key}"');
     }
     _nodes[node.key] = node;
@@ -76,6 +80,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
   @override
   void addEdge(Node parent, Node child) {
+    if (parent == child) {
+      throw StateError('Cannot add self-referencing edge');
+    }
+
     if (!containsNode(parent.key)) {
       addNode(parent);
     }
@@ -90,10 +98,25 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       );
     }
 
+    // Проверяем, не создаст ли новое ребро цикл
+    if (_wouldCreateCycle(parent, child)) {
+      throw StateError('Cannot create cycle');
+    }
+
     _parents[child] = parent;
     final childSet = _edges.putIfAbsent(parent, () => <Node>{});
     childSet.add(child);
     _invalidateCache();
+  }
+
+  bool _wouldCreateCycle(Node parent, Node child) {
+    // Проверяем, не является ли child предком parent
+    Node? current = parent;
+    while (current != null) {
+      if (current == child) return true;
+      current = getNodeParent(current);
+    }
+    return false;
   }
 
   // ==================================
@@ -102,38 +125,63 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
   @override
   void removeNode(Node node) {
-    _assertNodeExists(node);
+    if (!containsNode(node.key)) {
+      throw StateError('Node "${node.key}" does not exist in graph');
+    }
+    if (node == root) {
+      throw StateError('Root node cannot be removed');
+    }
+
+    // Сначала удаляем все рёбра, связанные с узлом
+    final nodeEdges = getNodeEdges(node).toList();
+    for (final child in nodeEdges) {
+      removeEdge(node, child);
+    }
+
+    // Удаляем узел из родительских связей
+    final parent = getNodeParent(node);
+    if (parent != null) {
+      removeEdge(parent, node);
+    }
+
+    // Удаляем сам узел
     _nodes.remove(node.key);
     _edges.remove(node);
-    for (final edges in _edges.values) {
-      edges.remove(node);
-    }
-    _parents.remove(node);
-    _parents.removeWhere((key, value) => value == node);
     _nodeDataManager.remove(node.key);
     _invalidateCache();
   }
 
   @override
   void removeEdge(Node parent, Node child) {
-    _assertNodeExists(parent, extra: '(parent)');
-    _assertNodeExists(child, extra: '(child)');
+    if (!containsNode(parent.key)) {
+      throw StateError('Node "${parent.key}" does not exist in graph (parent)');
+    }
+    if (!containsNode(child.key)) {
+      throw StateError('Node "${child.key}" does not exist in graph (child)');
+    }
+
+    if (!_edges.containsKey(parent) || !_edges[parent]!.contains(child)) {
+      throw StateError('Edge between "${parent.key}" and "${child.key}" does not exist');
+    }
+
     _parents.remove(child);
-    final childSet = _edges.putIfAbsent(parent, () => <Node>{});
+    final childSet = _edges[parent]!;
     childSet.remove(child);
     if (childSet.isEmpty) {
-      _edges.remove(parent);
+      _edges[parent] = <Node>{}; // Оставляем пустой сет вместо удаления
     }
     _invalidateCache();
   }
 
   @override
   void clear() {
+    final oldRoot = root;
     _nodes.clear();
     _nodeDataManager.clear();
     _edges.clear();
     _parents.clear();
     _invalidateCache();
+    addNode(oldRoot); // Добавляем корневой узел обратно
   }
 
   // ==================================
@@ -159,7 +207,12 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   // ==================================
 
   @override
-  Node? getNodeByKey(String key) => _nodes[key];
+  Node? getNodeByKey(String key) {
+    if (key.isEmpty) {
+      throw ArgumentError('Cannot get node with empty key');
+    }
+    return _nodes[key];
+  }
 
   @override
   bool containsNode(String nodeKey) => _nodes.containsKey(nodeKey);
@@ -168,7 +221,21 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Node? getNodeParent(Node node) => _parents[node];
 
   @override
-  Set<Node> getNodeEdges(Node node) => _edges[node] ?? <Node>{};
+  Set<Node> getNodeEdges(Node node) {
+    if (!containsNode(node.key)) {
+      throw StateError('Node "${node.key}" does not exist in graph');
+    }
+    return Set.unmodifiable(_edges[node] ?? <Node>{});
+  }
+
+  @override
+  Map<Node, Set<Node>> get edgesWithEmptySets {
+    // Создаем копию с пустыми сетами для узлов без рёбер
+    final result = Map<Node, Set<Node>>.fromEntries(
+      nodes.values.map((node) => MapEntry(node, _edges[node] ?? <Node>{})),
+    );
+    return Map.unmodifiable(result);
+  }
 
   // ==================================
   // METHODS
@@ -344,8 +411,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   // Вспомогательный метод проверки
   // ==================================
   void _assertNodeExists(Node node, {String extra = ''}) {
-    if (!_nodes.containsKey(node.key)) {
-      throw StateError('Graph does not contain the node "$node". $extra');
+    if (!containsNode(node.key)) {
+      throw StateError('Node "${node.key}" does not exist in graph $extra');
     }
   }
 

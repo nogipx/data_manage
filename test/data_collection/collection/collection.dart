@@ -1,91 +1,169 @@
 import 'package:data_manage/data_manage.dart';
 import 'package:test/test.dart';
 
+import '../_data.dart';
+
 void main() {
-  test('Initial settings for collection are applied', () {
-    final data = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    final sut = DataCollection<int>(
-      data: data,
-      defaultSort: SortAction(
-        (a, b) => a.compareTo(b),
-        direction: SortDirection.desc,
-      ),
-      initialFilters: [
-        FilterAction(
-          key: 'filter1',
-          predicate: (e) => e > 2,
+  group('DataCollection State Management |', () {
+    test('initial_state_is_correct', () {
+      final collection = DataCollection<String>(
+        data: abcCombinationsStrings,
+        defaultSort: SortAction(
+          (a, b) => a.compareTo(b),
+          direction: SortDirection.asc,
         ),
-      ],
-      initialMatchers: [
-        MatchAction(
-          key: 'match1',
+        initialFilters: [
+          FilterAction(
+            key: 'filter1',
+            predicate: (e) => e.contains('a'),
+          ),
+        ],
+        initialMatchers: [
+          MatchAction(
+            key: 'match1',
+            type: MatchActionType.and,
+            predicate: (e) => e.length == 2,
+          ),
+        ],
+      );
+
+      collection.actualize();
+      final state = collection.state;
+
+      expect(state.originalData, equals(abcCombinationsStrings));
+      expect(
+        state.data,
+        equals(['ab', 'ac']),
+        reason: 'Должны быть применены фильтры и матчеры',
+      );
+      expect(state.hasFilters, isTrue);
+      expect(state.hasMatchers, isTrue);
+    });
+
+    test('updates_state_when_data_changes', () {
+      final collection = DataCollection<String>(
+        data: ['a', 'b'],
+        autoActualize: true,
+      );
+
+      collection.updateOriginalData(['c', 'd']);
+
+      expect(
+        collection.state.originalData,
+        equals(['c', 'd']),
+        reason: 'Оригинальные данные должны обновиться',
+      );
+      expect(
+        collection.state.data,
+        equals(['c', 'd']),
+        reason: 'Текущие данные должны обновиться',
+      );
+    });
+
+    test('applies_filters_in_correct_order', () {
+      final collection = DataCollection<String>(
+        data: abcCombinationsStrings,
+      );
+
+      collection
+        ..addFilter(FilterAction(
+          key: 'contains_b',
+          predicate: (e) => e.contains('b'),
+        ))
+        ..addFilter(FilterAction(
+          key: 'length_2',
+          predicate: (e) => e.length == 2,
+        ))
+        ..actualize();
+
+      expect(
+        collection.state.data,
+        equals(['ab', 'bc']),
+        reason: 'Фильтры должны применяться последовательно',
+      );
+    });
+
+    test('applies_matchers_after_filters', () {
+      final collection = DataCollection<String>(
+        data: abcCombinationsStrings,
+      );
+
+      collection
+        ..addFilter(FilterAction(
+          key: 'length_2',
+          predicate: (e) => e.length == 2,
+        ))
+        ..addMatcher(MatchAction(
+          key: 'contains_a',
           type: MatchActionType.and,
-          predicate: (e) => e % 2 == 0,
-        ),
-        MatchAction(
-          key: 'match2',
-          type: MatchActionType.or,
-          predicate: (e) => e == 9,
-        ),
-      ],
-      listener: SimpleCollectionListener(
-        actualizeListener: (_) {},
-        stateListener: (_) {},
-      ),
-    );
+          predicate: (e) => e.contains('a'),
+        ))
+        ..actualize();
 
-    sut.actualize();
+      expect(
+        collection.state.data,
+        equals(['ab', 'ac']),
+        reason: 'Сначала применяются фильтры, затем матчеры',
+      );
+    });
 
-    final state = sut.state;
-    expect(state.originalData, equals(data));
-    expect(state.data, equals([9, 8, 6, 4]));
-    expect(state.hasFilters, equals(true));
-    expect(state.hasMatchers, equals(true));
-    expect(state.sort, isNull);
-    expect(sut.hasCollectionListener, isTrue);
-  });
+    test('applies_sort_last', () {
+      final collection = DataCollection<String>(
+        data: ['bc', 'ab', 'ac'],
+      );
 
-  test('Auto actualization applies all settings', () {
-    final data = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      collection
+        ..addFilter(FilterAction(
+          key: 'length_2',
+          predicate: (e) => e.length == 2,
+        ))
+        ..applySort(SortAction(
+          (a, b) => a.compareTo(b),
+          direction: SortDirection.asc,
+        ))
+        ..actualize();
 
-    DataCollectionState<int>? newState;
-    DataCollectionState<int>? actualizedState;
+      expect(
+        collection.state.data,
+        equals(['ab', 'ac', 'bc']),
+        reason: 'Сортировка должна применяться после фильтров и матчеров',
+      );
+    });
 
-    final sut = DataCollection<int>(
-      data: data,
-      autoActualize: true,
-      defaultSort: SortAction(
-        (a, b) => a.compareTo(b),
-        direction: SortDirection.desc,
-      ),
-      initialFilters: [
-        FilterAction(
-          key: 'filter1',
-          predicate: (e) => e > 2,
-        ),
-      ],
-      initialMatchers: [
-        MatchAction(
-          key: 'match1',
+    test('resets_all_operations_correctly', () {
+      final collection = DataCollection<String>(
+        data: abcCombinationsStrings,
+      );
+
+      collection
+        ..addFilter(FilterAction(
+          key: 'any',
+          predicate: (e) => true,
+        ))
+        ..addMatcher(MatchAction(
+          key: 'any',
           type: MatchActionType.and,
-          predicate: (e) => e % 2 == 0,
-        ),
-        MatchAction(
-          key: 'match2',
-          type: MatchActionType.or,
-          predicate: (e) => e == 9,
-        ),
-      ],
-      listener: SimpleCollectionListener(
-        actualizeListener: (e) => actualizedState = e,
-        stateListener: (e) => newState = e,
-      ),
-    );
+          predicate: (e) => true,
+        ))
+        ..applySort(SortAction(
+          (a, b) => a.compareTo(b),
+          direction: SortDirection.asc,
+        ));
 
-    final newData = [1, 2, 3, 4, 10, 11, 12, 13];
-    sut.updateOriginalData(newData);
+      collection
+        ..resetFilters()
+        ..resetMatchers()
+        ..resetSort()
+        ..actualize();
 
-    expect(actualizedState?.data, equals([12, 10, 4]));
-    expect(newState?.originalData, equals(newData));
+      expect(
+        collection.state.data,
+        equals(abcCombinationsStrings),
+        reason: 'После сброса должны вернуться исходные данные',
+      );
+      expect(collection.state.hasFilters, isFalse);
+      expect(collection.state.hasMatchers, isFalse);
+      expect(collection.state.sort, isNull);
+    });
   });
 }

@@ -29,27 +29,33 @@ class MatchUseCase<T> implements UseCase<MatchUseCaseResult<T>> {
   MatchUseCaseResult<T> run() {
     final enabledMatchers = matchers.where((e) => e.isEnabled);
 
-    if (data.isNotEmpty && enabledMatchers.isNotEmpty) {
-      final newFilteredData = <T>{};
-      for (final item in data) {
-        final isMatch = _isPassingMatchers(
-          value: item,
-          matchers: enabledMatchers,
-        );
-        if (isMatch) {
-          newFilteredData.add(item);
-        }
-      }
+    if (data.isEmpty) {
       return MatchUseCaseResult(
         originalData: data,
-        matchedData: newFilteredData,
+        matchedData: data,
         appliedMatchers: enabledMatchers,
       );
     }
+
+    if (enabledMatchers.isEmpty) {
+      return MatchUseCaseResult(
+        originalData: data,
+        matchedData: data,
+        appliedMatchers: const [],
+      );
+    }
+
+    final newFilteredData = <T>{};
+    for (final item in data) {
+      if (_isPassingMatchers(value: item, matchers: enabledMatchers)) {
+        newFilteredData.add(item);
+      }
+    }
+
     return MatchUseCaseResult(
       originalData: data,
-      matchedData: data,
-      appliedMatchers: const [],
+      matchedData: newFilteredData,
+      appliedMatchers: enabledMatchers,
     );
   }
 
@@ -70,38 +76,33 @@ class MatchUseCase<T> implements UseCase<MatchUseCaseResult<T>> {
     required T value,
     Iterable<MatchAction<T>> matchers = const [],
   }) {
-    if (matchers.isEmpty) {
-      return true;
+    if (matchers.isEmpty) return true;
+
+    final orMatchers = matchers.where((e) => e.type == MatchActionType.or);
+    final andMatchers = matchers.where((e) => e.type == MatchActionType.and);
+
+    // Если есть OR матчеры, хотя бы один должен пройти
+    if (orMatchers.isNotEmpty && !orMatchers.any((e) => e.predicate(value))) {
+      return false;
     }
 
-    final orMatchers = matchers.where((e) => e.type == MatchActionType.or).toList();
-
-    final passOr = orMatchers.any((e) => e.predicate(value));
-    if (orMatchers.isNotEmpty && passOr) {
-      return true;
+    // Если есть AND матчеры, все должны пройти
+    if (andMatchers.isNotEmpty && !andMatchers.every((e) => e.predicate(value))) {
+      return false;
     }
 
-    final andMatchers = matchers.where((e) => e.type == MatchActionType.and).toList();
-
-    final matchesAnd = andMatchers.every((e) => e.predicate(value));
-    if (andMatchers.isNotEmpty && matchesAnd) {
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
   /// Возвращает количество элементов, подходящих под матчеры.
   int countMatchedItems() {
     final enabledMatchers = matchers.where((e) => e.isEnabled);
+    if (data.isEmpty) return 0;
+    if (enabledMatchers.isEmpty) return data.length;
 
     int counter = 0;
     for (final item in data) {
-      final isPassing = _isPassingMatchers(
-        value: item,
-        matchers: enabledMatchers,
-      );
-      if (isPassing) {
+      if (_isPassingMatchers(value: item, matchers: enabledMatchers)) {
         counter++;
       }
     }

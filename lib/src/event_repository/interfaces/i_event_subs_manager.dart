@@ -6,9 +6,11 @@ import 'dart:async';
 abstract interface class IEventsSubscriptions<E> {
   /// Подписаться на события типа [E]
   /// Пример:
+  /// ```
   ///   eventsSubscriptions.on<UserLoggedIn>((event) {
   ///     print('Logged in: ${event.userId}');
   ///   });
+  /// ```
   ///
   /// Возвращаем подписку, если вдруг понадобится отменить именно её вручную.
   StreamSubscription<T> on<T extends E>(

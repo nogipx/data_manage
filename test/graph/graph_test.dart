@@ -521,9 +521,6 @@ void main() {
     });
 
     test('validates_node_operations', () {
-      // Arrange
-      final node = Node('node');
-
       // Act & Assert - проверяем самоссылающееся ребро
       expect(
         () => graph.addEdge(root, root),

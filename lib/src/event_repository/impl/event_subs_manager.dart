@@ -6,7 +6,7 @@ typedef StreamModifier<T> = Stream<T> Function(Stream<T> s)?;
 
 /// Пример менеджера, в котором для каждого конкретного типа T
 /// создаётся максимум одна подписка.
-/// Повторный вызов on<T> вернёт ту же самую подписку,
+/// Повторный вызов `on<T>` вернёт ту же самую подписку,
 /// чтобы не плодить лишних слушателей и избежать утечек.
 class EventsSubscriptions<E> implements IEventsSubscriptions<E> {
   final Stream<E> _eventStream;

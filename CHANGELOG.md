@@ -1,3 +1,6 @@
+# 2.2.3
+- docs: fixed docs
+
 # 2.2.2
 - fix!: improved matcher logic in DataCollection
   - corrected AND/OR conditions application order

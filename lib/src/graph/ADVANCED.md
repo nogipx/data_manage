@@ -2,28 +2,28 @@
 
 ## 🎯 Architecture Overview
 
-The graph implementation is built on a layered architecture with clear separation of concerns:
+The implementation is built on a layered architecture that enforces a strict tree structure with single-parent relationships:
 
 ```
-IGraphData<T>           # Base interface for data access
+IGraphData<T>           # Base interface for data access and validation
     ↓
-IGraph<T>              # Core graph operations
+IGraph<T>              # Core tree operations
     ↓
-IGraphEditable<T>      # Mutable graph operations
+IGraphEditable<T>      # Mutable tree operations
     ↓
 IGraphIterable<T>      # Advanced traversal capabilities
     ↓
-Graph<T>              # Concrete implementation
+Graph<T>              # Concrete implementation with single-parent enforcement
 ```
 
 ### Interface Responsibilities
 
 #### IGraphData<T>
 ```dart
-// Basic structure access
+// Basic structure access with single-parent validation
 Map<String, Node> get nodes;
-Map<Node, Set<Node>> get edges;
-Map<Node, Node> get parents;
+Map<Node, Set<Node>> get edges;  // children for each node
+Map<Node, Node> get parents;     // single parent for each node
 Map<String, T> get nodeData;
 ```
 

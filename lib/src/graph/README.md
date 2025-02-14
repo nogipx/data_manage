@@ -1,6 +1,6 @@
 # 🌳 Graph Implementation
 
-A robust and efficient implementation of directed graph data structure in Dart, with focus on tree-like structures.
+A robust and efficient implementation of tree data structure in Dart, with strict single-parent hierarchy and powerful traversal capabilities.
 
 ## ⚡️ Quick Start
 
@@ -113,10 +113,9 @@ print('Hit rate: ${metrics['hitRate']}');
 ## 🎨 Implementation Details
 
 ### Graph Properties
-- Directed graph structure with strict tree hierarchy
-- Single-parent relationship enforcement
-- Efficient node data management
-- Cached computations for performance
+- Strict tree structure with single-parent hierarchy
+- Efficient node data management with caching
+- Optimized traversal and path finding
 - Thread-safe operations
 
 ### Performance Considerations

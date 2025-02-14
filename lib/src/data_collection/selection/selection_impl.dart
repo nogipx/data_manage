@@ -5,7 +5,7 @@ import 'dart:collection';
 import '../_index.dart';
 
 class SelectionImpl<T> implements Selection<T> {
-  final StateCallback<SelectionState>? onStateChanged;
+  final StateCallback<SelectionState<T>>? onStateChanged;
 
   @override
   final bool useStaging;

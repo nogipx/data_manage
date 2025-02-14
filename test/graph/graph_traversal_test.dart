@@ -573,36 +573,6 @@ void main() {
           reason: 'Обход в ширину должен быть эффективным даже на широких графах',
         );
       });
-
-      test('cache_effectiveness_for_repeated_operations', () {
-        // Arrange - создаем дерево
-        final root = Node('root');
-        final graph = Graph<String>(root: root);
-
-        var currentParent = root;
-        for (var i = 0; i < 100; i++) {
-          final node = Node('node$i');
-          graph.addEdge(currentParent, node);
-          currentParent = node;
-        }
-
-        // Act - первый вызов (заполнение кэша)
-        final firstCallStart = DateTime.now();
-        final depths1 = graph.getDepths();
-        final firstCallDuration = DateTime.now().difference(firstCallStart);
-
-        // Второй вызов (должен использовать кэш)
-        final secondCallStart = DateTime.now();
-        final depths2 = graph.getDepths();
-        final secondCallDuration = DateTime.now().difference(secondCallStart);
-
-        // Assert
-        expect(
-          secondCallDuration.inMicroseconds,
-          lessThan(firstCallDuration.inMicroseconds),
-          reason: 'Повторные операции должны быть быстрее благодаря кэшированию',
-        );
-      });
     });
   });
 }

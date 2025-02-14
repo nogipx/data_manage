@@ -13,7 +13,7 @@ class DataCollection<T> {
 
   DataCollectionState<T> get state => _state;
 
-  DataCollectionListener? _listener;
+  DataCollectionListener<T>? _listener;
 
   bool get hasCollectionListener => _listener != null;
 
@@ -146,9 +146,8 @@ class DataCollection<T> {
         newMatchers: newMatchers != null
             ? IMap.fromEntries(newMatchers.map((e) => MapEntry(e.key, e)))
             : null,
-        newFilters: newFilters != null
-            ? IMap.fromEntries(newFilters.map((e) => MapEntry(e.key, e)))
-            : null,
+        newFilters:
+            newFilters != null ? IMap.fromEntries(newFilters.map((e) => MapEntry(e.key, e))) : null,
         newSort: newSort ?? _getSortToApply(resetSort),
       );
 
@@ -263,11 +262,9 @@ class DataCollection<T> {
       sort: newSort ?? currentState.sort ?? defaultSort,
     );
 
-    final hasMatchersChanged =
-        !newState.matchers.equalItemsToIMap(currentState.matchers);
+    final hasMatchersChanged = !newState.matchers.equalItemsToIMap(currentState.matchers);
 
-    final hasFiltersChanged =
-        !newState.filters.equalItemsToIMap(currentState.filters);
+    final hasFiltersChanged = !newState.filters.equalItemsToIMap(currentState.filters);
 
     if (hasMatchersChanged || useOriginalData) {
       final matchResult = MatchUseCase(
@@ -347,13 +344,11 @@ class DataCollection<T> {
     return sortToApply;
   }
 
-  static IMap<String, MatchAction<T>> _preprocessMatchers<T>(
-      List<MatchAction<T>> matchers) {
+  static IMap<String, MatchAction<T>> _preprocessMatchers<T>(List<MatchAction<T>> matchers) {
     return IMap.fromEntries(matchers.map((e) => MapEntry(e.key, e)));
   }
 
-  static IMap<String, FilterAction<T>> _preprocessFilters<T>(
-      List<FilterAction<T>> filters) {
+  static IMap<String, FilterAction<T>> _preprocessFilters<T>(List<FilterAction<T>> filters) {
     return IMap.fromEntries(filters.map((e) => MapEntry(e.key, e)));
   }
 }

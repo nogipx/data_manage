@@ -1,9 +1,11 @@
+// ignore_for_file: inference_failure_on_instance_creation
+
 import 'dart:async';
 
 import 'package:data_manage/data_manage.dart';
 
 class TestAsyncDelegate implements IBatchThrottleDelegate<String> {
-  AggregatedBatch? resultBatch;
+  AggregatedBatch<String>? resultBatch;
 
   @override
   Duration get durationIdleBeforeConfirm => const Duration(milliseconds: 15);
@@ -28,7 +30,7 @@ class TestAsyncDelegate implements IBatchThrottleDelegate<String> {
 }
 
 class TestSyncDelegate implements IBatchThrottleDelegate<String> {
-  AggregatedBatch? resultBatch;
+  AggregatedBatch<String>? resultBatch;
 
   @override
   Duration get durationIdleBeforeConfirm => const Duration(milliseconds: 15);

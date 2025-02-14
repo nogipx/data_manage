@@ -228,7 +228,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     return Set.unmodifiable(_edges[node] ?? <Node>{});
   }
 
-  @override
   Map<Node, Set<Node>> get edgesWithEmptySets {
     // Создаем копию с пустыми сетами для узлов без рёбер
     final result = Map<Node, Set<Node>>.fromEntries(

@@ -9,8 +9,8 @@ A powerful and flexible package for data management in Dart/Flutter applications
 ## 📦 Features
 
 ### 🌳 Graph and Trees ([documentation](lib/src/graph/README.md))
-- Efficient directed graph implementation
-- Support for trees and DAG structures
+- Efficient directed tree implementation
+- Single-parent hierarchy with strict validation
 - Advanced traversal and path finding algorithms
 - Smart node data caching
 - Extensible architecture

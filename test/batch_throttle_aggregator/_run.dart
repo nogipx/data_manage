@@ -1,3 +1,5 @@
+// ignore_for_file: inference_failure_on_instance_creation
+
 import 'package:data_manage/src/batch_throttle_aggregator/_index.dart';
 import 'package:test/test.dart';
 

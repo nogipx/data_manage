@@ -15,27 +15,27 @@ A powerful and flexible package for data management in Dart/Flutter applications
 - Smart node data caching
 - Extensible architecture
 
-### 📊 Data Collections
-- Data aggregation and batching
-- Collection state management
-- Optimized performance
+### 📊 Data Collections ([documentation](lib/src/data_collection/README.md))
+- Powerful filtering and matching system
+- AND/OR condition combinations
+- Flexible sorting capabilities
+- Immutable state management
+- Lazy evaluation and optimized performance
+- Automatic updates and state tracking
 
-### 🔄 State Management
-- Throttling and debouncing
-- Smart batch aggregation
-- Flexible confirmation strategies
 
 ## 🎯 Installation
 
 ```yaml
 dependencies:
-  data_manage: ^2.2.0
+  data_manage: ^2.2.2
 ```
 
 ## 📚 Documentation
 
 - [Graph Implementation](lib/src/graph/README.md) - Detailed guide on graph functionality
 - [Advanced Graph Guide](lib/src/graph/ADVANCED.md) - Advanced usage and concepts
+- [Data Collection](lib/src/data_collection/README.md) - Guide on collection management
 
 ## 📄 License
 

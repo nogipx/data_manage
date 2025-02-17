@@ -13,9 +13,7 @@ class FilterAction<T> {
 
   @override
   bool operator ==(Object other) =>
-      other is FilterAction<T> &&
-      key == other.key &&
-      predicate == other.predicate;
+      other is FilterAction<T> && key == other.key && predicate == other.predicate;
 
   @override
   int get hashCode => Object.hashAll([key, predicate]);

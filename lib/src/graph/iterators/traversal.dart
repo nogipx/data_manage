@@ -101,6 +101,7 @@ class LevelIterator extends BaseNodeCollectionIterator<Set<Node>> {
   final Set<Node> _visited = {};
   final Map<int, Set<Node>> _levels = {};
   int _currentLevel = 0;
+  bool _isTraversalComplete = false;
 
   LevelIterator(super.graph) {
     _queue.add(_NodeWithLevel(graph.root, 0));
@@ -108,18 +109,25 @@ class LevelIterator extends BaseNodeCollectionIterator<Set<Node>> {
 
   @override
   bool moveNext() {
-    while (_queue.isNotEmpty) {
-      final currentNode = _queue.removeFirst();
-      if (_visited.contains(currentNode.node)) continue;
+    if (_isTraversalComplete && _currentLevel >= _levels.length) {
+      return false;
+    }
 
-      _visited.add(currentNode.node);
-      _levels.putIfAbsent(currentNode.level, () => {}).add(currentNode.node);
+    if (!_isTraversalComplete) {
+      while (_queue.isNotEmpty) {
+        final currentNode = _queue.removeFirst();
+        if (_visited.contains(currentNode.node)) continue;
 
-      for (final child in graph.getNodeEdges(currentNode.node)) {
-        if (!_visited.contains(child)) {
-          _queue.add(_NodeWithLevel(child, currentNode.level + 1));
+        _visited.add(currentNode.node);
+        _levels.putIfAbsent(currentNode.level, () => {}).add(currentNode.node);
+
+        for (final child in graph.getNodeEdges(currentNode.node)) {
+          if (!_visited.contains(child)) {
+            _queue.add(_NodeWithLevel(child, currentNode.level + 1));
+          }
         }
       }
+      _isTraversalComplete = true;
     }
 
     if (_currentLevel < _levels.length) {

@@ -8,5 +8,4 @@ IEventsSubscriptions<T> createRepositoryEventsSubscriptions<T>(
   StreamTransformer<T, T>? transformAll,
   StreamModifier<T>? modifyAll,
 }) =>
-    EventsSubscriptions<T>(repository.stream,
-        transformAll: transformAll, modifyAll: modifyAll);
+    EventsSubscriptions<T>(repository.stream, transformAll: transformAll, modifyAll: modifyAll);

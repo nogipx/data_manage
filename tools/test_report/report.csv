@@ -1,0 +1,83 @@
+Group,Test Name,Protection,Refactoring,Feedback,Maintenance,Score,Comment
+Data Collection - Filter,single_filter_returns_matching_items,0.9,0.8,0.9,0.8,0.5184,Отличный базовый тест фильтрации
+Data Collection - Filter,disabled_filter_is_not_applied,0.8,0.9,0.9,0.8,0.5184,Важный тест отключенных фильтров
+Data Collection - Filter,multiple_filters_are_applied_sequentially,0.9,0.8,0.9,0.8,0.5184,Проверка последовательности фильтров
+Data Collection - Filter,empty_data_returns_empty_result,0.7,0.9,0.9,0.9,0.5103,Проверка граничного случая
+Data Collection - Filter,no_filters_returns_original_data,0.7,0.9,0.9,0.9,0.5103,Проверка базового случая
+Data Collection - Filter,filter_preserves_order_of_matched_items,0.8,0.8,0.9,0.8,0.4608,Проверка сохранения порядка
+Data Collection - Sort,sorts_ascending_order_correctly,0.9,0.8,0.9,0.8,0.5184,Базовый тест сортировки по возрастанию
+Data Collection - Sort,sorts_descending_order_correctly,0.9,0.8,0.9,0.8,0.5184,Базовый тест сортировки по убыванию
+Data Collection - Sort,empty_data_returns_empty_result,0.7,0.9,0.9,0.9,0.5103,Проверка граничного случая
+Data Collection - Sort,single_element_returns_same_element,0.7,0.9,0.9,0.9,0.5103,Проверка граничного случая
+Data Collection - Sort,equal_elements_preserve_order,0.8,0.8,0.9,0.8,0.4608,Проверка стабильности сортировки
+Data Collection - Match,matches_with_or_type_returns_items_matching_any_condition,0.9,0.8,0.9,0.8,0.5184,Тест OR-условий
+Data Collection - Match,matches_with_and_type_returns_items_matching_all_conditions,0.9,0.8,0.9,0.8,0.5184,Тест AND-условий
+Data Collection - Match,disabled_matchers_are_ignored,0.8,0.9,0.9,0.8,0.5184,Проверка отключенных матчеров
+Data Collection - Match,mixed_and_or_matchers_are_applied_in_correct_order,0.9,0.8,0.9,0.8,0.5184,Тест смешанных условий
+Data Collection - Match,empty_data_returns_empty_result,0.7,0.9,0.9,0.9,0.5103,Проверка граничного случая
+Data Collection - Match,no_matchers_returns_original_data,0.7,0.9,0.9,0.9,0.5103,Проверка базового случая
+Event Repository,delivers event to all subscribers,0.9,0.8,0.9,0.8,0.5184,Базовый тест доставки событий
+Event Repository,filters events by type,0.9,0.8,0.9,0.8,0.5184,Тест фильтрации событий
+Event Repository,prevents adding events after disposal,0.8,0.9,0.9,0.8,0.5184,Проверка состояния после dispose
+Event Repository,delivers events to type-specific handlers,0.9,0.8,0.9,0.8,0.5184,Тест типизированных обработчиков
+Event Repository,stops delivery after subscription cancellation,0.8,0.9,0.9,0.8,0.5184,Тест отмены подписки
+Event Repository,applies stream transformations,0.9,0.8,0.9,0.8,0.5184,Тест трансформации потока
+Node Data Manager - Simple,initial_state_is_empty,0.7,0.9,0.9,0.9,0.5103,Проверка начального состояния
+Node Data Manager - Simple,set_and_get_data,0.9,0.8,0.9,0.8,0.5184,Базовый тест работы с данными
+Node Data Manager - Simple,remove_data,0.8,0.9,0.9,0.8,0.5184,Тест удаления данных
+Node Data Manager - Simple,clear_data,0.8,0.9,0.9,0.8,0.5184,Тест очистки данных
+Node Data Manager - Simple,hit_miss_metrics,0.9,0.8,0.9,0.8,0.5184,Тест метрик кэша
+Node Data Manager - LRU,initial_state_is_empty,0.7,0.9,0.9,0.9,0.5103,Проверка начального состояния
+Node Data Manager - LRU,respect_max_size_limit,0.9,0.8,0.9,0.8,0.5184,Тест ограничения размера
+Node Data Manager - LRU,lru_order_is_maintained,0.9,0.8,0.9,0.8,0.5184,Тест порядка LRU
+Node Data Manager - LRU,get_updates_lru_order,0.9,0.8,0.9,0.8,0.5184,Тест обновления порядка
+Node Data Manager - LRU,clear_resets_all_state,0.8,0.9,0.9,0.8,0.5184,Тест сброса состояния
+Node Data Manager - LRU,metrics_are_accurate,0.9,0.8,0.9,0.8,0.5184,Тест точности метрик
+Node Data Manager - LRU,get_least_most_recently_used_keys,0.8,0.9,0.9,0.8,0.5184,Тест получения ключей по порядку
+Graph Base,graph_starts_with_only_root_node,0.9,0.8,0.9,0.8,0.5184,Базовый тест инициализации
+Graph Base,root_node_is_isolated_without_edges,0.8,0.9,0.9,0.8,0.5184,Тест изоляции корня
+Graph Base,root_node_is_independent_without_parent,0.8,0.9,0.9,0.8,0.5184,Тест независимости корня
+Graph Base,root_node_starts_without_data,0.7,0.9,0.9,0.9,0.5103,Тест начального состояния данных
+Graph Node Operations,adding_new_node_makes_it_accessible_in_graph,0.9,0.8,0.9,0.8,0.5184,Базовый тест добавления узла
+Graph Node Operations,cannot_add_node_with_existing_key,0.9,0.8,0.9,0.8,0.5184,Тест уникальности ключей
+Graph Node Operations,removing_node_makes_it_inaccessible,0.9,0.8,0.9,0.8,0.5184,Тест удаления узла
+Graph Node Operations,cannot_remove_non_existent_node,0.8,0.9,0.9,0.8,0.5184,Тест удаления несуществующего узла
+Graph Node Operations,root_node_cannot_be_removed,1.0,0.9,0.9,0.8,0.6480,Критический тест защиты корня
+Graph Node Operations,getting_node_by_key_returns_correct_node_or_null,0.8,0.9,0.9,0.8,0.5184,Тест получения узла по ключу
+Graph Node Operations,node_existence_check_works_through_lifecycle,0.9,0.8,0.9,0.8,0.5184,Тест жизненного цикла узла
+Graph Edge Operations,adding_edge_automatically_creates_missing_nodes,0.9,0.8,0.9,0.8,0.5184,Тест автосоздания узлов
+Graph Edge Operations,adding_edge_between_existing_nodes_preserves_node_count,0.8,0.9,0.9,0.8,0.5184,Тест сохранения количества узлов
+Graph Edge Operations,node_cannot_have_multiple_parents,1.0,0.9,0.9,0.8,0.6480,Критический тест единственности родителя
+Depth-First Traversal,visits_all_nodes_in_depth_first_order,0.9,0.8,0.9,0.7,0.4536,Отличный базовый тест проверяющий корректность обхода в глубину
+Depth-First Traversal,stops_traversal_when_specific_node_encountered,0.8,0.8,0.9,0.8,0.4608,Важный тест проверки прерывания обхода
+Depth-First Traversal,Iterator returns valid tree traversal,0.5,0.5,0.7,0.3,0.0525,Дублирует функционал первого теста избыточен
+Depth-First Traversal,depth_iterator_correctly_terminates,0.7,0.9,0.9,0.8,0.4536,Важная проверка корректного завершения итератора
+Breadth-First Traversal,visits_nodes_level_by_level,0.9,0.8,0.9,0.7,0.4536,Базовый тест правильности обхода в ширину
+Breadth-First Traversal,maintains_level_order_with_early_stop,0.8,0.7,0.9,0.7,0.3528,Проверка сохранения порядка при раннем завершении
+Breadth-First Traversal,breadth_iterator_correctly_terminates,0.7,0.9,0.9,0.8,0.4536,Проверка корректного завершения итератора
+Level-Based Operations,correctly calculates node levels,0.9,0.8,0.9,0.8,0.5184,Критически важный тест расчета уровней узлов
+Level-Based Operations,depth map matches node levels,0.8,0.7,0.9,0.7,0.3528,Проверка согласованности карты глубин с уровнями
+Level-Based Operations,level iterator groups nodes by levels,0.9,0.8,0.8,0.7,0.4032,Проверка правильности группировки узлов по уровням
+Level-Based Operations,level_iterator_correctly_terminates,0.7,0.9,0.9,0.8,0.4536,Проверка завершения итератора уровней
+Path Finding,path operations work correctly,0.8,0.7,0.8,0.6,0.2688,Слишком много проверок в одном тесте нужно разбить
+Path Finding,ancestor operations work correctly,0.9,0.8,0.8,0.6,0.3456,Требует разделения на отдельные тесты
+Graph Operations,get_siblings,0.7,0.9,0.9,0.9,0.5103,Простой и эффективный тест получения siblings
+Graph Operations,get_leaves,0.7,0.9,0.9,0.9,0.5103,Четкий тест получения листьев
+Graph Operations,select_root_creates_new_graph,0.8,0.7,0.8,0.6,0.2688,Можно объединить с другими тестами подграфов
+Graph Operations,extract_subtree_creates_new_graph,0.8,0.7,0.8,0.6,0.2688,Частично дублирует другие тесты подграфов
+Graph Operations,extract_subtree_creates_view,0.8,0.7,0.8,0.6,0.2688,Можно объединить с тестами view
+Subtree Operations,extract_subtree_from_root_returns_full_graph_copy,0.7,0.7,0.8,0.7,0.2744,Можно объединить с тестами копирования
+Subtree Operations,extract_subtree_with_node_data,0.8,0.8,0.9,0.8,0.4608,Важный тест сохранения данных при извлечении
+Subtree Operations,extract_subtree_from_non_existent_node_throws_error,0.9,0.9,0.9,0.9,0.6561,Отличный тест обработки ошибок
+Subtree Operations,view_modifications_affect_original_graph,0.8,0.7,0.8,0.7,0.3136,Проверка влияния изменений view на оригинал
+Subtree Operations,view_restricts_operations_outside_subtree,0.9,0.8,0.9,0.8,0.5184,Важный тест ограничений операций
+Subtree Operations,nested_subtree_extraction,0.7,0.7,0.8,0.7,0.2744,Можно объединить с другими тестами извлечения
+String Representation,maintains structural relationships in string form,0.2,0.1,0.7,0.3,0.0042,Самый нестабильный тест требует переработки
+Edge Cases,handles special graph cases correctly,0.8,0.7,0.8,0.7,0.3136,Хороший тест граничных случаев
+Complex Graph Structures,diamond_shape_graph_traversal,0.8,0.8,0.8,0.7,0.3584,Проверка сложных структур графа
+Complex Graph Structures,diamond_shape_throws_on_multiple_parents,1.0,0.9,0.9,0.8,0.6480,Лучший тест защищает важный инвариант
+Performance and Complexity,traversal operations scale reasonably,0.3,0.5,0.2,0.4,0.0120,Нестабильный тест производительности
+Performance and Complexity,memory usage scales linearly,0.4,0.6,0.3,0.5,0.0360,Нестабильный тест памяти
+Leaves Traversal,leaves_iterator_correctly_terminates,0.7,0.9,0.9,0.8,0.4536,Проверка завершения итератора листьев
+Iterator Behavior,iterators are not reusable,0.8,0.9,0.9,0.8,0.5184,Отличный тест контракта итератора
+Iterator Behavior,new iterator instance starts fresh,0.7,0.9,0.9,0.8,0.4536,Проверка свежего состояния нового итератора

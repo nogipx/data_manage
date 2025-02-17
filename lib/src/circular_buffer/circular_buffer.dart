@@ -99,8 +99,7 @@ class CircularBuffer<T> with ListMixin<T> {
   /// less than the [capacity].
   bool get isUnfilled => _buf.length < capacity;
 
-  int _normalizeIndex(int index) =>
-      isFilled ? (_start + index) % _buf.length : index;
+  int _normalizeIndex(int index) => isFilled ? (_start + index) % _buf.length : index;
 
   @override
   T operator [](int index) {

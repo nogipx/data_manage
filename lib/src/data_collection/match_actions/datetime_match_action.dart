@@ -18,11 +18,8 @@ class DateTimeMatchAction<T> extends MatchAction<T> {
               return false;
             }
 
-            final isAfterBegin = begin != null
-                ? createdAt.compareTo(begin.onlyDateUtc) >= 0
-                : null;
-            final isBeforeEnd =
-                end != null ? createdAt.compareTo(end.endOfDayUtc) <= 0 : null;
+            final isAfterBegin = begin != null ? createdAt.compareTo(begin.onlyDateUtc) >= 0 : null;
+            final isBeforeEnd = end != null ? createdAt.compareTo(end.endOfDayUtc) <= 0 : null;
 
             if (begin != null && end == null) {
               return isAfterBegin!;

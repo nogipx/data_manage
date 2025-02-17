@@ -1,4 +1,4 @@
-fvm flutter test --coverage --coverage-path coverage/lcov.temp.info test/run.dart
+fvm flutter test --coverage --coverage-path coverage/lcov.temp.info
 
 lcov --remove ./coverage/lcov.temp.info -o ./coverage/lcov.info \
     'lib/core/routes/*' \

@@ -37,8 +37,7 @@ class SortUseCase<T> implements UseCase<SortUseCaseResult<T>> {
 
     if (data.isNotEmpty) {
       final sorted = List<T>.from(data);
-      sorted.sort((a, b) =>
-          targetSort.comparator(a, b) * targetSort.direction.compareValue);
+      sorted.sort((a, b) => targetSort.comparator(a, b) * targetSort.direction.compareValue);
 
       return SortUseCaseResult(
         originalData: data,

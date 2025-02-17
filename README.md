@@ -38,6 +38,11 @@ A powerful and flexible package for data management in Dart/Flutter applications
 - Automatic resource cleanup and memory leak prevention
 - Efficient event processing with Dart Streams
 
+### 🔗 Chain ([documentation](lib/src/chain/README.md))
+- Type-safe data processing pipeline with rich error handling
+- Powerful mixin system for retry, metrics, and conditional execution
+- Perfect for complex workflows like API integrations, data imports, and payment processing
+
 ## 🎯 Installation
 
 ```yaml
@@ -52,6 +57,8 @@ dependencies:
 - [Data Collection](lib/src/data_collection/README.md) - Guide on collection management
 - [Event Repository](lib/src/event_repository/README.md) - Guide on event management system
 - [CircularList](lib/src/circular_list/README.md) - High-performance fixed-size list implementation
+- [Chain Implementation](lib/src/chain/README.md) - Type-safe data processing pipeline guide
+- [Advanced Chain Guide](lib/src/chain/ADVANCED.md) - Complex scenarios and performance optimization
 
 ## 📄 License
 
@@ -59,8 +66,9 @@ dependencies:
 - ✅ Use the code commercially
 - ✅ Modify the code
 - ✅ Distribute the code
-- ✅ Use private
-With only three requirements:
+- ✅ Use in private projects
+
+Requirements:
 1. Include the original copyright notice
 2. Include the license text
 3. Don't use the author's name for promotion

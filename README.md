@@ -23,6 +23,13 @@ A powerful and flexible package for data management in Dart/Flutter applications
 - Lazy evaluation and optimized performance
 - Automatic updates and state tracking
 
+### 🚀 Event Repository ([documentation](lib/src/event_repository/README.md))
+- Type-safe event handling and subscriptions
+- Memory leak prevention system
+- Flexible stream transformations
+- Broadcast event delivery
+- Automatic resource cleanup
+- Global and local stream modifiers
 
 ## 🎯 Installation
 
@@ -36,6 +43,7 @@ dependencies:
 - [Graph Implementation](lib/src/graph/README.md) - Detailed guide on graph functionality
 - [Advanced Graph Guide](lib/src/graph/ADVANCED.md) - Advanced usage and concepts
 - [Data Collection](lib/src/data_collection/README.md) - Guide on collection management
+- [Event Repository](lib/src/event_repository/README.md) - Guide on event management system
 
 ## 📄 License
 

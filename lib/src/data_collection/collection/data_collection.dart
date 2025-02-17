@@ -1,4 +1,4 @@
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'dart:collection';
 
 import '../_index.dart';
 
@@ -144,70 +144,68 @@ class DataCollection<T> {
       _chainProcessData(
         useOriginalData: true,
         newMatchers: newMatchers != null
-            ? IMap.fromEntries(newMatchers.map((e) => MapEntry(e.key, e)))
+            ? UnmodifiableMapView(Map.fromEntries(newMatchers.map((e) => MapEntry(e.key, e))))
             : null,
-        newFilters:
-            newFilters != null ? IMap.fromEntries(newFilters.map((e) => MapEntry(e.key, e))) : null,
+        newFilters: newFilters != null
+            ? UnmodifiableMapView(Map.fromEntries(newFilters.map((e) => MapEntry(e.key, e))))
+            : null,
         newSort: newSort ?? _getSortToApply(resetSort),
       );
 
   DataCollectionState<T> _addMatchers(Iterable<MatchAction<T>> data) {
-    final matchers = state.matchers.unlockLazy;
+    final matchers = Map.of(state.matchers);
     for (var matcher in data) {
       matchers[matcher.key] = matcher;
     }
     final newState = _chainProcessData(
-      newMatchers: matchers.lock,
+      newMatchers: UnmodifiableMapView(matchers),
     );
     return newState;
   }
 
   DataCollectionState<T> _removeMatchers(Iterable<String> data) {
-    final matchers = state.matchers.unlockLazy;
+    final matchers = Map.of(state.matchers);
     for (var matcherKey in data) {
       matchers.remove(matcherKey);
     }
     final newState = _chainProcessData(
-      newMatchers: matchers.lock,
+      newMatchers: UnmodifiableMapView(matchers),
     );
     return newState;
   }
 
   DataCollectionState<T> _resetMatchers() {
-    final clearedMatchers = state.matchers.unlockLazy..clear();
     final newState = _chainProcessData(
-      newMatchers: clearedMatchers.lock,
+      newMatchers: UnmodifiableMapView({}),
     );
     return newState;
   }
 
   DataCollectionState<T> _addFilters(Iterable<FilterAction<T>> data) {
-    final filters = state.filters.unlockLazy;
+    final filters = Map.of(state.filters);
     for (var filter in data) {
       filters[filter.key] = filter;
     }
     final newState = _chainProcessData(
-      newFilters: filters.lock,
+      newFilters: UnmodifiableMapView(filters),
     );
-
     return newState;
   }
 
   DataCollectionState<T> _removeFilters(Iterable<String> data) {
-    final filters = state.filters.unlockLazy;
+    final filters = Map.of(state.filters);
     for (var filterKey in data) {
       filters.remove(filterKey);
     }
     final newState = _chainProcessData(
-      newFilters: filters.lock,
+      newFilters: UnmodifiableMapView(filters),
     );
     return newState;
   }
 
   DataCollectionState<T> _resetFilters() {
-    final clearedFilters = state.filters.unlockLazy..clear();
     final newState = _chainProcessData(
-      newFilters: clearedFilters.lock,
+      newFilters: UnmodifiableMapView({}),
     );
     return newState;
   }
@@ -248,8 +246,8 @@ class DataCollection<T> {
 
   DataCollectionUpdatedState<T> _chainProcessData({
     DataCollectionState<T>? fromState,
-    IMap<String, MatchAction<T>>? newMatchers,
-    IMap<String, FilterAction<T>>? newFilters,
+    Map<String, MatchAction<T>>? newMatchers,
+    Map<String, FilterAction<T>>? newFilters,
     SortAction<T>? newSort,
     bool useOriginalData = true,
   }) {
@@ -262,9 +260,8 @@ class DataCollection<T> {
       sort: newSort ?? currentState.sort ?? defaultSort,
     );
 
-    final hasMatchersChanged = !newState.matchers.equalItemsToIMap(currentState.matchers);
-
-    final hasFiltersChanged = !newState.filters.equalItemsToIMap(currentState.filters);
+    final hasMatchersChanged = !_mapEquals(newState.matchers, currentState.matchers);
+    final hasFiltersChanged = !_mapEquals(newState.filters, currentState.filters);
 
     if (hasMatchersChanged || useOriginalData) {
       final matchResult = MatchUseCase(
@@ -344,11 +341,17 @@ class DataCollection<T> {
     return sortToApply;
   }
 
-  static IMap<String, MatchAction<T>> _preprocessMatchers<T>(List<MatchAction<T>> matchers) {
-    return IMap.fromEntries(matchers.map((e) => MapEntry(e.key, e)));
+  bool _mapEquals<K, V>(Map<K, V> a, Map<K, V> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    return a.entries.every((e) => b.containsKey(e.key) && b[e.key] == e.value);
   }
 
-  static IMap<String, FilterAction<T>> _preprocessFilters<T>(List<FilterAction<T>> filters) {
-    return IMap.fromEntries(filters.map((e) => MapEntry(e.key, e)));
+  static Map<String, MatchAction<T>> _preprocessMatchers<T>(List<MatchAction<T>> matchers) {
+    return UnmodifiableMapView(Map.fromEntries(matchers.map((e) => MapEntry(e.key, e))));
+  }
+
+  static Map<String, FilterAction<T>> _preprocessFilters<T>(List<FilterAction<T>> filters) {
+    return UnmodifiableMapView(Map.fromEntries(filters.map((e) => MapEntry(e.key, e))));
   }
 }

@@ -1,22 +1,13 @@
 name: data_manage
 description: A powerful and flexible package for data management in Dart/Flutter applications.
-version: 2.2.3
+version: 3.0.0
 repository: https://github.com/nogipx/data_manage
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
-dependencies:
-  equatable: ^2.0.7
-  fast_immutable_collections: ^11.0.3
-  freezed_annotation: ^2.4.1
-  meta: ^1.11.0
-
 dev_dependencies:
   lints: ^5.1.1
   test: ^1.25.15
-  freezed: ^2.5.0
-  build_runner: ^2.4.9
-  build_runner_core: ^8.0.0
   analyzer: ^7.3.0
   packo: ^0.5.0

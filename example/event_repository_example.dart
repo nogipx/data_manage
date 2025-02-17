@@ -32,7 +32,7 @@ void main() async {
   final subscriptions = createAppEventsSubscriptions(repository);
 
   // Subscribe to events
-  subscriptions.on<UserLoggedIn>((event) {
+  subscriptions.subscribe<UserLoggedIn>((event) {
     print('User logged in: ${event.data}');
   });
 

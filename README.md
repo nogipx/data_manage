@@ -4,9 +4,15 @@
 [![Dart SDK Version](https://badgen.net/pub/sdk-version/data_manage)](https://pub.dev/packages/data_manage)
 [![License](https://img.shields.io/github/license/nogipx/data_manage)](LICENSE)
 
-A powerful and flexible package for data management in Dart/Flutter applications.
+A powerful and flexible package for data management in Dart/Flutter applications. Built with pure Dart, zero external dependencies.
 
-## 📦 Features
+## 🎯 Key Features
+
+### 🌟 Zero Dependencies
+- Built entirely with standard Dart libraries
+- No external dependencies to manage
+- Smaller package size and faster builds
+- Direct use of Dart's powerful built-in features
 
 ### 🌳 Graph and Trees ([documentation](lib/src/graph/README.md))
 - Efficient directed tree implementation
@@ -15,27 +21,21 @@ A powerful and flexible package for data management in Dart/Flutter applications
 - Smart node data caching
 - Extensible architecture
 
-### 📊 Data Collections ([documentation](lib/src/data_collection/README.md))
-- Powerful filtering and matching system
-- AND/OR condition combinations
-- Flexible sorting capabilities
-- Immutable state management
-- Lazy evaluation and optimized performance
-- Automatic updates and state tracking
+### 📊 Data Collections
+- 🔍 Powerful filtering and sorting capabilities using pure Dart collections
+- 🔄 Efficient state management with immutable data structures
+- 🎯 Type-safe operations with built-in Dart features
 
-### 🚀 Event Repository ([documentation](lib/src/event_repository/README.md))
-- Type-safe event handling and subscriptions
-- Memory leak prevention system
-- Flexible stream transformations
-- Broadcast event delivery
-- Automatic resource cleanup
-- Global and local stream modifiers
+### 🚀 Event Repository
+- 🔒 Type-safe event handling using Dart's strong type system
+- 🧹 Automatic resource cleanup and memory leak prevention
+- 🔄 Efficient event processing with Dart Streams
 
 ## 🎯 Installation
 
 ```yaml
 dependencies:
-  data_manage: ^2.2.2
+  data_manage: ^3.0.0
 ```
 
 ## 📚 Documentation

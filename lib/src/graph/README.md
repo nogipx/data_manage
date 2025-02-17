@@ -128,7 +128,7 @@ print('Hit rate: ${metrics['hitRate']}');
 
 ```yaml
 dependencies:
-  data_manage: ^2.2.1
+  data_manage: ^3.0.0
 ```
 
 ## 🔧 Advanced Usage

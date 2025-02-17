@@ -1,5 +1,3 @@
-import 'package:equatable/equatable.dart';
-
 /// {@template iEventBase}
 /// Base interface for all application events.
 /// Provides common functionality for event data handling and equality comparison.
@@ -9,7 +7,7 @@ import 'package:equatable/equatable.dart';
 ///
 /// {@macro iEventBase}
 /// {@endtemplate}
-abstract base class IEventBase<T> with EquatableMixin {
+abstract base class IEventBase<T> {
   /// {@macro iEventBase}
   const IEventBase({required this.data});
 
@@ -17,8 +15,11 @@ abstract base class IEventBase<T> with EquatableMixin {
   /// Can be null if event doesn't carry any data.
   final T? data;
 
-  /// Properties used for equality comparison.
-  /// Events are considered equal if they have the same data.
   @override
-  List<Object?> get props => [data];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IEventBase<T> && (data == other.data || (data == null && other.data == null));
+
+  @override
+  int get hashCode => data?.hashCode ?? 0;
 }

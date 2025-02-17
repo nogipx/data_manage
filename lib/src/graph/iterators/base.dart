@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import '../_index.dart';
 
 /// Базовый итератор для одиночных узлов
@@ -19,7 +18,6 @@ abstract class BaseNodeIterator implements Iterator<Node> {
   @override
   bool moveNext();
 
-  @protected
   void setCurrent(Node value) => _current = value;
 }
 
@@ -41,7 +39,6 @@ abstract class BaseNodeCollectionIterator<C extends Iterable<Node>> implements I
   @override
   bool moveNext();
 
-  @protected
   void setCurrent(C value) => _current = value;
 }
 
@@ -63,7 +60,6 @@ abstract class CompositeIterator<T> implements Iterator<T> {
   @override
   bool moveNext();
 
-  @protected
   void setCurrent(T value) => _current = value;
 }
 

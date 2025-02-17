@@ -1,4 +1,40 @@
-# 2.2.3
+# 3.0.0
+### Breaking Changes
+- Removed ALL external dependencies
+  * Removed `equatable` in favor of manual equality implementation
+  * Removed `fast_immutable_collections` in favor of standard Dart collections
+  * Removed `freezed` and `freezed_annotation` in favor of manual state classes
+  * Removed `meta` package
+- Changed internal implementation to use standard Dart collections
+  * Replaced `IMap` with `UnmodifiableMapView`
+  * Replaced `ISet` with `UnmodifiableSetView`
+  * Updated all state classes to use standard Dart features
+
+### Improvements
+- Improved performance by reducing dependency overhead
+- Significantly reduced package size
+- Enhanced type safety with Dart's built-in features
+- Improved test coverage for core functionality
+
+### Technical Details
+- Rewritten equality comparisons using standard Dart
+- Optimized memory usage with built-in collections
+- Simplified codebase for better maintainability
+- Enhanced documentation with pure Dart examples
+
+### Major Changes
+- Removed external dependencies (`equatable`, `fast_immutable_collections`, `freezed`, `meta`)
+- Simplified codebase to use only standard Dart features
+- Improved performance by reducing dependency overhead
+- Replaced immutable collections with Dart's `UnmodifiableMapView` and `UnmodifiableSetView`
+- Rewrote state classes to use pure Dart implementations
+
+### Technical Details
+- Removed generated files and code
+- Updated equality comparisons to use standard Dart implementations
+- Optimized memory usage with built-in Dart collections
+- Maintained full backward compatibility
+- Enhanced type safety with Dart's built-in features
 - docs: fixed docs
 
 # 2.2.2

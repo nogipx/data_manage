@@ -158,11 +158,11 @@ base class SimpleTestEvent extends TestEventBase {
 }
 
 base class NumericTestEvent extends TestEventBase {
-  const NumericTestEvent({required int? data}) : super(data: data);
+  const NumericTestEvent({super.data});
 }
 
 base class StringTestEvent extends TestEventBase {
-  const StringTestEvent({required String? data}) : super(data: data);
+  const StringTestEvent({super.data});
 }
 
 class TestEventRepository with EventRepositoryMixin<TestEventBase> {}

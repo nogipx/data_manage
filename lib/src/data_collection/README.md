@@ -200,4 +200,20 @@ class CustomFilter<T> extends FilterAction<T> {
   
   // Additional logic
 }
-``` 
+```
+
+## 🔧 Implementation Details
+
+### Immutable Collections
+The package uses Dart's built-in immutable collections through `UnmodifiableMapView` and `UnmodifiableSetView` from `dart:collection`. This ensures:
+- 🔒 Thread-safe operations
+- 🚫 Prevention of accidental modifications
+- ⚡️ Optimal performance with native Dart collections
+- 🎯 Strong type safety
+
+### State Management
+All state classes are implemented using pure Dart, providing:
+- 🔄 Efficient equality comparisons
+- 🎨 Clean and maintainable code
+- 💪 Robust state transitions
+- 🔍 Easy debugging and testing 

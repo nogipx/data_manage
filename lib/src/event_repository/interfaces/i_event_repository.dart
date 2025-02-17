@@ -25,25 +25,6 @@ abstract interface class IEventRepository<E> {
   /// ```
   Stream<T> on<T extends E>();
 
-  /// Subscribes to events of type [T] with a callback.
-  ///
-  /// The [onData] callback is called for each event of type [T].
-  /// If [onError] is provided, it will be called when [onData] throws an error.
-  ///
-  /// Returns a [StreamSubscription] that can be used to cancel the subscription.
-  ///
-  /// Example:
-  /// ```dart
-  /// final subscription = repository.subscribe<UserLoggedIn>(
-  ///   (event) => print('User logged in: ${event.data}'),
-  ///   onError: (error) => print('Error: $error'),
-  /// );
-  /// ```
-  StreamSubscription<T> subscribe<T extends E>(
-    void Function(T event) onData, {
-    Function? onError,
-  });
-
   /// Adds a new event to the repository.
   ///
   /// All active subscribers will receive this event if they match

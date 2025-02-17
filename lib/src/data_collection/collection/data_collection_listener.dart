@@ -1,4 +1,4 @@
-import 'package:data_manage/data_manage.dart';
+import 'package:data_manage/data_collection.dart';
 
 abstract class DataCollectionListener<T> {
   void onStateChanged(DataCollectionState<T> state);
@@ -6,8 +6,8 @@ abstract class DataCollectionListener<T> {
 }
 
 class SimpleCollectionListener<T> implements DataCollectionListener<T> {
-  final StateCallback<DataCollectionState<T>>? actualizeListener;
-  final StateCallback<DataCollectionState<T>>? stateListener;
+  final DataCollectionStateCallback<DataCollectionState<T>>? actualizeListener;
+  final DataCollectionStateCallback<DataCollectionState<T>>? stateListener;
 
   const SimpleCollectionListener({
     this.actualizeListener,

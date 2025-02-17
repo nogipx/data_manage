@@ -12,7 +12,7 @@ class MatchUseCaseResult<T> {
   });
 }
 
-class MatchUseCase<T> implements UseCase<MatchUseCaseResult<T>> {
+class MatchUseCase<T> implements DataCollectionUseCase<MatchUseCaseResult<T>> {
   final Iterable<T> data;
   final Iterable<MatchAction<T>> matchers;
 

@@ -12,7 +12,7 @@ class FilterUseCaseResult<T> {
   });
 }
 
-class FilterUseCase<T> implements UseCase<FilterUseCaseResult<T>> {
+class FilterUseCase<T> implements DataCollectionUseCase<FilterUseCaseResult<T>> {
   final Iterable<T> data;
   final Iterable<FilterAction<T>> filters;
 

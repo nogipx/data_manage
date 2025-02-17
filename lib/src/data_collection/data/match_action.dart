@@ -12,7 +12,7 @@ enum MatchActionType {
 
 class MatchAction<T> {
   final String key;
-  final Predicate<T> predicate;
+  final DataCollectionPredicate<T> predicate;
   final MatchActionType type;
   final bool isEnabled;
 

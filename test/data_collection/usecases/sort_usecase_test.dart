@@ -1,4 +1,4 @@
-import 'package:data_manage/data_manage.dart';
+import 'package:data_manage/data_collection.dart';
 import 'package:test/test.dart';
 
 import '../_data.dart';

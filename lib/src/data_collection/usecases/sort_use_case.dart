@@ -12,7 +12,7 @@ class SortUseCaseResult<T> {
   });
 }
 
-class SortUseCase<T> implements UseCase<SortUseCaseResult<T>> {
+class SortUseCase<T> implements DataCollectionUseCase<SortUseCaseResult<T>> {
   final Iterable<T> data;
   final SortAction<T> sort;
 

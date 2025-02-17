@@ -39,8 +39,8 @@ class DataCollection<T> {
   DataCollection.fromState({
     required DataCollectionState<T> state,
     this.defaultSort,
-    StateCallback<DataCollectionState<T>>? onStateChanged,
-    StateCallback<DataCollectionState<T>>? onActualize,
+    DataCollectionStateCallback<DataCollectionState<T>>? onStateChanged,
+    DataCollectionStateCallback<DataCollectionState<T>>? onActualize,
     this.autoActualize = true,
   }) : _state = state;
 

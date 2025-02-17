@@ -2,7 +2,7 @@ import '../_index.dart';
 
 class FilterAction<T> {
   final String key;
-  final Predicate<T> predicate;
+  final DataCollectionPredicate<T> predicate;
   final bool isEnabled;
 
   const FilterAction({

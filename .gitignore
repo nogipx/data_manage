@@ -118,7 +118,8 @@ unlinked_spec.ds
 
 # Coverage
 coverage/
-!tools/coverage/
+!tool/report.csv
+!
 
 # Symbols
 app.*.symbols

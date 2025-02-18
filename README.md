@@ -14,31 +14,31 @@ A powerful and flexible package for data management in Dart/Flutter applications
 - Smaller package size and faster builds
 - Direct use of Dart's powerful built-in features
 
-### 🔄 CircularList ([documentation](lib/src/circular_list/README.md))
+### 🔄 CircularList ([documentation](doc/circular_list/README.md))
 - Fixed-size list with automatic oldest element removal
 - O(1) operations with efficient memory usage
 - Built-in numeric operations (average, min/max, moving average)
 - Change tracking with callbacks
 - Full List interface compliance
 
-### 🌳 Graph and Trees ([documentation](lib/src/graph/README.md))
+### 🌳 Graph and Trees ([documentation](doc/graph/README.md))
 - Efficient directed tree implementation
 - Single-parent hierarchy with strict validation
 - Advanced traversal and path finding algorithms
 - Smart node data caching
 - Extensible architecture
 
-### 📊 Data Collections
+### 📊 Data Collections ([documentation](doc/data_collection/README.md))
 - Powerful filtering and sorting capabilities using pure Dart collections
 - Efficient state management with immutable data structures
 - Type-safe operations with built-in Dart features
 
-### 🚀 Event Repository
+### 🚀 Event Repository ([documentation](doc/event_repository/README.md))
 - Type-safe event handling using Dart's strong type system
 - Automatic resource cleanup and memory leak prevention
 - Efficient event processing with Dart Streams
 
-### 🔗 Chain ([documentation](lib/src/chain/README.md))
+### 🔗 Chain ([documentation](doc/chain/README.md))
 - Type-safe data processing pipeline with rich error handling
 - Powerful mixin system for retry, metrics, and conditional execution
 - Perfect for complex workflows like API integrations, data imports, and payment processing
@@ -52,13 +52,13 @@ dependencies:
 
 ## 📚 Documentation
 
-- [Graph Implementation](lib/src/graph/README.md) - Detailed guide on graph functionality
-- [Advanced Graph Guide](lib/src/graph/ADVANCED.md) - Advanced usage and concepts
-- [Data Collection](lib/src/data_collection/README.md) - Guide on collection management
-- [Event Repository](lib/src/event_repository/README.md) - Guide on event management system
-- [CircularList](lib/src/circular_list/README.md) - High-performance fixed-size list implementation
-- [Chain Implementation](lib/src/chain/README.md) - Type-safe data processing pipeline guide
-- [Advanced Chain Guide](lib/src/chain/ADVANCED.md) - Complex scenarios and performance optimization
+- [Graph Implementation](doc/graph/README.md) - Detailed guide on graph functionality
+- [Advanced Graph Guide](doc/graph/ADVANCED.md) - Advanced usage and concepts
+- [Data Collection](doc/data_collection/README.md) - Guide on collection management
+- [Event Repository](doc/event_repository/README.md) - Guide on event management system
+- [CircularList](doc/circular_list/README.md) - High-performance fixed-size list implementation
+- [Chain Implementation](doc/chain/README.md) - Type-safe data processing pipeline guide
+- [Advanced Chain Guide](doc/chain/ADVANCED.md) - Complex scenarios and performance optimization
 
 ## 📄 License
 

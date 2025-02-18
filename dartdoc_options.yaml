@@ -1,0 +1,31 @@
+# Minimal dartdoc configuration
+dartdoc:
+  categories:
+    "Overview":
+      markdown: README.md
+    "Chain":
+      markdown: doc/chain/README.md
+    "Chain Advanced":
+      markdown: doc/chain/ADVANCED.md
+    "CircularList":
+      markdown: doc/circular_list/README.md
+    "Graph":
+      markdown: doc/graph/README.md
+    "Graph Advanced":
+      markdown: doc/graph/ADVANCED.md
+    "Data Collection":
+      markdown: doc/data_collection/README.md
+    "Event Repository":
+      markdown: doc/event_repository/README.md
+  
+  categoryOrder: [
+    "Overview",
+    "Graph",
+    "Graph Advanced",
+    "Chain",
+    "Chain Advanced",
+    "Event Repository",
+    "Data Collection",
+    "CircularList"
+  ]
+  

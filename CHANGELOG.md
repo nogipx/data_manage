@@ -1,4 +1,6 @@
-# Changelog
+# 3.0.1
+
+feat: Added `dartdoc` to the project
 
 # 3.0.0
 

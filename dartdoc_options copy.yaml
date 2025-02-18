@@ -1,0 +1,97 @@
+# Minimal dartdoc configuration
+dartdoc:
+  categories:
+    "Overview":
+      markdown: README.md
+    "Chain":
+      markdown: doc/chain/README.md
+    "Chain Advanced":
+      markdown: doc/chain/ADVANCED.md
+    "CircularList":
+      markdown: doc/circular_list/README.md
+    "Graph":
+      markdown: doc/graph/README.md
+    "Graph Advanced":
+      markdown: doc/graph/ADVANCED.md
+    "Data Collection":
+      markdown: doc/data_collection/README.md
+    "Event Repository":
+      markdown: doc/event_repository/README.md
+  
+  categoryOrder: [
+    "Overview",
+    "Graph",
+    "Graph Advanced",
+    "Chain",
+    "Chain Advanced",
+    "Event Repository",
+    "Data Collection",
+    "CircularList"
+  ]
+  
+  showUndocumentedCategories: true
+  documentationPath: doc
+  
+  # Package settings
+  include: [
+    "chain",
+    "circular_list",
+    "graph",
+    "data_collection",
+    "event_repository"
+  ]
+  exclude: ["src/internal"]
+  nodoc: ["lib/src/internal"]
+  
+  # Validation settings
+  ignore:
+    - broken-link
+    - missing-from-search-index
+    - type-mismatch
+    - ambiguous-reexport
+    - unknown-file
+    - no-canonical-found
+  
+  errors:
+    - unresolved-doc-reference
+    - ambiguous-doc-reference
+  
+  warnings:
+    - tool-error
+  
+  # Generation settings
+  linkToSource:
+    root: '.'
+    uriTemplate: 'https://github.com/nogipx/data_manage/blob/main/%f%#L%l%'
+  
+  # Output settings
+  format: html
+  prettyIndexJson: false
+  
+  # Content settings
+  includeSource: false
+  includeDependencies: false
+  
+  # License information
+  license: BSD-3-Clause
+  licenseText:
+    - "A permissive license that allows you to:"
+    - "- Use the code commercially"
+    - "- Modify the code"
+    - "- Distribute the code"
+    - "- Use in private projects"
+    - ""
+    - "Requirements:"
+    - "1. Include the original copyright notice"
+    - "2. Include the license text"
+    - "3. Don't use the author's name for promotion"
+  
+  # Repository
+  repository: https://github.com/nogipx/data_manage
+  
+  # Example installation
+  example: |
+    ```yaml
+    dependencies:
+      data_manage: ^3.0.0
+    ``` 

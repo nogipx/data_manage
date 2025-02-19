@@ -1,3 +1,7 @@
+# 3.0.2
+
+fix: add data_manage.dart global export file
+
 # 3.0.1
 
 feat: Added `dartdoc` to the project

@@ -278,20 +278,33 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
   @override
   int visitBreadth(VisitCallback visit, {Node? startNode}) {
-    final levels = _getLevelsMap();
-    int maxLevel = -1;
+    final origin = startNode ?? root;
+    _assertNodeExists(origin, extra: '(start node)');
 
-    for (final entry in levels.entries) {
-      for (final node in entry.value) {
-        final result = visit(node);
-        if (result == VisitResult.breakVisit) {
-          return entry.key;
+    final queue = Queue<_NodeWithLevel>()..add(_NodeWithLevel(origin, 0));
+    final visited = <Node>{};
+    var lastLevel = -1;
+
+    while (queue.isNotEmpty) {
+      final current = queue.removeFirst();
+      if (visited.contains(current.node)) continue;
+
+      visited.add(current.node);
+      lastLevel = current.level;
+
+      final result = visit(current.node);
+      if (result == VisitResult.breakVisit) {
+        return current.level;
+      }
+
+      for (final child in getNodeEdges(current.node)) {
+        if (!visited.contains(child)) {
+          queue.add(_NodeWithLevel(child, current.level + 1));
         }
       }
-      maxLevel = entry.key;
     }
 
-    return maxLevel;
+    return lastLevel;
   }
 
   @override
@@ -321,7 +334,9 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
   @override
   Set<Node> getLeaves({Node? startNode}) {
-    return _findLeaves();
+    final origin = startNode ?? root;
+    _assertNodeExists(origin, extra: '(start node)');
+    return _findLeaves(origin);
   }
 
   @override
@@ -531,9 +546,9 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   // ==================================
 
   /// Возвращает все листья графа
-  Set<Node> _findLeaves() {
+  Set<Node> _findLeaves(Node start) {
     final result = <Node>{};
-    _visitDepthFirst(root, (node) {
+    _visitDepthFirst(start, (node) {
       if (getNodeEdges(node).isEmpty) {
         result.add(node);
       }

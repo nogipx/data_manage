@@ -309,7 +309,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
   @override
   void visitDepth(VisitCallback visit, {Node? startNode}) {
-    _visitDepthFirst(startNode ?? root, (node) {
+    final origin = startNode ?? root;
+    _assertNodeExists(origin, extra: '(start node)');
+
+    _visitDepthFirst(origin, (node) {
       final result = visit(node);
       return result != VisitResult.breakVisit;
     });
@@ -406,7 +409,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Iterator<Node> pathIterator(Node start, Node end) => PathIterator(this, start, end);
 
   @override
-  Iterator<Node> subtreeIterator(Node root) => SubtreeIterator(this, root);
+  Iterator<Node> subtreeIterator(Node root) {
+    _assertNodeExists(root, extra: '(subtree root)');
+    return SubtreeIterator(this, root);
+  }
 
   @override
   Iterator<R> filtered<R>(Iterator<R> source, bool Function(R) predicate) =>
@@ -416,10 +422,17 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Iterator<R> mapped<R>(Iterator<T> source, R Function(T) mapper) => MappedIterator(source, mapper);
 
   /// Создает Iterable для пути между узлами
-  Iterable<Node> pathBetween(Node start, Node end) => _IterableGraph(pathIterator(start, end));
+  Iterable<Node> pathBetween(Node start, Node end) {
+    _assertNodeExists(start, extra: '(path start)');
+    _assertNodeExists(end, extra: '(path end)');
+    return _IterableGraph(() => pathIterator(start, end));
+  }
 
   /// Создает Iterable для поддерева
-  Iterable<Node> subtree(Node root) => _IterableGraph(subtreeIterator(root));
+  Iterable<Node> subtree(Node root) {
+    _assertNodeExists(root, extra: '(subtree root)');
+    return _IterableGraph(() => subtreeIterator(root));
+  }
 
   // ==================================
   // Вспомогательный метод проверки
@@ -594,6 +607,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   /// Возвращает все вершины от корня до листьев, включая путь до [node].
   @override
   Set<Node> getFullVerticalPath(Node node) {
+    _assertNodeExists(node);
     final result = <Node>{};
     // Добавляем путь от корня до node
     var current = node;
@@ -625,6 +639,9 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     Node second, {
     Map<String, int>? depths,
   }) {
+    _assertNodeExists(first, extra: '(first node)');
+    _assertNodeExists(second, extra: '(second node)');
+
     final result = <Node>{};
 
     // Находим LCA
@@ -701,6 +718,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
   @override
   Set<Node> getPathToNode(Node node) {
+    _assertNodeExists(node);
     final result = <Node>{};
     var current = node;
 
@@ -719,11 +737,11 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
 /// Вспомогательный класс для создания Iterable из Iterator
 class _IterableGraph<T> extends Iterable<T> {
-  final Iterator<T> _iterator;
-  _IterableGraph(this._iterator);
+  final Iterator<T> Function() _iteratorFactory;
+  _IterableGraph(this._iteratorFactory);
 
   @override
-  Iterator<T> get iterator => _iterator;
+  Iterator<T> get iterator => _iteratorFactory();
 }
 
 /// Вспомогательный класс для обхода по уровням

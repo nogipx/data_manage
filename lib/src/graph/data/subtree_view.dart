@@ -192,7 +192,12 @@ class SubtreeView<T> implements IGraphEditable<T> {
   }
 
   @override
-  Set<Node> getPathToNode(Node node) => originalGraph.getPathToNode(node);
+  Set<Node> getPathToNode(Node node) {
+    if (!_subtreeNodes.contains(node)) {
+      throw StateError('Node "${node.key}" is not in the subtree');
+    }
+    return originalGraph.getPathToNode(node);
+  }
 
   @override
   bool isAncestor({required Node ancestor, required Node descendant}) =>

@@ -331,6 +331,25 @@ void main() {
         );
       });
 
+      test('path iterables provide reusable traversal', () {
+        final pathIterable = graph.pathBetween(node3, node4);
+
+        final firstPass = pathIterable.map((n) => n.key).toList();
+        final secondPass = pathIterable.map((n) => n.key).toList();
+
+        expect(firstPass, equals(['node3', 'node1', 'node4']),
+            reason: 'Первый проход должен возвращать корректный путь');
+        expect(secondPass, equals(firstPass),
+            reason: 'Повторное использование Iterable должно давать те же результаты');
+
+        final depthIterable = graph.depthNodes;
+        final depthFirst = depthIterable.map((n) => n.key).toList();
+        final depthSecond = depthIterable.map((n) => n.key).toList();
+
+        expect(depthSecond, equals(depthFirst),
+            reason: 'Итераторы обхода должны создавать независимые последовательности');
+      });
+
       test('distance between nodes reflects edge count', () {
         expect(graph.getDistanceBetweenNodes(node3, node4), equals(2),
             reason: 'Расстояние между node3 и node4 проходит через общего родителя');
@@ -345,6 +364,39 @@ void main() {
             reason: 'Путь до несвязанного узла должен быть пустым');
         expect(graph.getDistanceBetweenNodes(node3, isolated), equals(-1),
             reason: 'Расстояние до несвязанного узла возвращает -1');
+      });
+
+      test('path utilities validate node existence', () {
+        expect(() => graph.getPathToNode(Node('ghost')), throwsA(isA<StateError>()),
+            reason: 'Путь до несуществующего узла должен выбрасывать ошибку');
+        expect(() => graph.getFullVerticalPath(Node('phantom')), throwsA(isA<StateError>()),
+            reason: 'Полный вертикальный путь невозможен для отсутствующего узла');
+        expect(
+          () => graph.getVerticalPathBetweenNodes(Node('ghost'), node1),
+          throwsA(isA<StateError>()),
+          reason: 'Вертикальный путь требует существующих узлов',
+        );
+        expect(
+          () => graph.subtreeIterator(Node('missing')),
+          throwsA(isA<StateError>()),
+          reason: 'Получение итератора поддерева должно проверять узел',
+        );
+      });
+
+      test('subtree view enforces membership for path queries', () {
+        final subtree = graph.extractSubtree(node1.key, copy: false) as SubtreeView<String>;
+
+        expect(
+          () => subtree.getPathToNode(node2),
+          throwsA(isA<StateError>()),
+          reason: 'Нельзя получить путь для узла вне поддерева',
+        );
+
+        expect(
+          subtree.getPathToNode(node3).map((n) => n.key).toList(),
+          equals(['node3', 'node1', 'root']),
+          reason: 'Путь для узла внутри поддерева должен оставаться рабочим',
+        );
       });
 
       test('ancestor operations work correctly', () {

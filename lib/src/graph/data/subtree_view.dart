@@ -176,6 +176,22 @@ class SubtreeView<T> implements IGraphEditable<T> {
       originalGraph.getVerticalPathBetweenNodes(first, second, depths: depths);
 
   @override
+  List<Node> getPathBetweenNodes(Node start, Node end) {
+    if (!_subtreeNodes.contains(start) || !_subtreeNodes.contains(end)) {
+      return [];
+    }
+    return originalGraph.getPathBetweenNodes(start, end);
+  }
+
+  @override
+  int getDistanceBetweenNodes(Node start, Node end) {
+    if (!_subtreeNodes.contains(start) || !_subtreeNodes.contains(end)) {
+      return -1;
+    }
+    return originalGraph.getDistanceBetweenNodes(start, end);
+  }
+
+  @override
   Set<Node> getPathToNode(Node node) => originalGraph.getPathToNode(node);
 
   @override

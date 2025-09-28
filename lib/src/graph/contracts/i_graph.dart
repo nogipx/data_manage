@@ -43,6 +43,17 @@ abstract interface class IGraph<Data> implements IGraphData<Data> {
     Map<String, int>? depths,
   });
 
+  /// Возвращает упорядоченный путь между двумя узлами.
+  ///
+  /// Если узлы не связаны между собой (например, один из них отсутствует в графе
+  /// или они принадлежат разным поддеревьям), возвращается пустой список.
+  List<Node> getPathBetweenNodes(Node start, Node end);
+
+  /// Возвращает расстояние в ребрах между двумя узлами.
+  ///
+  /// Если узлы не связаны, возвращает -1.
+  int getDistanceBetweenNodes(Node start, Node end);
+
   int visitBreadth(VisitCallback visit, {Node? startNode});
 
   void visitDepth(VisitCallback visit, {Node? startNode});

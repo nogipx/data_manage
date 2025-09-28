@@ -315,6 +315,38 @@ void main() {
         );
       });
 
+      test('ordered path between nodes is deterministic', () {
+        final orderedPath = graph.getPathBetweenNodes(node3, node4);
+        expect(
+          orderedPath.map((n) => n.key).toList(),
+          equals(['node3', 'node1', 'node4']),
+          reason: 'Путь между node3 и node4 должен сохранять порядок узлов',
+        );
+
+        final reversePath = graph.getPathBetweenNodes(node4, node3);
+        expect(
+          reversePath.map((n) => n.key).toList(),
+          equals(['node4', 'node1', 'node3']),
+          reason: 'Путь должен корректно перестраиваться в зависимости от направления',
+        );
+      });
+
+      test('distance between nodes reflects edge count', () {
+        expect(graph.getDistanceBetweenNodes(node3, node4), equals(2),
+            reason: 'Расстояние между node3 и node4 проходит через общего родителя');
+        expect(graph.getDistanceBetweenNodes(node1, node3), equals(1),
+            reason: 'Родитель и ребенок разделены одним ребром');
+        expect(graph.getDistanceBetweenNodes(node3, node3), equals(0),
+            reason: 'Расстояние до самого себя должно быть 0');
+
+        final isolated = Node('isolated');
+        graph.addNode(isolated);
+        expect(graph.getPathBetweenNodes(node3, isolated), isEmpty,
+            reason: 'Путь до несвязанного узла должен быть пустым');
+        expect(graph.getDistanceBetweenNodes(node3, isolated), equals(-1),
+            reason: 'Расстояние до несвязанного узла возвращает -1');
+      });
+
       test('ancestor operations work correctly', () {
         // Тест lowest common ancestor
         final lca = graph.findLowestCommonAncestor(node3, node4);

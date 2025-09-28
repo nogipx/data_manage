@@ -656,6 +656,50 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   }
 
   @override
+  List<Node> getPathBetweenNodes(Node start, Node end) {
+    _assertNodeExists(start, extra: '(start node)');
+    _assertNodeExists(end, extra: '(end node)');
+
+    final lca = findLowestCommonAncestor(start, end);
+    if (lca == null) return [];
+
+    final pathToAncestor = <Node>[];
+    var current = start;
+    while (true) {
+      pathToAncestor.add(current);
+      if (current == lca) break;
+      final parent = getNodeParent(current);
+      if (parent == null) {
+        return [];
+      }
+      current = parent;
+    }
+
+    final descent = <Node>[];
+    current = end;
+    while (current != lca) {
+      descent.add(current);
+      final parent = getNodeParent(current);
+      if (parent == null) {
+        return [];
+      }
+      current = parent;
+    }
+
+    return [...pathToAncestor, ...descent.reversed];
+  }
+
+  @override
+  int getDistanceBetweenNodes(Node start, Node end) {
+    if (start == end) return 0;
+
+    final path = getPathBetweenNodes(start, end);
+    if (path.isEmpty) return -1;
+
+    return path.length - 1;
+  }
+
+  @override
   Set<Node> getPathToNode(Node node) {
     final result = <Node>{};
     var current = node;

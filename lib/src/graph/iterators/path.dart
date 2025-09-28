@@ -9,7 +9,7 @@ class PathIterator extends BaseNodeIterator {
   int _currentIndex = 0;
 
   PathIterator(super.graph, this.start, this.end)
-      : _path = graph.getVerticalPathBetweenNodes(start, end).toList();
+      : _path = graph.getPathBetweenNodes(start, end);
 
   @override
   bool moveNext() {

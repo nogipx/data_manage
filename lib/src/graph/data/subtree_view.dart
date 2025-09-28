@@ -192,6 +192,19 @@ class SubtreeView<T> implements IGraphEditable<T> {
   }
 
   @override
+  GraphIntegrityReport analyzeIntegrity({bool repair = false}) {
+    final report = originalGraph.analyzeIntegrity(repair: repair);
+    final filteredIssues = report.issues.where((issue) {
+      final anchorInSubtree = _subtreeNodes.contains(issue.node);
+      final relatedInSubtree =
+          issue.related == null || _subtreeNodes.contains(issue.related!);
+      return anchorInSubtree || relatedInSubtree;
+    }).toList();
+
+    return GraphIntegrityReport(issues: filteredIssues);
+  }
+
+  @override
   Set<Node> getPathToNode(Node node) {
     if (!_subtreeNodes.contains(node)) {
       throw StateError('Node "${node.key}" is not in the subtree');

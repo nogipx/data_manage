@@ -824,4 +824,80 @@ void main() {
       );
     });
   });
+
+  group('Graph Integrity Analysis |', () {
+    test('depth_traversal_survives_dangling_child_reference', () {
+      // Arrange
+      final child = Node('child');
+      graph.addEdge(root, child);
+
+      // Инжектим битую ссылку напрямую в структуру ребер
+      graph.edges[root]!.add(Node('ghost'));
+
+      final visited = <Node>[];
+
+      // Act & Assert
+      expect(
+        () => graph.visitDepth((node) {
+          visited.add(node);
+          return VisitResult.continueVisit;
+        }),
+        returnsNormally,
+        reason: 'Обход должен пропускать битые дочерние ссылки без исключений',
+      );
+
+      expect(
+        visited,
+        containsAll(<Node>[root, child]),
+        reason: 'Должны посещаться только реальные узлы',
+      );
+      expect(
+        visited.where((node) => node.key == 'ghost'),
+        isEmpty,
+        reason: 'Битые узлы не должны попадать в обход',
+      );
+      expect(
+        graph.getNodeEdges(root),
+        equals({child}),
+        reason: 'После обхода битые ссылки очищаются',
+      );
+    });
+
+    test('analyzeIntegrity_reports_and_repairs_structure_issues', () {
+      // Arrange
+      final child = Node('child');
+      graph.addEdge(root, child);
+
+      // Создаем несогласованность: убираем ребро, но оставляем запись о родителе
+      graph.edges[root]!.remove(child);
+
+      // Добавляем ссылку на несуществующего узла
+      final ghost = Node('ghost');
+      graph.edges[root]!.add(ghost);
+
+      // Act
+      final report = graph.analyzeIntegrity();
+
+      // Assert
+      expect(report.isClean, isFalse);
+      expect(
+        report.issuesOf(GraphIntegrityIssueType.missingChild).length,
+        greaterThanOrEqualTo(1),
+        reason: 'Должны быть зафиксированы отсутствующие дочерние узлы',
+      );
+      expect(
+        report.issuesOf(GraphIntegrityIssueType.inconsistentParentLink).length,
+        equals(1),
+        reason: 'Несогласованность parent/edge должна обнаруживаться',
+      );
+
+      final repaired = graph.analyzeIntegrity(repair: true);
+      expect(repaired.isClean, isFalse, reason: 'Отчет фиксирует найденные проблемы');
+
+      final afterRepair = graph.analyzeIntegrity();
+      expect(afterRepair.isClean, isTrue, reason: 'После ремонта граф должен быть чистым');
+      expect(graph.getNodeEdges(root), isEmpty);
+      expect(graph.getNodeParent(child), isNull);
+    });
+  });
 }

@@ -54,6 +54,12 @@ abstract interface class IGraph<Data> implements IGraphData<Data> {
   /// Если узлы не связаны, возвращает -1.
   int getDistanceBetweenNodes(Node start, Node end);
 
+  /// Анализирует структуру графа на предмет поврежденных ссылок.
+  ///
+  /// Если [repair] = true, граф попытается автоматически восстановить структуру,
+  /// удаляя битые ссылки на отсутствующие узлы.
+  GraphIntegrityReport analyzeIntegrity({bool repair = false});
+
   int visitBreadth(VisitCallback visit, {Node? startNode});
 
   void visitDepth(VisitCallback visit, {Node? startNode});

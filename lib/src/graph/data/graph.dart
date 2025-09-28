@@ -59,6 +59,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     nodesData.forEach(_nodeDataManager.set);
     _edges.addAll(edges);
     _parents.addAll(parents);
+
+    if (_edges.isNotEmpty || _parents.isNotEmpty) {
+      analyzeIntegrity(repair: true);
+    }
   }
 
   // ==================================
@@ -225,7 +229,17 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (!containsNode(node.key)) {
       throw StateError('Node "${node.key}" does not exist in graph');
     }
-    return Set.unmodifiable(_edges[node] ?? <Node>{});
+    final children = _edges[node];
+    if (children == null || children.isEmpty) {
+      return const {};
+    }
+
+    final sanitized = _sanitizeChildSet(node, children);
+    if (sanitized.isEmpty) {
+      return const {};
+    }
+
+    return Set.unmodifiable(sanitized);
   }
 
   Map<Node, Set<Node>> get edgesWithEmptySets {
@@ -441,6 +455,46 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (!containsNode(node.key)) {
       throw StateError('Node "${node.key}" does not exist in graph $extra');
     }
+  }
+
+  Set<Node> _sanitizeChildSet(Node parent, Set<Node> children) {
+    final canonicalParent = _nodes[parent.key] ?? parent;
+    final validChildren = <Node>{};
+    var mutated = false;
+
+    for (final child in children) {
+      final canonicalChild = _nodes[child.key];
+      if (canonicalChild == null) {
+        mutated = true;
+        _removeParentLinkForKey(child.key, expectedParent: canonicalParent);
+        continue;
+      }
+
+      validChildren.add(canonicalChild);
+      if (!identical(canonicalChild, child)) {
+        mutated = true;
+      }
+    }
+
+    if (!mutated) {
+      return children;
+    }
+
+    if (!identical(canonicalParent, parent)) {
+      _edges.remove(parent);
+    }
+    _edges[canonicalParent] = validChildren;
+    _invalidateCache();
+    return validChildren;
+  }
+
+  void _removeParentLinkForKey(String childKey, {Node? expectedParent}) {
+    if (_parents.isEmpty) return;
+    _parents.removeWhere((child, parent) {
+      if (child.key != childKey) return false;
+      if (expectedParent == null) return true;
+      return parent.key == expectedParent.key;
+    });
   }
 
   /// Находит наименьшего общего предка для двух узлов
@@ -714,6 +768,134 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (path.isEmpty) return -1;
 
     return path.length - 1;
+  }
+
+  @override
+  GraphIntegrityReport analyzeIntegrity({bool repair = false}) {
+    final issues = <GraphIntegrityIssue>[];
+    var mutated = false;
+
+    final edgeEntries = _edges.entries.toList();
+    for (final entry in edgeEntries) {
+      final parent = entry.key;
+      final children = entry.value;
+      final canonicalParent = _nodes[parent.key];
+
+      if (canonicalParent == null) {
+        issues.add(
+          GraphIntegrityIssue(
+            type: GraphIntegrityIssueType.missingParentNode,
+            node: parent,
+            message:
+                'Parent node "${parent.key}" is referenced in edges but missing from the graph',
+          ),
+        );
+        if (repair) {
+          for (final child in children) {
+            _removeParentLinkForKey(child.key, expectedParent: parent);
+          }
+          _edges.remove(parent);
+          mutated = true;
+        }
+        continue;
+      }
+
+      final sanitizedChildren = <Node>{};
+      for (final child in children) {
+        final canonicalChild = _nodes[child.key];
+        if (canonicalChild == null) {
+          issues.add(
+            GraphIntegrityIssue(
+              type: GraphIntegrityIssueType.missingChild,
+              node: canonicalParent,
+              related: child,
+              message:
+                  'Node "${canonicalParent.key}" references missing child "${child.key}"',
+            ),
+          );
+          if (repair) {
+            _removeParentLinkForKey(child.key, expectedParent: canonicalParent);
+            mutated = true;
+          }
+          continue;
+        }
+
+        sanitizedChildren.add(canonicalChild);
+      }
+
+      if (repair &&
+          (sanitizedChildren.length != children.length ||
+              !identical(canonicalParent, parent))) {
+        _edges.remove(parent);
+        _edges[canonicalParent] = sanitizedChildren;
+        mutated = true;
+      }
+    }
+
+    final parentEntries = _parents.entries.toList();
+    for (final entry in parentEntries) {
+      final child = entry.key;
+      final parent = entry.value;
+      final canonicalChild = _nodes[child.key];
+      final canonicalParent = _nodes[parent.key];
+
+      if (canonicalChild == null) {
+        issues.add(
+          GraphIntegrityIssue(
+            type: GraphIntegrityIssueType.missingChild,
+            node: parent,
+            related: child,
+            message:
+                'Parent "${parent.key}" keeps reference to missing child "${child.key}"',
+          ),
+        );
+        if (repair) {
+          _parents.remove(child);
+          mutated = true;
+        }
+        continue;
+      }
+
+      if (canonicalParent == null) {
+        issues.add(
+          GraphIntegrityIssue(
+            type: GraphIntegrityIssueType.missingParent,
+            node: canonicalChild,
+            related: parent,
+            message:
+                'Child "${canonicalChild.key}" references missing parent "${parent.key}"',
+          ),
+        );
+        if (repair) {
+          _parents.remove(child);
+          mutated = true;
+        }
+        continue;
+      }
+
+      final childrenOfParent = _edges[canonicalParent];
+      if (childrenOfParent == null || !childrenOfParent.contains(canonicalChild)) {
+        issues.add(
+          GraphIntegrityIssue(
+            type: GraphIntegrityIssueType.inconsistentParentLink,
+            node: canonicalParent,
+            related: canonicalChild,
+            message:
+                'Parent "${canonicalParent.key}" is missing edge to "${canonicalChild.key}" while parents map references it',
+          ),
+        );
+        if (repair) {
+          _parents.remove(child);
+          mutated = true;
+        }
+      }
+    }
+
+    if (repair && mutated) {
+      _invalidateCache();
+    }
+
+    return GraphIntegrityReport(issues: issues);
   }
 
   @override

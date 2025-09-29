@@ -8,8 +8,8 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dev_dependencies:
-  lints: ^5.1.1
-  test: ^1.25.15
-  analyzer: ^6.11.0
+  lints: ^6.0.0
+  test: ^1.26.3
+  analyzer: ^7.7.1
   packo: ^0.5.1
-  dartdoc: 8.3.2
+  dartdoc: ^8.3.4

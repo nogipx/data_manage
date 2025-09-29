@@ -315,6 +315,90 @@ void main() {
         );
       });
 
+      test('ordered path between nodes is deterministic', () {
+        final orderedPath = graph.getPathBetweenNodes(node3, node4);
+        expect(
+          orderedPath.map((n) => n.key).toList(),
+          equals(['node3', 'node1', 'node4']),
+          reason: 'Путь между node3 и node4 должен сохранять порядок узлов',
+        );
+
+        final reversePath = graph.getPathBetweenNodes(node4, node3);
+        expect(
+          reversePath.map((n) => n.key).toList(),
+          equals(['node4', 'node1', 'node3']),
+          reason: 'Путь должен корректно перестраиваться в зависимости от направления',
+        );
+      });
+
+      test('path iterables provide reusable traversal', () {
+        final pathIterable = graph.pathBetween(node3, node4);
+
+        final firstPass = pathIterable.map((n) => n.key).toList();
+        final secondPass = pathIterable.map((n) => n.key).toList();
+
+        expect(firstPass, equals(['node3', 'node1', 'node4']),
+            reason: 'Первый проход должен возвращать корректный путь');
+        expect(secondPass, equals(firstPass),
+            reason: 'Повторное использование Iterable должно давать те же результаты');
+
+        final depthIterable = graph.depthNodes;
+        final depthFirst = depthIterable.map((n) => n.key).toList();
+        final depthSecond = depthIterable.map((n) => n.key).toList();
+
+        expect(depthSecond, equals(depthFirst),
+            reason: 'Итераторы обхода должны создавать независимые последовательности');
+      });
+
+      test('distance between nodes reflects edge count', () {
+        expect(graph.getDistanceBetweenNodes(node3, node4), equals(2),
+            reason: 'Расстояние между node3 и node4 проходит через общего родителя');
+        expect(graph.getDistanceBetweenNodes(node1, node3), equals(1),
+            reason: 'Родитель и ребенок разделены одним ребром');
+        expect(graph.getDistanceBetweenNodes(node3, node3), equals(0),
+            reason: 'Расстояние до самого себя должно быть 0');
+
+        final isolated = Node('isolated');
+        graph.addNode(isolated);
+        expect(graph.getPathBetweenNodes(node3, isolated), isEmpty,
+            reason: 'Путь до несвязанного узла должен быть пустым');
+        expect(graph.getDistanceBetweenNodes(node3, isolated), equals(-1),
+            reason: 'Расстояние до несвязанного узла возвращает -1');
+      });
+
+      test('path utilities validate node existence', () {
+        expect(() => graph.getPathToNode(Node('ghost')), throwsA(isA<StateError>()),
+            reason: 'Путь до несуществующего узла должен выбрасывать ошибку');
+        expect(() => graph.getFullVerticalPath(Node('phantom')), throwsA(isA<StateError>()),
+            reason: 'Полный вертикальный путь невозможен для отсутствующего узла');
+        expect(
+          () => graph.getVerticalPathBetweenNodes(Node('ghost'), node1),
+          throwsA(isA<StateError>()),
+          reason: 'Вертикальный путь требует существующих узлов',
+        );
+        expect(
+          () => graph.subtreeIterator(Node('missing')),
+          throwsA(isA<StateError>()),
+          reason: 'Получение итератора поддерева должно проверять узел',
+        );
+      });
+
+      test('subtree view enforces membership for path queries', () {
+        final subtree = graph.extractSubtree(node1.key, copy: false) as SubtreeView<String>;
+
+        expect(
+          () => subtree.getPathToNode(node2),
+          throwsA(isA<StateError>()),
+          reason: 'Нельзя получить путь для узла вне поддерева',
+        );
+
+        expect(
+          subtree.getPathToNode(node3).map((n) => n.key).toList(),
+          equals(['node3', 'node1', 'root']),
+          reason: 'Путь для узла внутри поддерева должен оставаться рабочим',
+        );
+      });
+
       test('ancestor operations work correctly', () {
         // Тест lowest common ancestor
         final lca = graph.findLowestCommonAncestor(node3, node4);
@@ -456,6 +540,37 @@ void main() {
         expect(nestedSubgraph.root, equals(node3));
         expect(nestedSubgraph.nodes.length, equals(1));
         expect(nestedSubgraph.edges.isEmpty, isTrue);
+      });
+
+      test('view_traversals_reject_nodes_outside_scope', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+
+        expect(
+          () => view.visitBreadth((_) => VisitResult.continueVisit, startNode: node2),
+          throwsA(isA<StateError>()),
+          reason: 'Обход не должен начинаться с узла вне поддерева',
+        );
+
+        expect(
+          () => view.visitDepth((_) => VisitResult.continueVisit, startNode: node2),
+          throwsA(isA<StateError>()),
+          reason: 'Обход в глубину также ограничен границами поддерева',
+        );
+      });
+
+      test('view_traversals_default_to_subtree_root', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+        final visited = <String>[];
+
+        view.visitBreadth((node) {
+          visited.add(node.key);
+          return VisitResult.continueVisit;
+        });
+
+        expect(visited, containsAll(['node1', 'node3', 'node4']),
+            reason: 'Обход должен посещать только узлы поддерева');
+        expect(visited, isNot(contains('node2')),
+            reason: 'Узлы вне поддерева не должны посещаться');
       });
     });
 

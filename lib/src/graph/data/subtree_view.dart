@@ -135,7 +135,7 @@ class SubtreeView<T> implements IGraphEditable<T> {
 
   @override
   Set<Node> getNodeEdges(Node node) {
-    if (!_subtreeNodes.contains(node)) return {};
+    if (!_subtreeNodes.contains(node)) return const <Node>{};
     return originalGraph.getNodeEdges(node).intersection(_subtreeNodes);
   }
 
@@ -148,13 +148,15 @@ class SubtreeView<T> implements IGraphEditable<T> {
 
   @override
   Set<Node> getSiblings(Node node) {
-    if (!_subtreeNodes.contains(node)) return {};
+    if (!_subtreeNodes.contains(node)) return const <Node>{};
     return originalGraph.getSiblings(node).intersection(_subtreeNodes);
   }
 
   @override
   Set<Node> getLeaves({Node? startNode}) {
-    if (startNode != null && !_subtreeNodes.contains(startNode)) return {};
+    if (startNode != null && !_subtreeNodes.contains(startNode)) {
+      return const <Node>{};
+    }
     return originalGraph.getLeaves(startNode: startNode).intersection(_subtreeNodes);
   }
 
@@ -176,19 +178,63 @@ class SubtreeView<T> implements IGraphEditable<T> {
       originalGraph.getVerticalPathBetweenNodes(first, second, depths: depths);
 
   @override
-  Set<Node> getPathToNode(Node node) => originalGraph.getPathToNode(node);
+  List<Node> getPathBetweenNodes(Node start, Node end) {
+    if (!_subtreeNodes.contains(start) || !_subtreeNodes.contains(end)) {
+      return [];
+    }
+    return originalGraph.getPathBetweenNodes(start, end);
+  }
+
+  @override
+  int getDistanceBetweenNodes(Node start, Node end) {
+    if (!_subtreeNodes.contains(start) || !_subtreeNodes.contains(end)) {
+      return -1;
+    }
+    return originalGraph.getDistanceBetweenNodes(start, end);
+  }
+
+  @override
+  GraphIntegrityReport analyzeIntegrity({bool repair = false}) {
+    final report = originalGraph.analyzeIntegrity(repair: repair);
+    final filteredIssues = report.issues.where((issue) {
+      final anchorInSubtree = _subtreeNodes.contains(issue.node);
+      final relatedInSubtree =
+          issue.related == null || _subtreeNodes.contains(issue.related!);
+      return anchorInSubtree || relatedInSubtree;
+    }).toList();
+
+    return GraphIntegrityReport(issues: filteredIssues);
+  }
+
+  @override
+  Set<Node> getPathToNode(Node node) {
+    if (!_subtreeNodes.contains(node)) {
+      throw StateError('Node "${node.key}" is not in the subtree');
+    }
+    return originalGraph.getPathToNode(node);
+  }
 
   @override
   bool isAncestor({required Node ancestor, required Node descendant}) =>
       originalGraph.isAncestor(ancestor: ancestor, descendant: descendant);
 
   @override
-  int visitBreadth(VisitCallback visit, {Node? startNode}) =>
-      originalGraph.visitBreadth(visit, startNode: startNode);
+  int visitBreadth(VisitCallback visit, {Node? startNode}) {
+    final origin = startNode ?? subtreeRoot;
+    if (!_subtreeNodes.contains(origin)) {
+      throw StateError('Node "${origin.key}" is not in the subtree');
+    }
+    return originalGraph.visitBreadth(visit, startNode: origin);
+  }
 
   @override
-  void visitDepth(VisitCallback visit, {Node? startNode}) =>
-      originalGraph.visitDepth(visit, startNode: startNode);
+  void visitDepth(VisitCallback visit, {Node? startNode}) {
+    final origin = startNode ?? subtreeRoot;
+    if (!_subtreeNodes.contains(origin)) {
+      throw StateError('Node "${origin.key}" is not in the subtree');
+    }
+    originalGraph.visitDepth(visit, startNode: origin);
+  }
 
   @override
   void visitDepthBacktrack(BacktrackCallback visit) => originalGraph.visitDepthBacktrack(visit);

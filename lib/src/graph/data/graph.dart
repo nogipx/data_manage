@@ -59,6 +59,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     nodesData.forEach(_nodeDataManager.set);
     _edges.addAll(edges);
     _parents.addAll(parents);
+
+    if (_edges.isNotEmpty || _parents.isNotEmpty) {
+      analyzeIntegrity(repair: true);
+    }
   }
 
   // ==================================
@@ -225,7 +229,17 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (!containsNode(node.key)) {
       throw StateError('Node "${node.key}" does not exist in graph');
     }
-    return Set.unmodifiable(_edges[node] ?? <Node>{});
+    final children = _edges[node];
+    if (children == null || children.isEmpty) {
+      return const <Node>{};
+    }
+
+    final sanitized = _sanitizeChildSet(node, children);
+    if (sanitized.isEmpty) {
+      return const <Node>{};
+    }
+
+    return Set.unmodifiable(sanitized);
   }
 
   Map<Node, Set<Node>> get edgesWithEmptySets {
@@ -278,25 +292,41 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
   @override
   int visitBreadth(VisitCallback visit, {Node? startNode}) {
-    final levels = _getLevelsMap();
-    int maxLevel = -1;
+    final origin = startNode ?? root;
+    _assertNodeExists(origin, extra: '(start node)');
 
-    for (final entry in levels.entries) {
-      for (final node in entry.value) {
-        final result = visit(node);
-        if (result == VisitResult.breakVisit) {
-          return entry.key;
+    final queue = Queue<_NodeWithLevel>()..add(_NodeWithLevel(origin, 0));
+    final visited = <Node>{};
+    var lastLevel = -1;
+
+    while (queue.isNotEmpty) {
+      final current = queue.removeFirst();
+      if (visited.contains(current.node)) continue;
+
+      visited.add(current.node);
+      lastLevel = current.level;
+
+      final result = visit(current.node);
+      if (result == VisitResult.breakVisit) {
+        return current.level;
+      }
+
+      for (final child in getNodeEdges(current.node)) {
+        if (!visited.contains(child)) {
+          queue.add(_NodeWithLevel(child, current.level + 1));
         }
       }
-      maxLevel = entry.key;
     }
 
-    return maxLevel;
+    return lastLevel;
   }
 
   @override
   void visitDepth(VisitCallback visit, {Node? startNode}) {
-    _visitDepthFirst(startNode ?? root, (node) {
+    final origin = startNode ?? root;
+    _assertNodeExists(origin, extra: '(start node)');
+
+    _visitDepthFirst(origin, (node) {
       final result = visit(node);
       return result != VisitResult.breakVisit;
     });
@@ -314,14 +344,16 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   @override
   Set<Node> getSiblings(Node node) {
     final parent = getNodeParent(node);
-    if (parent == null) return const {};
+    if (parent == null) return const <Node>{};
 
     return getNodeEdges(parent).where((n) => n != node).toSet();
   }
 
   @override
   Set<Node> getLeaves({Node? startNode}) {
-    return _findLeaves();
+    final origin = startNode ?? root;
+    _assertNodeExists(origin, extra: '(start node)');
+    return _findLeaves(origin);
   }
 
   @override
@@ -391,7 +423,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Iterator<Node> pathIterator(Node start, Node end) => PathIterator(this, start, end);
 
   @override
-  Iterator<Node> subtreeIterator(Node root) => SubtreeIterator(this, root);
+  Iterator<Node> subtreeIterator(Node root) {
+    _assertNodeExists(root, extra: '(subtree root)');
+    return SubtreeIterator(this, root);
+  }
 
   @override
   Iterator<R> filtered<R>(Iterator<R> source, bool Function(R) predicate) =>
@@ -401,10 +436,17 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Iterator<R> mapped<R>(Iterator<T> source, R Function(T) mapper) => MappedIterator(source, mapper);
 
   /// Создает Iterable для пути между узлами
-  Iterable<Node> pathBetween(Node start, Node end) => _IterableGraph(pathIterator(start, end));
+  Iterable<Node> pathBetween(Node start, Node end) {
+    _assertNodeExists(start, extra: '(path start)');
+    _assertNodeExists(end, extra: '(path end)');
+    return _IterableGraph(() => pathIterator(start, end));
+  }
 
   /// Создает Iterable для поддерева
-  Iterable<Node> subtree(Node root) => _IterableGraph(subtreeIterator(root));
+  Iterable<Node> subtree(Node root) {
+    _assertNodeExists(root, extra: '(subtree root)');
+    return _IterableGraph(() => subtreeIterator(root));
+  }
 
   // ==================================
   // Вспомогательный метод проверки
@@ -413,6 +455,46 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (!containsNode(node.key)) {
       throw StateError('Node "${node.key}" does not exist in graph $extra');
     }
+  }
+
+  Set<Node> _sanitizeChildSet(Node parent, Set<Node> children) {
+    final canonicalParent = _nodes[parent.key] ?? parent;
+    final validChildren = <Node>{};
+    var mutated = false;
+
+    for (final child in children) {
+      final canonicalChild = _nodes[child.key];
+      if (canonicalChild == null) {
+        mutated = true;
+        _removeParentLinkForKey(child.key, expectedParent: canonicalParent);
+        continue;
+      }
+
+      validChildren.add(canonicalChild);
+      if (!identical(canonicalChild, child)) {
+        mutated = true;
+      }
+    }
+
+    if (!mutated) {
+      return children;
+    }
+
+    if (!identical(canonicalParent, parent)) {
+      _edges.remove(parent);
+    }
+    _edges[canonicalParent] = validChildren;
+    _invalidateCache();
+    return validChildren;
+  }
+
+  void _removeParentLinkForKey(String childKey, {Node? expectedParent}) {
+    if (_parents.isEmpty) return;
+    _parents.removeWhere((child, parent) {
+      if (child.key != childKey) return false;
+      if (expectedParent == null) return true;
+      return parent.key == expectedParent.key;
+    });
   }
 
   /// Находит наименьшего общего предка для двух узлов
@@ -519,7 +601,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
     final levels = <int, Set<Node>>{};
     _traverseLevels((node, level) {
-      levels.putIfAbsent(level, () => {}).add(node);
+      levels.putIfAbsent(level, () => <Node>{}).add(node);
     });
 
     _cachedLevels = levels;
@@ -531,9 +613,9 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   // ==================================
 
   /// Возвращает все листья графа
-  Set<Node> _findLeaves() {
+  Set<Node> _findLeaves(Node start) {
     final result = <Node>{};
-    _visitDepthFirst(root, (node) {
+    _visitDepthFirst(start, (node) {
       if (getNodeEdges(node).isEmpty) {
         result.add(node);
       }
@@ -579,6 +661,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   /// Возвращает все вершины от корня до листьев, включая путь до [node].
   @override
   Set<Node> getFullVerticalPath(Node node) {
+    _assertNodeExists(node);
     final result = <Node>{};
     // Добавляем путь от корня до node
     var current = node;
@@ -610,18 +693,21 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     Node second, {
     Map<String, int>? depths,
   }) {
+    _assertNodeExists(first, extra: '(first node)');
+    _assertNodeExists(second, extra: '(second node)');
+
     final result = <Node>{};
 
     // Находим LCA
     final commonAncestor = findLowestCommonAncestor(first, second);
-    if (commonAncestor == null) return {};
+    if (commonAncestor == null) return <Node>{};
 
     // Добавляем путь от first до LCA
     var current = first;
     while (current != commonAncestor) {
       result.add(current);
       final parent = getNodeParent(current);
-      if (parent == null) return {};
+      if (parent == null) return <Node>{};
       current = parent;
     }
 
@@ -633,7 +719,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     while (current != commonAncestor) {
       result.add(current);
       final parent = getNodeParent(current);
-      if (parent == null) return {};
+      if (parent == null) return <Node>{};
       current = parent;
     }
 
@@ -641,7 +727,180 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   }
 
   @override
+  List<Node> getPathBetweenNodes(Node start, Node end) {
+    _assertNodeExists(start, extra: '(start node)');
+    _assertNodeExists(end, extra: '(end node)');
+
+    final lca = findLowestCommonAncestor(start, end);
+    if (lca == null) return [];
+
+    final pathToAncestor = <Node>[];
+    var current = start;
+    while (true) {
+      pathToAncestor.add(current);
+      if (current == lca) break;
+      final parent = getNodeParent(current);
+      if (parent == null) {
+        return [];
+      }
+      current = parent;
+    }
+
+    final descent = <Node>[];
+    current = end;
+    while (current != lca) {
+      descent.add(current);
+      final parent = getNodeParent(current);
+      if (parent == null) {
+        return [];
+      }
+      current = parent;
+    }
+
+    return [...pathToAncestor, ...descent.reversed];
+  }
+
+  @override
+  int getDistanceBetweenNodes(Node start, Node end) {
+    if (start == end) return 0;
+
+    final path = getPathBetweenNodes(start, end);
+    if (path.isEmpty) return -1;
+
+    return path.length - 1;
+  }
+
+  @override
+  GraphIntegrityReport analyzeIntegrity({bool repair = false}) {
+    final issues = <GraphIntegrityIssue>[];
+    var mutated = false;
+
+    final edgeEntries = _edges.entries.toList();
+    for (final entry in edgeEntries) {
+      final parent = entry.key;
+      final children = entry.value;
+      final canonicalParent = _nodes[parent.key];
+
+      if (canonicalParent == null) {
+        issues.add(
+          GraphIntegrityIssue(
+            type: GraphIntegrityIssueType.missingParentNode,
+            node: parent,
+            message:
+                'Parent node "${parent.key}" is referenced in edges but missing from the graph',
+          ),
+        );
+        if (repair) {
+          for (final child in children) {
+            _removeParentLinkForKey(child.key, expectedParent: parent);
+          }
+          _edges.remove(parent);
+          mutated = true;
+        }
+        continue;
+      }
+
+      final sanitizedChildren = <Node>{};
+      for (final child in children) {
+        final canonicalChild = _nodes[child.key];
+        if (canonicalChild == null) {
+          issues.add(
+            GraphIntegrityIssue(
+              type: GraphIntegrityIssueType.missingChild,
+              node: canonicalParent,
+              related: child,
+              message:
+                  'Node "${canonicalParent.key}" references missing child "${child.key}"',
+            ),
+          );
+          if (repair) {
+            _removeParentLinkForKey(child.key, expectedParent: canonicalParent);
+            mutated = true;
+          }
+          continue;
+        }
+
+        sanitizedChildren.add(canonicalChild);
+      }
+
+      if (repair &&
+          (sanitizedChildren.length != children.length ||
+              !identical(canonicalParent, parent))) {
+        _edges.remove(parent);
+        _edges[canonicalParent] = sanitizedChildren;
+        mutated = true;
+      }
+    }
+
+    final parentEntries = _parents.entries.toList();
+    for (final entry in parentEntries) {
+      final child = entry.key;
+      final parent = entry.value;
+      final canonicalChild = _nodes[child.key];
+      final canonicalParent = _nodes[parent.key];
+
+      if (canonicalChild == null) {
+        issues.add(
+          GraphIntegrityIssue(
+            type: GraphIntegrityIssueType.missingChild,
+            node: parent,
+            related: child,
+            message:
+                'Parent "${parent.key}" keeps reference to missing child "${child.key}"',
+          ),
+        );
+        if (repair) {
+          _parents.remove(child);
+          mutated = true;
+        }
+        continue;
+      }
+
+      if (canonicalParent == null) {
+        issues.add(
+          GraphIntegrityIssue(
+            type: GraphIntegrityIssueType.missingParent,
+            node: canonicalChild,
+            related: parent,
+            message:
+                'Child "${canonicalChild.key}" references missing parent "${parent.key}"',
+          ),
+        );
+        if (repair) {
+          _parents.remove(child);
+          mutated = true;
+        }
+        continue;
+      }
+
+      final childrenOfParent = _edges[canonicalParent];
+      if (childrenOfParent == null || !childrenOfParent.contains(canonicalChild)) {
+        issues.add(
+          GraphIntegrityIssue(
+            type: GraphIntegrityIssueType.inconsistentParentLink,
+            node: canonicalParent,
+            related: canonicalChild,
+            message:
+                'Parent "${canonicalParent.key}" is missing edge to "${canonicalChild.key}" while parents map references it',
+          ),
+        );
+        if (repair) {
+          _parents.remove(child);
+          mutated = true;
+        }
+      }
+    }
+
+    if (repair && mutated) {
+      _invalidateCache();
+    }
+
+    return GraphIntegrityReport(issues: issues);
+  }
+
+  @override
   Set<Node> getPathToNode(Node node) {
+    _assertNodeExists(node);
     final result = <Node>{};
     var current = node;
 
@@ -660,11 +919,11 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
 /// Вспомогательный класс для создания Iterable из Iterator
 class _IterableGraph<T> extends Iterable<T> {
-  final Iterator<T> _iterator;
-  _IterableGraph(this._iterator);
+  final Iterator<T> Function() _iteratorFactory;
+  _IterableGraph(this._iteratorFactory);
 
   @override
-  Iterator<T> get iterator => _iterator;
+  Iterator<T> get iterator => _iteratorFactory();
 }
 
 /// Вспомогательный класс для обхода по уровням

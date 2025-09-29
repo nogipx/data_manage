@@ -541,6 +541,37 @@ void main() {
         expect(nestedSubgraph.nodes.length, equals(1));
         expect(nestedSubgraph.edges.isEmpty, isTrue);
       });
+
+      test('view_traversals_reject_nodes_outside_scope', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+
+        expect(
+          () => view.visitBreadth((_) => VisitResult.continueVisit, startNode: node2),
+          throwsA(isA<StateError>()),
+          reason: 'Обход не должен начинаться с узла вне поддерева',
+        );
+
+        expect(
+          () => view.visitDepth((_) => VisitResult.continueVisit, startNode: node2),
+          throwsA(isA<StateError>()),
+          reason: 'Обход в глубину также ограничен границами поддерева',
+        );
+      });
+
+      test('view_traversals_default_to_subtree_root', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+        final visited = <String>[];
+
+        view.visitBreadth((node) {
+          visited.add(node.key);
+          return VisitResult.continueVisit;
+        });
+
+        expect(visited, containsAll(['node1', 'node3', 'node4']),
+            reason: 'Обход должен посещать только узлы поддерева');
+        expect(visited, isNot(contains('node2')),
+            reason: 'Узлы вне поддерева не должны посещаться');
+      });
     });
 
     group('Iterator Behavior |', () {

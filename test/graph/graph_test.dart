@@ -368,6 +368,18 @@ void main() {
         );
       });
 
+      test('node_edges_are_returned_as_unmodifiable_set', () {
+        final parent = Node('parent');
+        final child = Node('child');
+
+        graph.addEdge(parent, child);
+
+        final edges = graph.getNodeEdges(parent);
+
+        expect(() => edges.add(Node('other')), throwsUnsupportedError,
+            reason: 'Множество ребер должно быть доступно только для чтения');
+      });
+
       test('get_node_parent_returns_correct_node', () {
         final parent = Node('parent');
         final child = Node('child');

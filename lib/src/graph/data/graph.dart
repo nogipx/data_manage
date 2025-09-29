@@ -231,12 +231,12 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     }
     final children = _edges[node];
     if (children == null || children.isEmpty) {
-      return const {};
+      return const <Node>{};
     }
 
     final sanitized = _sanitizeChildSet(node, children);
     if (sanitized.isEmpty) {
-      return const {};
+      return const <Node>{};
     }
 
     return Set.unmodifiable(sanitized);
@@ -344,7 +344,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   @override
   Set<Node> getSiblings(Node node) {
     final parent = getNodeParent(node);
-    if (parent == null) return const {};
+    if (parent == null) return const <Node>{};
 
     return getNodeEdges(parent).where((n) => n != node).toSet();
   }
@@ -601,7 +601,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
     final levels = <int, Set<Node>>{};
     _traverseLevels((node, level) {
-      levels.putIfAbsent(level, () => {}).add(node);
+      levels.putIfAbsent(level, () => <Node>{}).add(node);
     });
 
     _cachedLevels = levels;
@@ -700,14 +700,14 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
     // Находим LCA
     final commonAncestor = findLowestCommonAncestor(first, second);
-    if (commonAncestor == null) return {};
+    if (commonAncestor == null) return <Node>{};
 
     // Добавляем путь от first до LCA
     var current = first;
     while (current != commonAncestor) {
       result.add(current);
       final parent = getNodeParent(current);
-      if (parent == null) return {};
+      if (parent == null) return <Node>{};
       current = parent;
     }
 
@@ -719,7 +719,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     while (current != commonAncestor) {
       result.add(current);
       final parent = getNodeParent(current);
-      if (parent == null) return {};
+      if (parent == null) return <Node>{};
       current = parent;
     }
 

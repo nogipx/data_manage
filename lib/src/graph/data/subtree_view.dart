@@ -224,7 +224,17 @@ class SubtreeView<T> implements IGraphEditable<T> {
     if (!_subtreeNodes.contains(origin)) {
       throw StateError('Node "${origin.key}" is not in the subtree');
     }
-    return originalGraph.visitBreadth(visit, startNode: origin);
+    final queue = Queue<_NodeWithLevel>()..add(_NodeWithLevel(origin, 0));
+    var lastLevel = -1;
+    while (queue.isNotEmpty) {
+      final current = queue.removeFirst();
+      lastLevel = current.level;
+      if (visit(current.node) == VisitResult.breakVisit) return current.level;
+      for (final child in getNodeEdges(current.node)) {
+        queue.add(_NodeWithLevel(child, current.level + 1));
+      }
+    }
+    return lastLevel;
   }
 
   @override
@@ -233,11 +243,56 @@ class SubtreeView<T> implements IGraphEditable<T> {
     if (!_subtreeNodes.contains(origin)) {
       throw StateError('Node "${origin.key}" is not in the subtree');
     }
-    originalGraph.visitDepth(visit, startNode: origin);
+    final stack = <Node>[origin];
+    while (stack.isNotEmpty) {
+      final node = stack.removeLast();
+      if (visit(node) == VisitResult.breakVisit) return;
+      final children = getNodeEdges(node).toList();
+      for (var i = children.length - 1; i >= 0; i--) {
+        stack.add(children[i]);
+      }
+    }
   }
 
   @override
-  void visitDepthBacktrack(BacktrackCallback visit) => originalGraph.visitDepthBacktrack(visit);
+  void visitDepthBacktrack(BacktrackCallback visit) {
+    final path = <Node>[subtreeRoot];
+    if (visit(List.of(path)) == VisitResult.breakVisit) return;
+
+    final childStacks = <List<Node>>[];
+    final childIndices = <int>[];
+
+    final rootKids = getNodeEdges(subtreeRoot).toList();
+    if (rootKids.isNotEmpty) {
+      childStacks.add(rootKids);
+      childIndices.add(0);
+    }
+
+    while (childStacks.isNotEmpty) {
+      final idx = childIndices.last;
+      final children = childStacks.last;
+
+      if (idx >= children.length) {
+        childStacks.removeLast();
+        childIndices.removeLast();
+        path.removeLast();
+        continue;
+      }
+
+      childIndices[childIndices.length - 1]++;
+      final child = children[idx];
+      path.add(child);
+      if (visit(List.of(path)) == VisitResult.breakVisit) return;
+
+      final grandkids = getNodeEdges(child).toList();
+      if (grandkids.isNotEmpty) {
+        childStacks.add(grandkids);
+        childIndices.add(0);
+      } else {
+        path.removeLast();
+      }
+    }
+  }
 
   @override
   IGraphEditable<T> extractSubtree(String key, {bool copy = true}) =>

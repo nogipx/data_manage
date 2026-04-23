@@ -572,6 +572,63 @@ void main() {
         expect(visited, isNot(contains('node2')),
             reason: 'Узлы вне поддерева не должны посещаться');
       });
+
+      test('view_visitBreadth_scoped_to_subtree', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+        final visited = <String>[];
+
+        view.visitBreadth((node) {
+          visited.add(node.key);
+          return VisitResult.continueVisit;
+        });
+
+        expect(visited, equals(['node1', 'node3', 'node4']));
+        expect(visited, isNot(contains('root')));
+        expect(visited, isNot(contains('node2')));
+      });
+
+      test('view_visitDepth_scoped_to_subtree', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+        final visited = <String>[];
+
+        view.visitDepth((node) {
+          visited.add(node.key);
+          return VisitResult.continueVisit;
+        });
+
+        expect(visited, containsAll(['node1', 'node3', 'node4']));
+        expect(visited, isNot(contains('root')));
+        expect(visited, isNot(contains('node2')));
+      });
+
+      test('view_visitDepthBacktrack_scoped_to_subtree', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+        final paths = <String>[];
+
+        view.visitDepthBacktrack((path) {
+          paths.add(path.map((n) => n.key).join('>'));
+          return VisitResult.continueVisit;
+        });
+
+        expect(paths, containsAll(['node1', 'node1>node3', 'node1>node4']));
+        for (final p in paths) {
+          expect(p, isNot(contains('root')));
+          expect(p, isNot(contains('node2')));
+        }
+      });
+
+      test('view_visitDepth_early_stop_stays_in_subtree', () {
+        final view = graph.extractSubtree(node1.key, copy: false);
+        final visited = <String>[];
+
+        view.visitDepth((node) {
+          visited.add(node.key);
+          return node.key == 'node3' ? VisitResult.breakVisit : VisitResult.continueVisit;
+        });
+
+        expect(visited, isNot(contains('root')));
+        expect(visited, isNot(contains('node2')));
+      });
     });
 
     group('Iterator Behavior |', () {

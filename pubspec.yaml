@@ -1,8 +1,8 @@
 name: data_manage
-description: A powerful and flexible package for data management in Dart/Flutter applications.
-version: 3.0.2
+description: Data structures and processing utilities for Dart. No external dependencies.
+version: 3.1.0
 repository: https://github.com/nogipx/data_manage
-license: BSD-3-Clause
+license: MIT
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

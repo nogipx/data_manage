@@ -2,7 +2,7 @@
 
 [![Pub Version](https://img.shields.io/pub/v/data_manage)](https://pub.dev/packages/data_manage)
 [![Dart SDK Version](https://badgen.net/pub/sdk-version/data_manage)](https://pub.dev/packages/data_manage)
-[![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Data management utilities for Dart/Flutter. No external dependencies.
 
@@ -42,4 +42,4 @@ dependencies:
 
 ## License
 
-[BSD 3-Clause](LICENSE)
+[MIT](LICENSE)

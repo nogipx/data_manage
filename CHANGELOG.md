@@ -1,3 +1,66 @@
+# 3.1.0
+
+BREAKING CHANGE: `addEdge` now requires parent to already exist in graph
+- Calling `addEdge(parent, child)` where parent is not in the graph throws `StateError`
+- Previously parent was auto-created as a floating node; this led to potential cycles and incorrect state
+- Migration: call `addNode(parent)` and connect it to the tree before calling `addEdge`
+
+BREAKING CHANGE: removed analytics extension
+- Removed `GraphAnalyticsExtension` and all analytics methods
+- These were not core graph algorithms and added noise to the API
+
+feat: added `BacktrackIterator` — yields every prefix path during DFS
+- Access via `graph.backtrackIterator`
+- Each `current` is a `List<Node>` representing the path from root to current node
+- Also exposed via `visitDepthBacktrack(BacktrackCallback)`
+
+feat: added `SubtreeIterator` — BFS traversal scoped to a subtree
+- Access via `graph.subtreeIterator(node)`
+- Also available as `graph.subtree(node)` iterable
+
+fix: `SubtreeView.visitBreadth`, `visitDepth`, `visitDepthBacktrack` now scoped to subtree
+- Previously these methods delegated to the original graph, traversing nodes outside the subtree boundary
+- Now correctly limited to nodes within the view
+
+fix: `SubtreeView.removeEdge` removes child and all its descendants from tracked scope
+- Previously child and its subtree remained in `_subtreeNodes` after edge removal, causing incorrect `containsNode` and traversal results
+
+fix: `getLeaves` no longer calls `getNodeEdges` twice per node
+
+fix: `findLowestCommonAncestor` is now O(depth) instead of O(N) — no longer calls `getDepths()`
+
+fix: `isAncestor` is now O(depth) with early exit instead of building ancestor Set
+
+fix: BFS traversal (`visitBreadth`) start node was incorrect in some cases
+
+fix: scoped leaf queries in subtree views
+
+perf: `addEdge` is O(1) for the common case (new child)
+- New child cannot be an ancestor of anything — cycle check skipped
+- Existing child with a parent: existing parent check throws first
+- Only floating existing child (rare) requires O(depth) cycle check
+
+perf: `removeEdge` is O(1) — no cache or depth tracking
+
+perf: removed depth cache entirely
+- `getNodeLevel` is O(depth) parent walk on demand
+- `getDepths()` is O(N) BFS computed fresh on demand
+- Matches real access patterns: frequent edge mutations, rare depth queries
+
+perf: reduced allocations in hot traversal paths
+- Internal `_childrenOf()` bypasses `Set.unmodifiable` wrapper for internal use
+- `_visitDepthFirst`: reverse by index — 1 allocation instead of 3
+- `_findLeaves`: accesses `_edges` directly
+- `_getAllPaths`: backtracking generator — O(depth) stack instead of O(N×depth) path copies
+- `visitBreadth`: removed redundant `visited` Set (tree has no cycles)
+- `removeEdge`: removes key from `_edges` map when last child removed instead of storing empty Set
+- `DepthFirstIterator`, `BreadthFirstIterator`, `LeavesIterator`: removed `_visited` Sets
+- `nodes`, `edges`, `parents` public getters: `late final` — unmodifiable wrapper allocated once
+
+perf: `extractSubtree(copy: true)` now single BFS pass
+- Previously: DFS to collect subtree Set, then second iteration to build new graph
+- Now: one BFS pass writing directly to internal fields of new graph
+
 # 3.0.2
 
 fix: add data_manage.dart global export file

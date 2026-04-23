@@ -7,7 +7,7 @@ class Node {
   bool operator ==(Object other) => other is Node && other.key == key;
 
   @override
-  int get hashCode => Object.hashAll([key]);
+  int get hashCode => key.hashCode;
 
   @override
   String toString() => 'Node($key)';

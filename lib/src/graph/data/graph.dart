@@ -25,26 +25,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Map<Node, Node> get parents => Map.unmodifiable(_parents);
   final Map<Node, Node> _parents = {};
 
-  // Кэш для часто используемых вычислений
-  // Не используем WeakReference, так как:
-  // 1. Кэш содержит только ссылки на узлы, которые уже хранятся в графе
-  // 2. Кэш инвалидируется при любом изменении структуры
-  // 3. Время жизни кэша совпадает со временем жизни графа
-  Map<int, Set<Node>>? _cachedLevels;
-  Map<Node, int>? _cachedDepths;
-
-  /// Инвалидирует кэш при изменении структуры графа
-  void _invalidateCache() {
-    _cachedLevels = null;
-    _cachedDepths = null;
-  }
-
-  /// Очищает кэш для освобождения памяти
-  /// Используйте этот метод, если нужно временно освободить память,
-  /// например, когда граф долго не используется
-  void clearCache() {
-    _invalidateCache();
-  }
+  final Map<Node, int> _depths = {};
 
   Graph({
     required this.root,
@@ -63,6 +44,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (_edges.isNotEmpty || _parents.isNotEmpty) {
       analyzeIntegrity(repair: true);
     }
+    _rebuildDepths();
   }
 
   // ==================================
@@ -79,7 +61,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       throw StateError('Graph already contains node "${node.key}"');
     }
     _nodes[node.key] = node;
-    _invalidateCache();
+    if (node == root) _depths[node] = 0;
   }
 
   @override
@@ -110,7 +92,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     _parents[child] = parent;
     final childSet = _edges.putIfAbsent(parent, () => <Node>{});
     childSet.add(child);
-    _invalidateCache();
+    _setDepthsForSubtree(child, (_depths[parent] ?? 0) + 1);
   }
 
   bool _wouldCreateCycle(Node parent, Node child) {
@@ -151,8 +133,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     // Удаляем сам узел
     _nodes.remove(node.key);
     _edges.remove(node);
+    _depths.remove(node);
     _nodeDataManager.remove(node.key);
-    _invalidateCache();
   }
 
   @override
@@ -172,9 +154,9 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     final childSet = _edges[parent]!;
     childSet.remove(child);
     if (childSet.isEmpty) {
-      _edges[parent] = <Node>{}; // Оставляем пустой сет вместо удаления
+      _edges[parent] = <Node>{};
     }
-    _invalidateCache();
+    _removeDepthsForSubtree(child);
   }
 
   @override
@@ -184,8 +166,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     _nodeDataManager.clear();
     _edges.clear();
     _parents.clear();
-    _invalidateCache();
-    addNode(oldRoot); // Добавляем корневой узел обратно
+    _depths.clear();
+    addNode(oldRoot);
   }
 
   // ==================================
@@ -354,21 +336,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   int getNodeLevel(Node node) => getDepths()[node] ?? -1;
 
   @override
-  Map<Node, int> getDepths() {
-    if (_cachedDepths != null) return _cachedDepths!;
-
-    final result = <Node, int>{};
-    final levels = _getLevelsMap();
-
-    for (final entry in levels.entries) {
-      for (final node in entry.value) {
-        result[node] = entry.key;
-      }
-    }
-
-    _cachedDepths = result;
-    return result;
-  }
+  Map<Node, int> getDepths() => Map.unmodifiable(_depths);
 
   @override
   String get graphString {
@@ -515,30 +483,40 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     }
   }
 
-  /// Базовый метод обхода по уровням с колбэком для обработки узлов
-  void _traverseLevels(void Function(Node node, int level) onNode) {
-    final queue = Queue<_NodeWithLevel>()..add(_NodeWithLevel(root, 0));
-
-    while (queue.isNotEmpty) {
-      final current = queue.removeFirst();
-      onNode(current.node, current.level);
-      for (final child in getNodeEdges(current.node)) {
-        queue.add(_NodeWithLevel(child, current.level + 1));
+  void _setDepthsForSubtree(Node start, int startDepth) {
+    final stack = <(Node, int)>[(start, startDepth)];
+    while (stack.isNotEmpty) {
+      final (node, depth) = stack.removeLast();
+      _depths[node] = depth;
+      final children = _edges[node];
+      if (children != null) {
+        for (final child in children) {
+          stack.add((child, depth + 1));
+        }
       }
     }
   }
 
-  /// Базовый метод обхода по уровням
-  Map<int, Set<Node>> _getLevelsMap() {
-    if (_cachedLevels != null) return _cachedLevels!;
+  void _removeDepthsForSubtree(Node start) {
+    final stack = <Node>[start];
+    while (stack.isNotEmpty) {
+      final node = stack.removeLast();
+      _depths.remove(node);
+      final children = _edges[node];
+      if (children != null) stack.addAll(children);
+    }
+  }
 
-    final levels = <int, Set<Node>>{};
-    _traverseLevels((node, level) {
-      levels.putIfAbsent(level, () => <Node>{}).add(node);
-    });
-
-    _cachedLevels = levels;
-    return levels;
+  void _rebuildDepths() {
+    _depths.clear();
+    final queue = Queue<Node>()..add(root);
+    while (queue.isNotEmpty) {
+      final node = queue.removeFirst();
+      final parent = _parents[node];
+      _depths[node] = parent == null ? 0 : (_depths[parent]! + 1);
+      final children = _edges[node];
+      if (children != null) queue.addAll(children);
+    }
   }
 
   // ==================================
@@ -831,7 +809,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     }
 
     if (repair && mutated) {
-      _invalidateCache();
+      _rebuildDepths();
     }
 
     return GraphIntegrityReport(issues: issues);

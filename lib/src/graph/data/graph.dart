@@ -25,7 +25,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Map<Node, Node> get parents => Map.unmodifiable(_parents);
   final Map<Node, Node> _parents = {};
 
-  final Map<Node, int> _depths = {};
 
   Graph({
     required this.root,
@@ -44,7 +43,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (_edges.isNotEmpty || _parents.isNotEmpty) {
       analyzeIntegrity(repair: true);
     }
-    _rebuildDepths();
   }
 
   // ==================================
@@ -61,7 +59,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       throw StateError('Graph already contains node "${node.key}"');
     }
     _nodes[node.key] = node;
-    if (node == root) _depths[node] = 0;
   }
 
   @override
@@ -92,7 +89,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     _parents[child] = parent;
     final childSet = _edges.putIfAbsent(parent, () => <Node>{});
     childSet.add(child);
-    _setDepthsForSubtree(child, (_depths[parent] ?? 0) + 1);
   }
 
   bool _wouldCreateCycle(Node parent, Node child) {
@@ -133,7 +129,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     // Удаляем сам узел
     _nodes.remove(node.key);
     _edges.remove(node);
-    _depths.remove(node);
     _nodeDataManager.remove(node.key);
   }
 
@@ -156,7 +151,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (childSet.isEmpty) {
       _edges[parent] = <Node>{};
     }
-    _removeDepthsForSubtree(child);
   }
 
   @override
@@ -166,7 +160,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     _nodeDataManager.clear();
     _edges.clear();
     _parents.clear();
-    _depths.clear();
     addNode(oldRoot);
   }
 
@@ -333,10 +326,29 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   }
 
   @override
-  int getNodeLevel(Node node) => getDepths()[node] ?? -1;
+  int getNodeLevel(Node node) {
+    int level = 0;
+    var current = getNodeParent(node);
+    while (current != null) {
+      level++;
+      current = getNodeParent(current);
+    }
+    return level;
+  }
 
   @override
-  Map<Node, int> getDepths() => Map.unmodifiable(_depths);
+  Map<Node, int> getDepths() {
+    final result = <Node, int>{};
+    final queue = Queue<Node>()..add(root);
+    while (queue.isNotEmpty) {
+      final node = queue.removeFirst();
+      final parent = _parents[node];
+      result[node] = parent == null ? 0 : result[parent]! + 1;
+      final children = _edges[node];
+      if (children != null) queue.addAll(children);
+    }
+    return Map.unmodifiable(result);
+  }
 
   @override
   String get graphString {
@@ -483,41 +495,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     }
   }
 
-  void _setDepthsForSubtree(Node start, int startDepth) {
-    final stack = <(Node, int)>[(start, startDepth)];
-    while (stack.isNotEmpty) {
-      final (node, depth) = stack.removeLast();
-      _depths[node] = depth;
-      final children = _edges[node];
-      if (children != null) {
-        for (final child in children) {
-          stack.add((child, depth + 1));
-        }
-      }
-    }
-  }
-
-  void _removeDepthsForSubtree(Node start) {
-    final stack = <Node>[start];
-    while (stack.isNotEmpty) {
-      final node = stack.removeLast();
-      _depths.remove(node);
-      final children = _edges[node];
-      if (children != null) stack.addAll(children);
-    }
-  }
-
-  void _rebuildDepths() {
-    _depths.clear();
-    final queue = Queue<Node>()..add(root);
-    while (queue.isNotEmpty) {
-      final node = queue.removeFirst();
-      final parent = _parents[node];
-      _depths[node] = parent == null ? 0 : (_depths[parent]! + 1);
-      final children = _edges[node];
-      if (children != null) queue.addAll(children);
-    }
-  }
 
   // ==================================
   // МЕТОДЫ ДОСТУПА К СТРУКТУРЕ
@@ -808,9 +785,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       }
     }
 
-    if (repair && mutated) {
-      _rebuildDepths();
-    }
 
     return GraphIntegrityReport(issues: issues);
   }

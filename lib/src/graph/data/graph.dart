@@ -233,13 +233,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     if (children == null || children.isEmpty) {
       return const <Node>{};
     }
-
-    final sanitized = _sanitizeChildSet(node, children);
-    if (sanitized.isEmpty) {
-      return const <Node>{};
-    }
-
-    return Set.unmodifiable(sanitized);
+    return Set.unmodifiable(children);
   }
 
   Map<Node, Set<Node>> get edgesWithEmptySets {
@@ -357,15 +351,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   }
 
   @override
-  int getNodeLevel(Node node) {
-    final levels = _getLevelsMap();
-    for (final entry in levels.entries) {
-      if (entry.value.contains(node)) {
-        return entry.key;
-      }
-    }
-    return -1;
-  }
+  int getNodeLevel(Node node) => getDepths()[node] ?? -1;
 
   @override
   Map<Node, int> getDepths() {
@@ -457,37 +443,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     }
   }
 
-  Set<Node> _sanitizeChildSet(Node parent, Set<Node> children) {
-    final canonicalParent = _nodes[parent.key] ?? parent;
-    final validChildren = <Node>{};
-    var mutated = false;
-
-    for (final child in children) {
-      final canonicalChild = _nodes[child.key];
-      if (canonicalChild == null) {
-        mutated = true;
-        _removeParentLinkForKey(child.key, expectedParent: canonicalParent);
-        continue;
-      }
-
-      validChildren.add(canonicalChild);
-      if (!identical(canonicalChild, child)) {
-        mutated = true;
-      }
-    }
-
-    if (!mutated) {
-      return children;
-    }
-
-    if (!identical(canonicalParent, parent)) {
-      _edges.remove(parent);
-    }
-    _edges[canonicalParent] = validChildren;
-    _invalidateCache();
-    return validChildren;
-  }
-
   void _removeParentLinkForKey(String childKey, {Node? expectedParent}) {
     if (_parents.isEmpty) return;
     _parents.removeWhere((child, parent) {
@@ -501,50 +456,35 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Node? findLowestCommonAncestor(Node first, Node second) {
     if (first == second) return first;
 
-    // Получаем глубины узлов для оптимизации
-    final depths = getDepths();
-    final firstDepth = depths[first] ?? 0;
-    final secondDepth = depths[second] ?? 0;
+    // Собираем всех предков first (включая его самого)
+    final ancestors = <Node>{};
+    var current = first;
+    while (true) {
+      ancestors.add(current);
+      final parent = getNodeParent(current);
+      if (parent == null) break;
+      current = parent;
+    }
 
-    // Поднимаем более глубокий узел до уровня менее глубокого
-    var currentFirst = first;
-    var currentSecond = second;
-
-    // Выравниваем глубину узлов
-    for (var i = 0; i < (firstDepth - secondDepth); i++) {
-      final parent = getNodeParent(currentFirst);
+    // Идём вверх от second — первый узел из ancestors и есть LCA
+    current = second;
+    while (true) {
+      if (ancestors.contains(current)) return current;
+      final parent = getNodeParent(current);
       if (parent == null) return null;
-      currentFirst = parent;
+      current = parent;
     }
-
-    for (var i = 0; i < (secondDepth - firstDepth); i++) {
-      final parent = getNodeParent(currentSecond);
-      if (parent == null) return null;
-      currentSecond = parent;
-    }
-
-    // Если после выравнивания узлы совпали - это и есть LCA
-    if (currentFirst == currentSecond) return currentFirst;
-
-    // Поднимаемся по дереву, пока не найдем общего предка
-    while (currentFirst != root && currentSecond != root) {
-      final parentFirst = getNodeParent(currentFirst);
-      final parentSecond = getNodeParent(currentSecond);
-
-      if (parentFirst == null || parentSecond == null) return null;
-      if (parentFirst == parentSecond) return parentFirst;
-
-      currentFirst = parentFirst;
-      currentSecond = parentSecond;
-    }
-
-    return root;
   }
 
   /// Проверяет, является ли один узел предком другого
   @override
   bool isAncestor({required Node ancestor, required Node descendant}) {
-    return getPathToNode(descendant).contains(ancestor);
+    var current = getNodeParent(descendant);
+    while (current != null) {
+      if (current == ancestor) return true;
+      current = getNodeParent(current);
+    }
+    return false;
   }
 
   // ==================================
@@ -563,34 +503,27 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   /// Если visitor возвращает false, обход прерывается.
   void _visitDepthFirst(Node start, bool Function(Node) visitor) {
     final stack = <Node>[start];
-    final visited = <Node>{};
 
     while (stack.isNotEmpty) {
       final node = stack.removeLast();
-      if (visited.contains(node)) continue;
-
-      visited.add(node);
-      if (!visitor(node)) return; // Прерываем если visitor вернул false
-      stack.addAll(getNodeEdges(node).toList().reversed);
+      if (!containsNode(node.key)) continue;
+      final children = getNodeEdges(node);
+      if (!visitor(node)) return;
+      for (final child in children.toList().reversed) {
+        stack.add(child);
+      }
     }
   }
 
   /// Базовый метод обхода по уровням с колбэком для обработки узлов
   void _traverseLevels(void Function(Node node, int level) onNode) {
     final queue = Queue<_NodeWithLevel>()..add(_NodeWithLevel(root, 0));
-    final visited = <Node>{};
 
     while (queue.isNotEmpty) {
       final current = queue.removeFirst();
-      if (visited.contains(current.node)) continue;
-
-      visited.add(current.node);
       onNode(current.node, current.level);
-
       for (final child in getNodeEdges(current.node)) {
-        if (!visited.contains(child)) {
-          queue.add(_NodeWithLevel(child, current.level + 1));
-        }
+        queue.add(_NodeWithLevel(child, current.level + 1));
       }
     }
   }
@@ -615,12 +548,18 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   /// Возвращает все листья графа
   Set<Node> _findLeaves(Node start) {
     final result = <Node>{};
-    _visitDepthFirst(start, (node) {
-      if (getNodeEdges(node).isEmpty) {
+    final stack = <Node>[start];
+
+    while (stack.isNotEmpty) {
+      final node = stack.removeLast();
+      final children = getNodeEdges(node);
+      if (children.isEmpty) {
         result.add(node);
+      } else {
+        stack.addAll(children);
       }
-      return true; // Продолжаем обход
-    });
+    }
+
     return result;
   }
 
@@ -629,7 +568,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     final result = <Node>{};
     _visitDepthFirst(node, (n) {
       result.add(n);
-      return true; // Продолжаем обход
+      return true;
     });
     return result;
   }

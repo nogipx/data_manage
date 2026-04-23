@@ -868,10 +868,13 @@ void main() {
         isEmpty,
         reason: 'Битые узлы не должны попадать в обход',
       );
+
+      // Очистка битых ссылок требует явного вызова analyzeIntegrity
+      graph.analyzeIntegrity(repair: true);
       expect(
         graph.getNodeEdges(root),
         equals({child}),
-        reason: 'После обхода битые ссылки очищаются',
+        reason: 'После analyzeIntegrity(repair: true) битые ссылки удаляются',
       );
     });
 

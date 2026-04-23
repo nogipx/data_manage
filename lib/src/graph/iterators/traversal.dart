@@ -3,17 +3,17 @@ import '../_index.dart';
 
 /// Итератор для обхода графа в глубину
 class DepthFirstIterator extends BaseNodeIterator {
-  final Queue<Node> _queue = Queue();
+  final List<Node> _stack = [];
   final Set<Node> _visited = {};
 
   DepthFirstIterator(super.graph) {
-    _queue.add(graph.root);
+    _stack.add(graph.root);
   }
 
   @override
   bool moveNext() {
-    while (_queue.isNotEmpty) {
-      final node = _queue.removeLast();
+    while (_stack.isNotEmpty) {
+      final node = _stack.removeLast();
       if (_visited.contains(node)) continue;
 
       _visited.add(node);
@@ -22,7 +22,7 @@ class DepthFirstIterator extends BaseNodeIterator {
       final children = graph.getNodeEdges(node).toList();
       for (final child in children.reversed) {
         if (!_visited.contains(child)) {
-          _queue.add(child);
+          _stack.add(child);
         }
       }
 
@@ -64,17 +64,17 @@ class BreadthFirstIterator extends BaseNodeIterator {
 
 /// Итератор для обхода листьев графа
 class LeavesIterator extends BaseNodeIterator {
-  final Queue<Node> _queue = Queue();
+  final List<Node> _stack = [];
   final Set<Node> _visited = {};
 
   LeavesIterator(super.graph) {
-    _queue.add(graph.root);
+    _stack.add(graph.root);
   }
 
   @override
   bool moveNext() {
-    while (_queue.isNotEmpty) {
-      final node = _queue.removeLast();
+    while (_stack.isNotEmpty) {
+      final node = _stack.removeLast();
       if (_visited.contains(node)) continue;
 
       _visited.add(node);
@@ -87,7 +87,7 @@ class LeavesIterator extends BaseNodeIterator {
 
       for (final child in children.toList().reversed) {
         if (!_visited.contains(child)) {
-          _queue.add(child);
+          _stack.add(child);
         }
       }
     }
@@ -95,54 +95,107 @@ class LeavesIterator extends BaseNodeIterator {
   }
 }
 
-/// Итератор для обхода графа по уровням
+/// Итератор для обхода графа по уровням (lazy — обрабатывает один уровень за раз)
 class LevelIterator extends BaseNodeCollectionIterator<Set<Node>> {
-  final Queue<_NodeWithLevel> _queue = Queue();
-  final Set<Node> _visited = {};
-  final Map<int, Set<Node>> _levels = {};
-  int _currentLevel = 0;
-  bool _isTraversalComplete = false;
+  final Queue<Node> _queue = Queue();
 
   LevelIterator(super.graph) {
-    _queue.add(_NodeWithLevel(graph.root, 0));
+    _queue.add(graph.root);
   }
 
   @override
   bool moveNext() {
-    if (_isTraversalComplete && _currentLevel >= _levels.length) {
-      return false;
-    }
+    if (_queue.isEmpty) return false;
 
-    if (!_isTraversalComplete) {
-      while (_queue.isNotEmpty) {
-        final currentNode = _queue.removeFirst();
-        if (_visited.contains(currentNode.node)) continue;
+    final levelSize = _queue.length;
+    final level = <Node>{};
 
-        _visited.add(currentNode.node);
-        _levels.putIfAbsent(currentNode.level, () => {}).add(currentNode.node);
-
-        for (final child in graph.getNodeEdges(currentNode.node)) {
-          if (!_visited.contains(child)) {
-            _queue.add(_NodeWithLevel(child, currentNode.level + 1));
-          }
-        }
+    for (var i = 0; i < levelSize; i++) {
+      final node = _queue.removeFirst();
+      level.add(node);
+      for (final child in graph.getNodeEdges(node)) {
+        _queue.add(child);
       }
-      _isTraversalComplete = true;
     }
 
-    if (_currentLevel < _levels.length) {
-      setCurrent(_levels[_currentLevel]!);
-      _currentLevel++;
-      return true;
-    }
-
-    return false;
+    setCurrent(level);
+    return true;
   }
 }
 
-/// Вспомогательный класс для обхода по уровням
-class _NodeWithLevel {
-  final Node node;
-  final int level;
-  _NodeWithLevel(this.node, this.level);
+/// Итератор для обхода с backtracking
+class BacktrackIterator extends BaseNodeCollectionIterator<List<Node>> {
+  final List<Node> _currentPath;
+  final Set<Node> _inPath;
+  bool _hasNext = true;
+
+  BacktrackIterator(super.graph)
+      : _currentPath = [graph.root],
+        _inPath = {graph.root};
+
+  @override
+  bool moveNext() {
+    if (!_hasNext) return false;
+
+    setCurrent(List.from(_currentPath));
+
+    final currentNode = _currentPath.last;
+    final children = graph.getNodeEdges(currentNode);
+
+    for (final child in children) {
+      if (!_inPath.contains(child)) {
+        _currentPath.add(child);
+        _inPath.add(child);
+        return true;
+      }
+    }
+
+    // Backtrack
+    while (_currentPath.isNotEmpty) {
+      final node = _currentPath.removeLast();
+      _inPath.remove(node);
+
+      if (_currentPath.isEmpty) {
+        _hasNext = false;
+        return true;
+      }
+
+      final parent = _currentPath.last;
+      final siblings = graph.getNodeEdges(parent).toList();
+      final nodeIndex = siblings.indexOf(node);
+
+      for (final sibling in siblings.skip(nodeIndex + 1)) {
+        if (!_inPath.contains(sibling)) {
+          _currentPath.add(sibling);
+          _inPath.add(sibling);
+          return true;
+        }
+      }
+    }
+
+    _hasNext = false;
+    return true;
+  }
+}
+
+/// Итератор для обхода поддерева (BFS, без visited — дерево гарантирует отсутствие циклов)
+class SubtreeIterator extends BaseNodeIterator {
+  final Node root;
+  final Queue<Node> _queue;
+
+  SubtreeIterator(super.graph, this.root) : _queue = Queue()..add(root);
+
+  @override
+  bool moveNext() {
+    if (_queue.isEmpty) return false;
+
+    final node = _queue.removeFirst();
+    setCurrent(node);
+
+    for (final child in graph.getNodeEdges(node)) {
+      _queue.add(child);
+    }
+
+    return true;
+  }
 }

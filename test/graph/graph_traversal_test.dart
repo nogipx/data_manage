@@ -922,6 +922,95 @@ void main() {
       });
     });
 
+    group('Backtrack Traversal |', () {
+      /*
+        Структура тестового графа:
+             root
+            /    \
+          node1  node2
+          /  \
+      node3  node4
+      */
+
+      test('backtrack_iterator_yields_all_paths', () {
+        final iterator = graph.backtrackIterator;
+        final pathStrings = <String>[];
+        while (iterator.moveNext()) {
+          pathStrings.add(iterator.current.map((n) => n.key).join('>'));
+        }
+
+        expect(pathStrings, contains('root'));
+        expect(pathStrings, contains('root>node1'));
+        expect(pathStrings, contains('root>node1>node3'));
+        expect(pathStrings, contains('root>node1>node4'));
+        expect(pathStrings, contains('root>node2'));
+      });
+
+      test('backtrack_iterator_no_duplicate_paths', () {
+        final paths = <List<String>>[];
+        final iterator = graph.backtrackIterator;
+        while (iterator.moveNext()) {
+          paths.add(iterator.current.map((n) => n.key).toList());
+        }
+
+        final unique = paths.map((p) => p.join('>')).toSet();
+        expect(unique.length, equals(paths.length), reason: 'Не должно быть дублирующихся путей');
+      });
+
+      test('backtrack_iterator_paths_are_valid_prefixes', () {
+        final iterator = graph.backtrackIterator;
+        while (iterator.moveNext()) {
+          final path = iterator.current;
+          // Каждый путь должен начинаться с root
+          expect(path.first, equals(root));
+          // Каждый узел в пути должен быть родителем следующего
+          for (var i = 0; i < path.length - 1; i++) {
+            expect(
+              graph.getNodeParent(path[i + 1]),
+              equals(path[i]),
+              reason: '${path[i].key} должен быть родителем ${path[i + 1].key}',
+            );
+          }
+        }
+      });
+
+      test('backtrack_iterator_terminates_correctly', () {
+        final iterator = graph.backtrackIterator;
+        var count = 0;
+        while (iterator.moveNext()) {
+          count++;
+        }
+        expect(count, greaterThan(0));
+        expect(iterator.moveNext(), isFalse);
+        expect(iterator.moveNext(), isFalse);
+      });
+
+      test('backtrack_iterator_single_node_graph', () {
+        final singleGraph = Graph<String>(root: Node('only'));
+        final iterator = singleGraph.backtrackIterator;
+
+        expect(iterator.moveNext(), isTrue);
+        expect(iterator.current.map((n) => n.key).toList(), equals(['only']));
+        expect(iterator.moveNext(), isFalse);
+      });
+
+      test('visitDepthBacktrack_visits_same_paths_as_iterator', () {
+        final iteratorPaths = <List<String>>[];
+        final it = graph.backtrackIterator;
+        while (it.moveNext()) {
+          iteratorPaths.add(it.current.map((n) => n.key).toList());
+        }
+
+        final visitPaths = <List<String>>[];
+        graph.visitDepthBacktrack((path) {
+          visitPaths.add(path.map((n) => n.key).toList());
+          return VisitResult.continueVisit;
+        });
+
+        expect(visitPaths, equals(iteratorPaths));
+      });
+    });
+
     group('Leaves Traversal |', () {
       test('leaves_iterator_correctly_terminates_after_complete_traversal', () {
         final iterator = graph.leavesIterator;

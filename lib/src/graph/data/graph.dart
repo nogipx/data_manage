@@ -149,7 +149,7 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     final childSet = _edges[parent]!;
     childSet.remove(child);
     if (childSet.isEmpty) {
-      _edges[parent] = <Node>{};
+      _edges.remove(parent);
     }
   }
 
@@ -211,6 +211,9 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     return Set.unmodifiable(children);
   }
 
+  /// Internal access to children without unmodifiable wrapper overhead.
+  Iterable<Node> _childrenOf(Node node) => _edges[node] ?? const <Node>[];
+
   Map<Node, Set<Node>> get edgesWithEmptySets {
     // Создаем копию с пустыми сетами для узлов без рёбер
     final result = Map<Node, Set<Node>>.fromEntries(
@@ -265,14 +268,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     _assertNodeExists(origin, extra: '(start node)');
 
     final queue = Queue<_NodeWithLevel>()..add(_NodeWithLevel(origin, 0));
-    final visited = <Node>{};
     var lastLevel = -1;
 
     while (queue.isNotEmpty) {
       final current = queue.removeFirst();
-      if (visited.contains(current.node)) continue;
-
-      visited.add(current.node);
       lastLevel = current.level;
 
       final result = visit(current.node);
@@ -280,10 +279,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
         return current.level;
       }
 
-      for (final child in getNodeEdges(current.node)) {
-        if (!visited.contains(child)) {
-          queue.add(_NodeWithLevel(child, current.level + 1));
-        }
+      for (final child in _childrenOf(current.node)) {
+        queue.add(_NodeWithLevel(child, current.level + 1));
       }
     }
 
@@ -487,10 +484,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     while (stack.isNotEmpty) {
       final node = stack.removeLast();
       if (!containsNode(node.key)) continue;
-      final children = getNodeEdges(node);
       if (!visitor(node)) return;
-      for (final child in children.toList().reversed) {
-        stack.add(child);
+      final children = _childrenOf(node).toList();
+      for (var i = children.length - 1; i >= 0; i--) {
+        stack.add(children[i]);
       }
     }
   }
@@ -507,8 +504,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
 
     while (stack.isNotEmpty) {
       final node = stack.removeLast();
-      final children = getNodeEdges(node);
-      if (children.isEmpty) {
+      final children = _edges[node];
+      if (children == null || children.isEmpty) {
         result.add(node);
       } else {
         stack.addAll(children);
@@ -528,26 +525,44 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     return result;
   }
 
-  /// Возвращает все пути от корня до листьев
+  /// Возвращает все пути от корня до листьев.
+  /// Использует backtracking — O(depth) память на стек вместо O(N*depth).
   Iterable<List<Node>> _getAllPaths() sync* {
-    // Всегда добавляем корневой узел как отдельный путь
-    yield [root];
+    final path = <Node>[root];
+    yield List.of(path);
 
-    final stack = <_PathNode>[
-      _PathNode(root, [root])
-    ];
+    // Stack of (children list, current index)
+    final childStacks = <List<Node>>[];
+    final childIndices = <int>[];
 
-    while (stack.isNotEmpty) {
-      final current = stack.removeLast();
-      final children = getNodeEdges(current.node);
+    final rootKids = _edges[root];
+    if (rootKids != null && rootKids.isNotEmpty) {
+      childStacks.add(rootKids.toList());
+      childIndices.add(0);
+    }
 
-      // Добавляем текущий путь, если это не корень (который уже добавлен)
-      if (current.node != root) {
-        yield current.path;
+    while (childStacks.isNotEmpty) {
+      final idx = childIndices.last;
+      final children = childStacks.last;
+
+      if (idx >= children.length) {
+        childStacks.removeLast();
+        childIndices.removeLast();
+        path.removeLast();
+        continue;
       }
 
-      for (final child in children.toList().reversed) {
-        stack.add(_PathNode(child, [...current.path, child]));
+      childIndices[childIndices.length - 1]++;
+      final child = children[idx];
+      path.add(child);
+      yield List.of(path);
+
+      final grandkids = _edges[child];
+      if (grandkids != null && grandkids.isNotEmpty) {
+        childStacks.add(grandkids.toList());
+        childIndices.add(0);
+      } else {
+        path.removeLast();
       }
     }
   }
@@ -824,9 +839,3 @@ class _NodeWithLevel {
   _NodeWithLevel(this.node, this.level);
 }
 
-/// Вспомогательный класс для хранения пути
-class _PathNode {
-  final Node node;
-  final List<Node> path;
-  _PathNode(this.node, this.path);
-}

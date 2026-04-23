@@ -428,7 +428,7 @@ void main() {
 
         expect(graph.containsNode(parent.key), isTrue);
         expect(graph.containsNode(child.key), isTrue);
-        expect(graph.edges[parent], isEmpty);
+        expect(graph.edges[parent] ?? const <Node>{}, isEmpty);
       });
     });
 

@@ -9,21 +9,21 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   @override
   final Node root;
 
-  @override
-  Map<String, Node> get nodes => Map.unmodifiable(_nodes);
   final Map<String, Node> _nodes = {};
+  @override
+  late final Map<String, Node> nodes = Map.unmodifiable(_nodes);
 
   @override
   Map<String, T> get nodeData => _nodeDataManager.data;
   final INodeDataManager<T> _nodeDataManager;
 
-  @override
-  Map<Node, Set<Node>> get edges => Map.unmodifiable(_edges);
   final Map<Node, Set<Node>> _edges = {};
-
   @override
-  Map<Node, Node> get parents => Map.unmodifiable(_parents);
+  late final Map<Node, Set<Node>> edges = Map.unmodifiable(_edges);
+
   final Map<Node, Node> _parents = {};
+  @override
+  late final Map<Node, Node> parents = Map.unmodifiable(_parents);
 
 
   Graph({
@@ -239,24 +239,25 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       );
     }
 
-    // Создаем копию поддерева
+    // Создаем копию поддерева одним BFS-проходом
     final tree = Graph<T>(root: newRoot);
-    final subtree = _getSubtree(newRoot);
-
-    for (final node in subtree) {
+    final queue = Queue<Node>()..add(newRoot);
+    while (queue.isNotEmpty) {
+      final node = queue.removeFirst();
       if (node != newRoot) {
-        tree.addNode(node);
+        tree._nodes[node.key] = node;
+        final parent = _parents[node];
+        if (parent != null) {
+          tree._parents[node] = parent;
+          tree._edges.putIfAbsent(parent, () => <Node>{}).add(node);
+        }
       }
-
-      final parent = getNodeParent(node);
-      if (parent != null && subtree.contains(parent)) {
-        tree.addEdge(parent, node);
-      }
-
       final data = getNodeData(node.key);
       if (data != null) {
-        tree.updateNodeData(node.key, data);
+        tree._nodeDataManager.set(node.key, data);
       }
+      final children = _edges[node];
+      if (children != null) queue.addAll(children);
     }
 
     return tree;

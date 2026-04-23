@@ -96,6 +96,13 @@ class SubtreeView<T> implements IGraphEditable<T> {
       throw StateError('One or both nodes are not in the subtree');
     }
     originalGraph.removeEdge(parent, child);
+    // Remove child and all its descendants from tracked subtree
+    final toRemove = <Node>[child];
+    while (toRemove.isNotEmpty) {
+      final node = toRemove.removeLast();
+      _subtreeNodes.remove(node);
+      toRemove.addAll(originalGraph._childrenOf(node));
+    }
   }
 
   @override
@@ -136,7 +143,7 @@ class SubtreeView<T> implements IGraphEditable<T> {
   @override
   Set<Node> getNodeEdges(Node node) {
     if (!_subtreeNodes.contains(node)) return const <Node>{};
-    return originalGraph.getNodeEdges(node).intersection(_subtreeNodes);
+    return originalGraph.getNodeEdges(node);
   }
 
   @override

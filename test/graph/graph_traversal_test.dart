@@ -617,6 +617,44 @@ void main() {
         }
       });
 
+
+      test('view_removeEdge_removes_child_and_descendants_from_scope', () {
+        // Extend graph: node1 -> node3 -> node5
+        final node5 = Node('node5');
+        graph.addEdge(node3, node5);
+
+        final view = graph.extractSubtree(node1.key, copy: false);
+        expect(view.containsNode(node3.key), isTrue);
+        expect(view.containsNode(node5.key), isTrue);
+
+        view.removeEdge(node1, node3);
+
+        // node3 and its descendant node5 must leave the view
+        expect(view.containsNode(node3.key), isFalse);
+        expect(view.containsNode(node5.key), isFalse);
+        // node1 and node4 remain
+        expect(view.containsNode(node1.key), isTrue);
+        expect(view.containsNode(node4.key), isTrue);
+      });
+
+      test('view_removeEdge_updates_traversal_scope', () {
+        final node5 = Node('node5');
+        graph.addEdge(node3, node5);
+
+        final view = graph.extractSubtree(node1.key, copy: false);
+        view.removeEdge(node1, node3);
+
+        final visited = <String>[];
+        view.visitDepth((node) {
+          visited.add(node.key);
+          return VisitResult.continueVisit;
+        });
+
+        expect(visited, isNot(contains('node3')));
+        expect(visited, isNot(contains('node5')));
+        expect(visited, containsAll(['node1', 'node4']));
+      });
+
       test('view_visitDepth_early_stop_stays_in_subtree', () {
         final view = graph.extractSubtree(node1.key, copy: false);
         final visited = <String>[];

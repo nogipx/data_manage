@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'package:test/test.dart';
 import 'package:data_manage/src/graph/_index.dart';
 
@@ -84,8 +88,9 @@ void main() {
         expect(
           () => graph.addNode(node),
           throwsA(
-            predicate(
-                (e) => e is StateError && e.message == 'Graph already contains node "test_node"'),
+            predicate((e) =>
+                e is StateError &&
+                e.message == 'Graph already contains node "test_node"'),
           ),
           reason: 'Нельзя добавить узел с существующим ключом',
         );
@@ -115,8 +120,9 @@ void main() {
         expect(
           () => graph.removeNode(node),
           throwsA(
-            predicate(
-                (e) => e is StateError && e.message == 'Node "test_node" does not exist in graph'),
+            predicate((e) =>
+                e is StateError &&
+                e.message == 'Node "test_node" does not exist in graph'),
           ),
           reason: 'Нельзя удалить несуществующий узел',
         );
@@ -127,7 +133,8 @@ void main() {
         expect(
           () => graph.removeNode(root),
           throwsA(
-            predicate((e) => e is StateError && e.message == 'Root node cannot be removed'),
+            predicate((e) =>
+                e is StateError && e.message == 'Root node cannot be removed'),
           ),
           reason: 'Корневой узел не может быть удален',
         );
@@ -251,7 +258,8 @@ void main() {
           () => graph.addEdge(parent2, child),
           throwsA(
             predicate((e) =>
-                e is StateError && e.message == 'Node "child" already has a parent "parent1"'),
+                e is StateError &&
+                e.message == 'Node "child" already has a parent "parent1"'),
           ),
           reason: 'Узел не может иметь более одного родителя',
         );
@@ -463,7 +471,8 @@ void main() {
         throwsA(
           predicate((e) =>
               e is StateError &&
-              e.message == 'Cannot update data for non-existent node "non-existent"'),
+              e.message ==
+                  'Cannot update data for non-existent node "non-existent"'),
         ),
         reason: 'Нельзя обновить данные несуществующего узла',
       );
@@ -631,7 +640,8 @@ void main() {
       );
     });
 
-    test('maintains_parent_child_relationships_through_middle_node_removal', () {
+    test('maintains_parent_child_relationships_through_middle_node_removal',
+        () {
       // Arrange
       final parent = Node('parent');
       final middle = Node('middle');
@@ -701,8 +711,9 @@ void main() {
       expect(
         () => graph.addEdge(node3, node2),
         throwsA(
-          predicate(
-              (e) => e is StateError && e.message == 'Node "node2" already has a parent "node1"'),
+          predicate((e) =>
+              e is StateError &&
+              e.message == 'Node "node2" already has a parent "node1"'),
         ),
         reason: 'Cannot add edge to node with existing parent',
       );
@@ -757,7 +768,8 @@ void main() {
       expect(
         graph.getNodeEdges(parent).length,
         equals(1000),
-        reason: 'Граф должен корректно обрабатывать большое количество дочерних узлов',
+        reason:
+            'Граф должен корректно обрабатывать большое количество дочерних узлов',
       );
     });
 
@@ -902,10 +914,12 @@ void main() {
       );
 
       final repaired = graph.analyzeIntegrity(repair: true);
-      expect(repaired.isClean, isFalse, reason: 'Отчет фиксирует найденные проблемы');
+      expect(repaired.isClean, isFalse,
+          reason: 'Отчет фиксирует найденные проблемы');
 
       final afterRepair = graph.analyzeIntegrity();
-      expect(afterRepair.isClean, isTrue, reason: 'После ремонта граф должен быть чистым');
+      expect(afterRepair.isClean, isTrue,
+          reason: 'После ремонта граф должен быть чистым');
       expect(graph.getNodeEdges(root), isEmpty);
       expect(graph.getNodeParent(child), isNull);
     });

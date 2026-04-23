@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import '../_index.dart';
 
 abstract interface class IGraph<Data> implements IGraphData<Data> {
@@ -83,7 +87,8 @@ abstract interface class IGraphData<T> {
   String get graphString;
 }
 
-abstract interface class IGraphEditable<Data> implements IGraphData<Data>, IGraph<Data> {
+abstract interface class IGraphEditable<Data>
+    implements IGraphData<Data>, IGraph<Data> {
   void addEdge(Node first, Node second);
 
   void addNode(Node node);

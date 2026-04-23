@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'dart:async';
 
 import '../_index.dart';
@@ -8,4 +12,5 @@ IEventsSubscriptions<T> createRepositoryEventsSubscriptions<T>(
   StreamTransformer<T, T>? transformAll,
   StreamModifier<T>? modifyAll,
 }) =>
-    EventsSubscriptions<T>(repository.stream, transformAll: transformAll, modifyAll: modifyAll);
+    EventsSubscriptions<T>(repository.stream,
+        transformAll: transformAll, modifyAll: modifyAll);

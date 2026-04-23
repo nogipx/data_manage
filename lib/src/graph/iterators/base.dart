@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import '../_index.dart';
 
 /// Базовый итератор для одиночных узлов
@@ -22,7 +26,8 @@ abstract class BaseNodeIterator implements Iterator<Node> {
 }
 
 /// Базовый итератор для коллекций узлов
-abstract class BaseNodeCollectionIterator<C extends Iterable<Node>> implements Iterator<C> {
+abstract class BaseNodeCollectionIterator<C extends Iterable<Node>>
+    implements Iterator<C> {
   final IGraph<dynamic> graph;
   C? _current;
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import '../_index.dart';
 
 /// Стиль визуализации графа
@@ -30,8 +34,10 @@ extension GraphVisualization<T> on IGraph<T> {
 
     // Добавляем узлы
     for (final node in nodes.values) {
-      final nodeData = style.showNodeData ? getNodeData(node.key)?.toString() : '';
-      final label = nodeData?.isNotEmpty == true ? '${node.key}\\n$nodeData' : node.key;
+      final nodeData =
+          style.showNodeData ? getNodeData(node.key)?.toString() : '';
+      final label =
+          nodeData?.isNotEmpty == true ? '${node.key}\\n$nodeData' : node.key;
       buffer.writeln('  ${node.key}[${_escapeMermaid(label)}]');
       buffer.writeln('  style ${node.key} ${style.nodeShape}');
     }

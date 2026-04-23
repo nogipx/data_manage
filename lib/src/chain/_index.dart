@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 /// Chain of Responsibility pattern implementation with type-safe data transformation.
 ///
 /// Provides a flexible way to build data processing pipelines with:
@@ -10,7 +14,7 @@
 /// - [Chain Implementation](doc/chain/README.md)
 /// - [Advanced Chain Guide](doc/chain/ADVANCED.md)
 
-library chain;
+library;
 
 export 'impl/_index.dart';
 export 'mixins/_index.dart';

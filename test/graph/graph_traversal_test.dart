@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'package:test/test.dart';
 import 'package:data_manage/src/graph/_index.dart';
 
@@ -78,7 +82,9 @@ void main() {
 
         graph.visitDepth((node) {
           visited.add(node.key);
-          return node.key == 'node3' ? VisitResult.breakVisit : VisitResult.continueVisit;
+          return node.key == 'node3'
+              ? VisitResult.breakVisit
+              : VisitResult.continueVisit;
         });
 
         expect(
@@ -107,13 +113,15 @@ void main() {
           }
         }
 
-        expect(visited.toSet(), equals({'root', 'node1', 'node2', 'node3', 'node4'}));
+        expect(visited.toSet(),
+            equals({'root', 'node1', 'node2', 'node3', 'node4'}));
 
         for (final entry in parents.entries) {
           final parentVisitIndex = visited.indexOf(entry.value);
           final childVisitIndex = visited.indexOf(entry.key);
           expect(parentVisitIndex, lessThan(childVisitIndex),
-              reason: 'Родитель ${entry.value} должен быть посещен до потомка ${entry.key}');
+              reason:
+                  'Родитель ${entry.value} должен быть посещен до потомка ${entry.key}');
         }
       });
 
@@ -125,7 +133,8 @@ void main() {
         while (iterator.moveNext()) {
           nodesCount++;
         }
-        expect(nodesCount, equals(5), reason: 'Должно быть ровно 5 узлов в тестовом графе');
+        expect(nodesCount, equals(5),
+            reason: 'Должно быть ровно 5 узлов в тестовом графе');
 
         // Проверяем что после полного обхода итератор корректно завершается
         expect(iterator.moveNext(), isFalse,
@@ -169,7 +178,9 @@ void main() {
         graph.visitBreadth((node) {
           visited.add(node.key);
           levels[node.key] = graph.getNodeLevel(node);
-          return node.key == 'node2' ? VisitResult.breakVisit : VisitResult.continueVisit;
+          return node.key == 'node2'
+              ? VisitResult.breakVisit
+              : VisitResult.continueVisit;
         });
 
         for (var i = 0; i < visited.length - 1; i++) {
@@ -178,12 +189,14 @@ void main() {
           expect(
             nextLevel,
             greaterThanOrEqualTo(currentLevel),
-            reason: 'Каждый следующий узел должен быть на том же или более глубоком уровне',
+            reason:
+                'Каждый следующий узел должен быть на том же или более глубоком уровне',
           );
         }
       });
 
-      test('breadth_iterator_correctly_terminates_after_complete_traversal', () {
+      test('breadth_iterator_correctly_terminates_after_complete_traversal',
+          () {
         final iterator = graph.breadthIterator;
 
         // Проходим все узлы
@@ -191,7 +204,8 @@ void main() {
         while (iterator.moveNext()) {
           nodesCount++;
         }
-        expect(nodesCount, equals(5), reason: 'Должно быть ровно 5 узлов в тестовом графе');
+        expect(nodesCount, equals(5),
+            reason: 'Должно быть ровно 5 узлов в тестовом графе');
 
         // Проверяем что после полного обхода итератор корректно завершается
         expect(iterator.moveNext(), isFalse,
@@ -203,7 +217,8 @@ void main() {
 
     group('Level-Based Operations |', () {
       test('correctly calculates node levels', () {
-        expect(graph.getNodeLevel(root), equals(0), reason: 'Корень должен быть на уровне 0');
+        expect(graph.getNodeLevel(root), equals(0),
+            reason: 'Корень должен быть на уровне 0');
         expect(graph.getNodeLevel(node1), equals(1),
             reason: 'Прямые потомки корня должны быть на уровне 1');
         expect(graph.getNodeLevel(node2), equals(1),
@@ -225,7 +240,8 @@ void main() {
         };
 
         expect(depths, equals(expectedDepths),
-            reason: 'Карта глубин должна соответствовать уровням узлов в графе');
+            reason:
+                'Карта глубин должна соответствовать уровням узлов в графе');
 
         // Проверяем согласованность с getNodeLevel
         for (final node in graph.nodes.values) {
@@ -253,8 +269,10 @@ void main() {
         // Проверяем что группировка итератора совпадает с прямым расчетом уровней
         var levelIndex = 0;
         for (final levelNodes in nodesByLevel.values) {
-          expect(levels[levelIndex], equals(levelNodes.map((n) => n.key).toSet()),
-              reason: 'Группировка узлов итератором должна совпадать с их уровнями');
+          expect(
+              levels[levelIndex], equals(levelNodes.map((n) => n.key).toSet()),
+              reason:
+                  'Группировка узлов итератором должна совпадать с их уровнями');
           levelIndex++;
         }
 
@@ -266,7 +284,8 @@ void main() {
               {'node1', 'node2'},
               {'node3', 'node4'},
             ]),
-            reason: 'Узлы должны быть сгруппированы по уровням в правильном порядке');
+            reason:
+                'Узлы должны быть сгруппированы по уровням в правильном порядке');
       });
 
       test('level iterator correctly terminates after complete traversal', () {
@@ -278,7 +297,8 @@ void main() {
           levelsCount++;
         }
 
-        expect(levelsCount, equals(3), reason: 'В тестовом графе должно быть ровно 3 уровня');
+        expect(levelsCount, equals(3),
+            reason: 'В тестовом графе должно быть ровно 3 уровня');
 
         // Проверяем корректное завершение
         expect(iterator.moveNext(), isFalse,
@@ -327,7 +347,8 @@ void main() {
         expect(
           reversePath.map((n) => n.key).toList(),
           equals(['node4', 'node1', 'node3']),
-          reason: 'Путь должен корректно перестраиваться в зависимости от направления',
+          reason:
+              'Путь должен корректно перестраиваться в зависимости от направления',
         );
       });
 
@@ -340,19 +361,22 @@ void main() {
         expect(firstPass, equals(['node3', 'node1', 'node4']),
             reason: 'Первый проход должен возвращать корректный путь');
         expect(secondPass, equals(firstPass),
-            reason: 'Повторное использование Iterable должно давать те же результаты');
+            reason:
+                'Повторное использование Iterable должно давать те же результаты');
 
         final depthIterable = graph.depthNodes;
         final depthFirst = depthIterable.map((n) => n.key).toList();
         final depthSecond = depthIterable.map((n) => n.key).toList();
 
         expect(depthSecond, equals(depthFirst),
-            reason: 'Итераторы обхода должны создавать независимые последовательности');
+            reason:
+                'Итераторы обхода должны создавать независимые последовательности');
       });
 
       test('distance between nodes reflects edge count', () {
         expect(graph.getDistanceBetweenNodes(node3, node4), equals(2),
-            reason: 'Расстояние между node3 и node4 проходит через общего родителя');
+            reason:
+                'Расстояние между node3 и node4 проходит через общего родителя');
         expect(graph.getDistanceBetweenNodes(node1, node3), equals(1),
             reason: 'Родитель и ребенок разделены одним ребром');
         expect(graph.getDistanceBetweenNodes(node3, node3), equals(0),
@@ -367,10 +391,13 @@ void main() {
       });
 
       test('path utilities validate node existence', () {
-        expect(() => graph.getPathToNode(Node('ghost')), throwsA(isA<StateError>()),
+        expect(() => graph.getPathToNode(Node('ghost')),
+            throwsA(isA<StateError>()),
             reason: 'Путь до несуществующего узла должен выбрасывать ошибку');
-        expect(() => graph.getFullVerticalPath(Node('phantom')), throwsA(isA<StateError>()),
-            reason: 'Полный вертикальный путь невозможен для отсутствующего узла');
+        expect(() => graph.getFullVerticalPath(Node('phantom')),
+            throwsA(isA<StateError>()),
+            reason:
+                'Полный вертикальный путь невозможен для отсутствующего узла');
         expect(
           () => graph.getVerticalPathBetweenNodes(Node('ghost'), node1),
           throwsA(isA<StateError>()),
@@ -384,7 +411,8 @@ void main() {
       });
 
       test('subtree view enforces membership for path queries', () {
-        final subtree = graph.extractSubtree(node1.key, copy: false) as SubtreeView<String>;
+        final subtree =
+            graph.extractSubtree(node1.key, copy: false) as SubtreeView<String>;
 
         expect(
           () => subtree.getPathToNode(node2),
@@ -406,7 +434,8 @@ void main() {
             reason: 'Ближайший общий предок node3 и node4 должен быть node1');
 
         final lca2 = graph.findLowestCommonAncestor(node3, node2);
-        expect(lca2, equals(root), reason: 'Ближайший общий предок node3 и node2 должен быть root');
+        expect(lca2, equals(root),
+            reason: 'Ближайший общий предок node3 и node2 должен быть root');
 
         // Тест проверки предка
         expect(graph.isAncestor(ancestor: root, descendant: node3), isTrue,
@@ -546,13 +575,15 @@ void main() {
         final view = graph.extractSubtree(node1.key, copy: false);
 
         expect(
-          () => view.visitBreadth((_) => VisitResult.continueVisit, startNode: node2),
+          () => view.visitBreadth((_) => VisitResult.continueVisit,
+              startNode: node2),
           throwsA(isA<StateError>()),
           reason: 'Обход не должен начинаться с узла вне поддерева',
         );
 
         expect(
-          () => view.visitDepth((_) => VisitResult.continueVisit, startNode: node2),
+          () => view.visitDepth((_) => VisitResult.continueVisit,
+              startNode: node2),
           throwsA(isA<StateError>()),
           reason: 'Обход в глубину также ограничен границами поддерева',
         );
@@ -617,7 +648,6 @@ void main() {
         }
       });
 
-
       test('view_removeEdge_removes_child_and_descendants_from_scope', () {
         // Extend graph: node1 -> node3 -> node5
         final node5 = Node('node5');
@@ -661,7 +691,9 @@ void main() {
 
         view.visitDepth((node) {
           visited.add(node.key);
-          return node.key == 'node3' ? VisitResult.breakVisit : VisitResult.continueVisit;
+          return node.key == 'node3'
+              ? VisitResult.breakVisit
+              : VisitResult.continueVisit;
         });
 
         expect(visited, isNot(contains('root')));
@@ -687,13 +719,15 @@ void main() {
           while (iterator.moveNext()) {
             hasElements = true;
           }
-          expect(hasElements, isTrue, reason: '$name итератор должен вернуть хотя бы один элемент');
+          expect(hasElements, isTrue,
+              reason: '$name итератор должен вернуть хотя бы один элемент');
 
           // Проверяем корректное завершение
           expect(iterator.moveNext(), isFalse,
               reason: '$name итератор должен корректно завершиться');
           expect(iterator.moveNext(), isFalse,
-              reason: '$name итератор не должен возобновить работу после завершения');
+              reason:
+                  '$name итератор не должен возобновить работу после завершения');
         }
       });
 
@@ -704,7 +738,8 @@ void main() {
         while (depthIterator.moveNext()) {
           depthVisited.add(depthIterator.current.key);
         }
-        expect(depthVisited.toSet(), equals({'root', 'node1', 'node2', 'node3', 'node4'}),
+        expect(depthVisited.toSet(),
+            equals({'root', 'node1', 'node2', 'node3', 'node4'}),
             reason: 'DFS должен посетить все узлы');
 
         // BFS
@@ -713,7 +748,8 @@ void main() {
         while (breadthIterator.moveNext()) {
           breadthVisited.add(breadthIterator.current.key);
         }
-        expect(breadthVisited.toSet(), equals({'root', 'node1', 'node2', 'node3', 'node4'}),
+        expect(breadthVisited.toSet(),
+            equals({'root', 'node1', 'node2', 'node3', 'node4'}),
             reason: 'BFS должен посетить все узлы');
 
         // Level
@@ -763,7 +799,8 @@ void main() {
             secondRun.add(it.current);
           }
           expect(secondRun, equals(firstRun),
-              reason: 'Новый итератор должен вернуть те же элементы в том же порядке');
+              reason:
+                  'Новый итератор должен вернуть те же элементы в том же порядке');
         }
       });
     });
@@ -773,10 +810,12 @@ void main() {
         test('empty_graph_contains_only_root', () {
           graph.clear();
 
-          expect(graph.nodes.length, equals(1), reason: 'После clear должен остаться только root');
+          expect(graph.nodes.length, equals(1),
+              reason: 'После clear должен остаться только root');
           expect(graph.containsNode(root.key), isTrue,
               reason: 'Root должен сохраниться после clear');
-          expect(graph.edges.isEmpty, isTrue, reason: 'В пустом графе не должно быть рёбер');
+          expect(graph.edges.isEmpty, isTrue,
+              reason: 'В пустом графе не должно быть рёбер');
           expect(graph.parents.isEmpty, isTrue,
               reason: 'В пустом графе не должно быть связей родитель-потомок');
         });
@@ -787,7 +826,8 @@ void main() {
           // Проверяем все типы обхода на пустом графе
           final traversals = {
             'DFS': () => graph.visitDepth((node) => VisitResult.continueVisit),
-            'BFS': () => graph.visitBreadth((node) => VisitResult.continueVisit),
+            'BFS': () =>
+                graph.visitBreadth((node) => VisitResult.continueVisit),
             'Level': () => graph.levelIterator,
             'Leaves': () => graph.leavesIterator,
           };
@@ -804,7 +844,8 @@ void main() {
                 visited.addAll(levelIterator.current.map((n) => n.key));
               }
               expect(levelCount, equals(1),
-                  reason: '$name должен найти только один уровень в пустом графе');
+                  reason:
+                      '$name должен найти только один уровень в пустом графе');
             } else if (name == 'Leaves') {
               final leavesIterator = entry.value() as Iterator<Node>;
               while (leavesIterator.moveNext()) {
@@ -857,8 +898,10 @@ void main() {
           diamondGraph.addEdge(b, d);
 
           // Проверяем корректность структуры
-          expect(diamondGraph.getNodeLevel(d), equals(2), reason: 'Узел D должен быть на уровне 2');
-          expect(diamondGraph.getNodeParent(d), equals(b), reason: 'Родителем D должен быть B');
+          expect(diamondGraph.getNodeLevel(d), equals(2),
+              reason: 'Узел D должен быть на уровне 2');
+          expect(diamondGraph.getNodeParent(d), equals(b),
+              reason: 'Родителем D должен быть B');
 
           // Проверяем запрет множественных родителей
           expect(
@@ -992,7 +1035,8 @@ void main() {
 
           operationCounts['level'] = levelCount;
           expect(levelCount, equals(size + 1),
-              reason: 'Количество операций получения уровня должно быть линейным');
+              reason:
+                  'Количество операций получения уровня должно быть линейным');
         }
       });
 
@@ -1049,7 +1093,8 @@ void main() {
         }
 
         final unique = paths.map((p) => p.join('>')).toSet();
-        expect(unique.length, equals(paths.length), reason: 'Не должно быть дублирующихся путей');
+        expect(unique.length, equals(paths.length),
+            reason: 'Не должно быть дублирующихся путей');
       });
 
       test('backtrack_iterator_paths_are_valid_prefixes', () {

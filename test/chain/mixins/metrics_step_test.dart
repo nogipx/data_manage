@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'dart:async';
 import 'package:test/test.dart';
 import 'package:data_manage/src/chain/_index.dart';
@@ -22,7 +26,8 @@ void main() {
       // Assert
       expect(result.value, equals('test_processed'));
 
-      final metrics = context.getMetadata<List<StepMetrics>>(ProcessingStep.kMetricsKey)!;
+      final metrics =
+          context.getMetadata<List<StepMetrics>>(ProcessingStep.kMetricsKey)!;
       expect(metrics, hasLength(1));
       expect(metrics.first.isSuccess, isTrue);
       expect(metrics.first.duration, greaterThan(Duration.zero));
@@ -43,7 +48,8 @@ void main() {
         )),
       );
 
-      final metrics = context.getMetadata<List<StepMetrics>>(ProcessingStep.kMetricsKey)!;
+      final metrics =
+          context.getMetadata<List<StepMetrics>>(ProcessingStep.kMetricsKey)!;
       expect(metrics, hasLength(1));
       expect(metrics.first.isSuccess, isFalse);
       expect(metrics.first.duration, greaterThan(Duration.zero));
@@ -60,7 +66,8 @@ void main() {
       await step.handle(input2, context);
 
       // Assert
-      final metrics = context.getMetadata<List<StepMetrics>>(ProcessingStep.kMetricsKey)!;
+      final metrics =
+          context.getMetadata<List<StepMetrics>>(ProcessingStep.kMetricsKey)!;
       expect(metrics, hasLength(2));
       expect(metrics.every((m) => m.isSuccess), isTrue);
     });
@@ -74,7 +81,8 @@ void main() {
       await customStep.handle(input, context);
 
       // Assert
-      final metrics = context.getMetadata<List<StepMetrics>>(CustomMetricsStep.kMetricsKey)!;
+      final metrics = context
+          .getMetadata<List<StepMetrics>>(CustomMetricsStep.kMetricsKey)!;
       expect(metrics, hasLength(1));
     });
   });
@@ -104,7 +112,8 @@ class ProcessingStep extends ChainStep<TestData, ProcessedData>
   String get metricsKey => kMetricsKey;
 
   @override
-  FutureOr<ProcessedData> executeWithMetrics(TestData data, ChainContext context) {
+  FutureOr<ProcessedData> executeWithMetrics(
+      TestData data, ChainContext context) {
     if (!data.shouldSucceed) {
       throw StateError('test error');
     }
@@ -120,7 +129,8 @@ class CustomMetricsStep extends ChainStep<TestData, ProcessedData>
   String get metricsKey => kMetricsKey;
 
   @override
-  FutureOr<ProcessedData> executeWithMetrics(TestData data, ChainContext context) {
+  FutureOr<ProcessedData> executeWithMetrics(
+      TestData data, ChainContext context) {
     return ProcessedData(value: '${data.value}_processed');
   }
 }

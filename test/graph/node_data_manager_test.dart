@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'package:test/test.dart';
 import 'package:data_manage/src/graph/data/node_data_managers/simple.dart';
 import 'package:data_manage/src/graph/data/node_data_managers/lru_cache.dart';
@@ -162,7 +166,8 @@ void main() {
       manager.get('node1');
 
       expect(manager.getLeastUsedKeys(), equals(['node2', 'node3', 'node1']));
-      expect(manager.getMostRecentlyUsedKeys(), equals(['node1', 'node3', 'node2']));
+      expect(manager.getMostRecentlyUsedKeys(),
+          equals(['node1', 'node3', 'node2']));
     });
   });
 }

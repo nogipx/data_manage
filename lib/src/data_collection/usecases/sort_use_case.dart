@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import '../_index.dart';
 
 class SortUseCaseResult<T> {
@@ -37,7 +41,8 @@ class SortUseCase<T> implements DataCollectionUseCase<SortUseCaseResult<T>> {
 
     if (data.isNotEmpty) {
       final sorted = List<T>.from(data);
-      sorted.sort((a, b) => targetSort.comparator(a, b) * targetSort.direction.compareValue);
+      sorted.sort((a, b) =>
+          targetSort.comparator(a, b) * targetSort.direction.compareValue);
 
       return SortUseCaseResult(
         originalData: data,

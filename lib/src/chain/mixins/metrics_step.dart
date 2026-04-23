@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'dart:async';
 import '../_index.dart';
 
@@ -58,7 +62,8 @@ mixin MetricsStep<Input, Output> on ChainStep<Input, Output> {
 
       rethrow;
     } finally {
-      final existingMetrics = context.getMetadata<List<StepMetrics>>(metricsKey) ?? [];
+      final existingMetrics =
+          context.getMetadata<List<StepMetrics>>(metricsKey) ?? [];
       context.addMetadata(metricsKey, [...existingMetrics, metrics]);
     }
   }

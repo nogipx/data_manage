@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 part of 'graph.dart';
 
 /// Представляет собой view на поддерево существующего графа.
@@ -63,7 +67,9 @@ class SubtreeView<T> implements IGraphEditable<T> {
     return Map.fromEntries(
       _subtreeNodes.map((node) {
         final parent = originalGraph.getNodeParent(node);
-        return parent != null && _subtreeNodes.contains(parent) ? MapEntry(node, parent) : null;
+        return parent != null && _subtreeNodes.contains(parent)
+            ? MapEntry(node, parent)
+            : null;
       }).whereType<MapEntry<Node, Node>>(),
     );
   }
@@ -164,7 +170,9 @@ class SubtreeView<T> implements IGraphEditable<T> {
     if (startNode != null && !_subtreeNodes.contains(startNode)) {
       return const <Node>{};
     }
-    return originalGraph.getLeaves(startNode: startNode).intersection(_subtreeNodes);
+    return originalGraph
+        .getLeaves(startNode: startNode)
+        .intersection(_subtreeNodes);
   }
 
   @override
@@ -178,10 +186,12 @@ class SubtreeView<T> implements IGraphEditable<T> {
   Map<Node, int> getDepths() => originalGraph.getDepths();
 
   @override
-  Set<Node> getFullVerticalPath(Node node) => originalGraph.getFullVerticalPath(node);
+  Set<Node> getFullVerticalPath(Node node) =>
+      originalGraph.getFullVerticalPath(node);
 
   @override
-  Set<Node> getVerticalPathBetweenNodes(Node first, Node second, {Map<String, int>? depths}) =>
+  Set<Node> getVerticalPathBetweenNodes(Node first, Node second,
+          {Map<String, int>? depths}) =>
       originalGraph.getVerticalPathBetweenNodes(first, second, depths: depths);
 
   @override

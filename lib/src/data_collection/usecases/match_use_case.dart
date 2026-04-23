@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import '../_index.dart';
 
 class MatchUseCaseResult<T> {
@@ -87,7 +91,8 @@ class MatchUseCase<T> implements DataCollectionUseCase<MatchUseCaseResult<T>> {
     }
 
     // Если есть AND матчеры, все должны пройти
-    if (andMatchers.isNotEmpty && !andMatchers.every((e) => e.predicate(value))) {
+    if (andMatchers.isNotEmpty &&
+        !andMatchers.every((e) => e.predicate(value))) {
       return false;
     }
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import '../_index.dart';
 
 class FilterUseCaseResult<T> {
@@ -12,7 +16,8 @@ class FilterUseCaseResult<T> {
   });
 }
 
-class FilterUseCase<T> implements DataCollectionUseCase<FilterUseCaseResult<T>> {
+class FilterUseCase<T>
+    implements DataCollectionUseCase<FilterUseCaseResult<T>> {
   final Iterable<T> data;
   final Iterable<FilterAction<T>> filters;
 
@@ -41,7 +46,8 @@ class FilterUseCase<T> implements DataCollectionUseCase<FilterUseCaseResult<T>> 
       );
     }
 
-    bool composedPredicate(T item) => enabledFilters.every((e) => e.predicate(item));
+    bool composedPredicate(T item) =>
+        enabledFilters.every((e) => e.predicate(item));
 
     final filteredData = data.where(composedPredicate);
 

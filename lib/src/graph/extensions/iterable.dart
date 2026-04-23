@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import '../_index.dart';
 
 /// Extension для удобного использования итераторов в for-in циклах
@@ -18,10 +22,12 @@ extension GraphIterable<T> on IGraphIterable<T> {
   Iterable<List<Node>> get paths => _IterableGraph(() => backtrackIterator);
 
   /// Создает Iterable для пути между узлами
-  Iterable<Node> pathBetween(Node start, Node end) => _IterableGraph(() => pathIterator(start, end));
+  Iterable<Node> pathBetween(Node start, Node end) =>
+      _IterableGraph(() => pathIterator(start, end));
 
   /// Создает Iterable для поддерева
-  Iterable<Node> subtree(Node root) => _IterableGraph(() => subtreeIterator(root));
+  Iterable<Node> subtree(Node root) =>
+      _IterableGraph(() => subtreeIterator(root));
 }
 
 /// Вспомогательный класс для создания Iterable из Iterator

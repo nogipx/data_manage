@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 /// {@template iEventBase}
 /// Base interface for all application events.
 /// Provides common functionality for event data handling and equality comparison.
@@ -18,7 +22,8 @@ abstract base class IEventBase<T> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is IEventBase<T> && (data == other.data || (data == null && other.data == null));
+      other is IEventBase<T> &&
+          (data == other.data || (data == null && other.data == null));
 
   @override
   int get hashCode => data?.hashCode ?? 0;

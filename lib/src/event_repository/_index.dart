@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 /// Type-safe event handling system with automatic resource management.
 ///
 /// Provides robust event processing capabilities:
@@ -9,7 +13,7 @@
 /// For detailed documentation see:
 /// - [Event Repository Guide](doc/event_repository/README.md)
 
-library event_repository;
+library;
 
 export 'interfaces/_index.dart';
 export 'impl/_index.dart';

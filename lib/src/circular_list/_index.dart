@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 /// Fixed-size list implementation with automatic oldest element removal.
 ///
 /// Provides efficient memory usage and O(1) operations with features like:
@@ -9,6 +13,6 @@
 /// For detailed documentation see:
 /// - [CircularList Documentation](doc/circular_list/README.md)
 
-library circular_list;
+library;
 
 export 'circular_list.dart';

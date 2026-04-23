@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'package:test/test.dart';
 import 'package:data_manage/src/chain/_index.dart';
 
@@ -35,7 +39,8 @@ void main() {
 
     test('uses custom skip value when processing is skipped', () async {
       // Arrange
-      final input = TestData(value: 'test', shouldProcess: false, skipValue: 'custom_skip');
+      final input = TestData(
+          value: 'test', shouldProcess: false, skipValue: 'custom_skip');
 
       // Act
       final result = await step.handle(input, context);
@@ -47,7 +52,8 @@ void main() {
     test('considers context state in decision making', () async {
       // Arrange
       context.addMetadata('feature_enabled', true);
-      final input = TestData(value: 'test', shouldProcess: true, requiresFeature: true);
+      final input =
+          TestData(value: 'test', shouldProcess: true, requiresFeature: true);
 
       // Act
       final result = await step.handle(input, context);
@@ -83,7 +89,8 @@ class ProcessingStep extends ChainStep<TestData, ProcessedData>
   @override
   bool shouldExecute(TestData data, ChainContext context) {
     if (data.requiresFeature) {
-      return data.shouldProcess && (context.getMetadata<bool>('feature_enabled') ?? false);
+      return data.shouldProcess &&
+          (context.getMetadata<bool>('feature_enabled') ?? false);
     }
     return data.shouldProcess;
   }

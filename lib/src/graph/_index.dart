@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 /// Efficient directed tree implementation with strict hierarchy validation.
 ///
 /// Provides a robust graph/tree structure with features like:
@@ -10,7 +14,7 @@
 /// - [Graph Implementation](doc/graph/README.md)
 /// - [Advanced Graph Guide](doc/graph/ADVANCED.md)
 
-library graph;
+library;
 
 export 'contracts/_index.dart';
 export 'data/_index.dart';

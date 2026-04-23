@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'dart:async';
 
 import '../interfaces/_index.dart';
@@ -30,7 +34,8 @@ mixin EventRepositoryMixin<E> implements IEventRepository<E> {
   /// Errors in event handlers are caught and forwarded to the subscriber's
   /// error handler (if provided).
   @override
-  Stream<T> on<T extends E>() => _controller.stream.where((event) => event is T).cast<T>();
+  Stream<T> on<T extends E>() =>
+      _controller.stream.where((event) => event is T).cast<T>();
 
   /// Adds a new event to the repository's stream.
   ///

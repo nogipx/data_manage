@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'dart:collection';
 
 import 'package:data_manage/src/graph/_index.dart';
@@ -688,8 +692,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   @override
   GraphIntegrityReport analyzeIntegrity({bool repair = false}) {
     final issues = <GraphIntegrityIssue>[];
-    var mutated = false;
-
     final edgeEntries = _edges.entries.toList();
     for (final entry in edgeEntries) {
       final parent = entry.key;
@@ -710,7 +712,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
             _removeParentLinkForKey(child.key, expectedParent: parent);
           }
           _edges.remove(parent);
-          mutated = true;
         }
         continue;
       }
@@ -730,7 +731,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
           );
           if (repair) {
             _removeParentLinkForKey(child.key, expectedParent: canonicalParent);
-            mutated = true;
           }
           continue;
         }
@@ -743,7 +743,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
               !identical(canonicalParent, parent))) {
         _edges.remove(parent);
         _edges[canonicalParent] = sanitizedChildren;
-        mutated = true;
       }
     }
 
@@ -766,7 +765,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
         );
         if (repair) {
           _parents.remove(child);
-          mutated = true;
         }
         continue;
       }
@@ -783,7 +781,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
         );
         if (repair) {
           _parents.remove(child);
-          mutated = true;
         }
         continue;
       }
@@ -802,7 +799,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
         );
         if (repair) {
           _parents.remove(child);
-          mutated = true;
         }
       }
     }

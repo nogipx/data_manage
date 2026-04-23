@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'dart:async';
 
 import 'package:test/test.dart';
@@ -44,7 +48,8 @@ void main() {
         final receivedEvents = StreamController<NumericTestEvent>();
 
         // Act
-        final subscription = sut.on<NumericTestEvent>().listen(receivedEvents.add);
+        final subscription =
+            sut.on<NumericTestEvent>().listen(receivedEvents.add);
         sut.addEvent(event: targetEvent);
         sut.addEvent(event: noiseEvent);
 
@@ -94,7 +99,8 @@ void main() {
         final receivedEvents = <NumericTestEvent>[];
 
         // Act
-        final subscription = sut.subscribe<NumericTestEvent>((e) => receivedEvents.add(e));
+        final subscription =
+            sut.subscribe<NumericTestEvent>((e) => receivedEvents.add(e));
         repository.addEvent(event: event);
 
         // Assert
@@ -111,7 +117,8 @@ void main() {
         final receivedEvents = <NumericTestEvent>[];
 
         // Act
-        final subscription = sut.subscribe<NumericTestEvent>((e) => receivedEvents.add(e));
+        final subscription =
+            sut.subscribe<NumericTestEvent>((e) => receivedEvents.add(e));
         sut.cancel<NumericTestEvent>();
         repository.addEvent(event: event);
 

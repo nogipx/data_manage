@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 class SortAction<T> {
   final Comparator<T> comparator;
   final SortDirection direction;
@@ -23,7 +27,8 @@ class SortAction<T> {
       );
 
   @override
-  bool operator ==(Object other) => other is SortAction<T> && comparator == other.comparator;
+  bool operator ==(Object other) =>
+      other is SortAction<T> && comparator == other.comparator;
 
   @override
   int get hashCode => Object.hashAll([comparator]);

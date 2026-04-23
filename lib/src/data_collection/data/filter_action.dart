@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import '../_index.dart';
 
 class FilterAction<T> {
@@ -13,7 +17,9 @@ class FilterAction<T> {
 
   @override
   bool operator ==(Object other) =>
-      other is FilterAction<T> && key == other.key && predicate == other.predicate;
+      other is FilterAction<T> &&
+      key == other.key &&
+      predicate == other.predicate;
 
   @override
   int get hashCode => Object.hashAll([key, predicate]);

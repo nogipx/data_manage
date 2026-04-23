@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'dart:async';
 
 import 'context.dart';
@@ -49,7 +53,8 @@ class Chain<Initial, Final> {
   List<StepState<dynamic, dynamic>> get history => List.unmodifiable(_history);
 
   /// Validates type compatibility between steps at runtime
-  void _validateStepTypes<StepInput, StepOutput>(ChainStep<StepInput, StepOutput> step) {
+  void _validateStepTypes<StepInput, StepOutput>(
+      ChainStep<StepInput, StepOutput> step) {
     if (_steps.isEmpty) {
       if (step.inputType != Initial) {
         throw ArgumentError(

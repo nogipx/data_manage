@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Karim "nogipx" Mamatkazin <nogipx@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+
 import 'dart:collection';
 
 import '../_index.dart';
@@ -144,10 +148,12 @@ class DataCollection<T> {
       _chainProcessData(
         useOriginalData: true,
         newMatchers: newMatchers != null
-            ? UnmodifiableMapView(Map.fromEntries(newMatchers.map((e) => MapEntry(e.key, e))))
+            ? UnmodifiableMapView(
+                Map.fromEntries(newMatchers.map((e) => MapEntry(e.key, e))))
             : null,
         newFilters: newFilters != null
-            ? UnmodifiableMapView(Map.fromEntries(newFilters.map((e) => MapEntry(e.key, e))))
+            ? UnmodifiableMapView(
+                Map.fromEntries(newFilters.map((e) => MapEntry(e.key, e))))
             : null,
         newSort: newSort ?? _getSortToApply(resetSort),
       );
@@ -260,8 +266,10 @@ class DataCollection<T> {
       sort: newSort ?? currentState.sort ?? defaultSort,
     );
 
-    final hasMatchersChanged = !_mapEquals(newState.matchers, currentState.matchers);
-    final hasFiltersChanged = !_mapEquals(newState.filters, currentState.filters);
+    final hasMatchersChanged =
+        !_mapEquals(newState.matchers, currentState.matchers);
+    final hasFiltersChanged =
+        !_mapEquals(newState.filters, currentState.filters);
 
     if (hasMatchersChanged || useOriginalData) {
       final matchResult = MatchUseCase(
@@ -347,11 +355,15 @@ class DataCollection<T> {
     return a.entries.every((e) => b.containsKey(e.key) && b[e.key] == e.value);
   }
 
-  static Map<String, MatchAction<T>> _preprocessMatchers<T>(List<MatchAction<T>> matchers) {
-    return UnmodifiableMapView(Map.fromEntries(matchers.map((e) => MapEntry(e.key, e))));
+  static Map<String, MatchAction<T>> _preprocessMatchers<T>(
+      List<MatchAction<T>> matchers) {
+    return UnmodifiableMapView(
+        Map.fromEntries(matchers.map((e) => MapEntry(e.key, e))));
   }
 
-  static Map<String, FilterAction<T>> _preprocessFilters<T>(List<FilterAction<T>> filters) {
-    return UnmodifiableMapView(Map.fromEntries(filters.map((e) => MapEntry(e.key, e))));
+  static Map<String, FilterAction<T>> _preprocessFilters<T>(
+      List<FilterAction<T>> filters) {
+    return UnmodifiableMapView(
+        Map.fromEntries(filters.map((e) => MapEntry(e.key, e))));
   }
 }

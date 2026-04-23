@@ -191,33 +191,29 @@ void main() {
       setUp(() {
         parent = Node('parent');
         child = Node('child');
+        graph.addNode(parent);
       });
 
-      test('adding_edge_automatically_creates_missing_nodes', () {
-        // Act
+      test('adding_edge_automatically_creates_missing_child', () {
+        // parent is already in graph (setUp), child is not
         graph.addEdge(parent, child);
 
-        // Assert
+        expect(graph.nodes.length, equals(3),
+            reason: 'root + parent + auto-created child');
+        expect(graph.parents[child], equals(parent));
+      });
+
+      test('adding_edge_throws_if_parent_not_in_graph', () {
+        final unknownParent = Node('unknown');
         expect(
-          graph.nodes.length,
-          equals(3),
-          reason: 'Должно быть 3 узла: root + parent + child',
-        );
-        expect(
-          graph.edgesWithEmptySets[parent],
-          contains(child),
-          reason: 'Должно быть создано ребро от parent к child',
-        );
-        expect(
-          graph.parents[child],
-          equals(parent),
-          reason: 'У child должен быть установлен правильный родитель',
+          () => graph.addEdge(unknownParent, child),
+          throwsStateError,
+          reason: 'Parent must exist in graph before addEdge',
         );
       });
 
       test('adding_edge_between_existing_nodes_preserves_node_count', () {
-        // Arrange
-        graph.addNode(parent);
+        // Arrange (parent already in graph from setUp)
         graph.addNode(child);
 
         // Act
@@ -246,6 +242,8 @@ void main() {
         final parent1 = Node('parent1');
         final parent2 = Node('parent2');
         final child = Node('child');
+        graph.addNode(parent1);
+        graph.addNode(parent2);
         graph.addEdge(parent1, child);
 
         // Act & Assert
@@ -323,6 +321,7 @@ void main() {
         final node1 = Node('node1');
         final node2 = Node('node2');
 
+        graph.addNode(node1);
         graph.addEdge(node1, node2);
 
         // Act & Assert
@@ -339,7 +338,7 @@ void main() {
         final child1 = Node('child1');
         final child2 = Node('child2');
 
-        graph.addNode(parent);
+        // parent already in graph (Edge Operations setUp)
         graph.addNode(child1);
         graph.addNode(child2);
 
@@ -393,36 +392,24 @@ void main() {
         expect(graph.getNodeParent(child), isNull);
       });
 
-      test('adds_edge_with_new_nodes_automatically', () {
-        // Arrange
-        final parent = Node('parent');
-        final child = Node('child');
-
-        // Act
+      test('adds_edge_auto_creates_child_but_requires_parent', () {
+        // parent is pre-added in setUp; only child is auto-created
         graph.addEdge(parent, child);
 
-        // Assert
-        expect(
-          graph.containsNode(parent.key),
-          isTrue,
-          reason: 'Родительский узел должен быть автоматически добавлен',
-        );
-        expect(
-          graph.containsNode(child.key),
-          isTrue,
-          reason: 'Дочерний узел должен быть автоматически добавлен',
-        );
-        expect(
-          graph.parents[child],
-          equals(parent),
-          reason: 'Должна быть установлена корректная связь parent -> child',
-        );
+        expect(graph.containsNode(parent.key), isTrue);
+        expect(graph.containsNode(child.key), isTrue);
+        expect(graph.parents[child], equals(parent));
+
+        // Parent not in graph must throw
+        final stranger = Node('stranger');
+        expect(() => graph.addEdge(stranger, Node('x')), throwsStateError);
       });
 
       test('remove_edge_keeps_nodes', () {
         final parent = Node('parent');
         final child = Node('child');
 
+        // parent already in graph from setUp
         graph.addEdge(parent, child);
         graph.removeEdge(parent, child);
 
@@ -436,6 +423,7 @@ void main() {
       test('clear_graph', () {
         final node1 = Node('node1');
         final node2 = Node('node2');
+        graph.addNode(node1);
         graph.addEdge(node1, node2);
         graph.updateNodeData(node1.key, 'data1');
 
@@ -601,6 +589,7 @@ void main() {
       final child2 = Node('child2');
 
       // Act
+      graph.addNode(parent);
       graph.addEdge(parent, child1);
       graph.addEdge(parent, child2);
 
@@ -622,6 +611,7 @@ void main() {
       final parent = Node('parent');
       final child1 = Node('child1');
       final child2 = Node('child2');
+      graph.addNode(parent);
       graph.addEdge(parent, child1);
       graph.addEdge(parent, child2);
 
@@ -647,6 +637,7 @@ void main() {
       final middle = Node('middle');
       final child = Node('child');
 
+      graph.addNode(parent);
       graph.addEdge(parent, middle);
       graph.addEdge(middle, child);
 
@@ -690,6 +681,7 @@ void main() {
       final node3 = Node('node3');
 
       // Добавляем первое ребро
+      graph.addNode(node1);
       graph.addEdge(node1, node2);
 
       expect(
@@ -705,6 +697,7 @@ void main() {
       );
 
       // Пытаемся добавить второго родителя к node2
+      graph.addNode(node3);
       expect(
         () => graph.addEdge(node3, node2),
         throwsA(
@@ -755,6 +748,7 @@ void main() {
       final children = List.generate(1000, (i) => Node('child$i'));
 
       // Act
+      graph.addNode(parent);
       for (final child in children) {
         graph.addEdge(parent, child);
       }
@@ -816,6 +810,7 @@ void main() {
       // Arrange
       final parent = Node('parent');
       final children = List.generate(10, (i) => Node('child$i'));
+      graph.addNode(parent);
       for (final child in children) {
         graph.addEdge(parent, child);
       }

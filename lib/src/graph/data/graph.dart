@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:data_manage/src/graph/_index.dart';
 
 import 'node_data_managers/_index.dart';
+
 part 'subtree_view.dart';
 
 class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
@@ -24,7 +25,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   final Map<Node, Node> _parents = {};
   @override
   late final Map<Node, Node> parents = Map.unmodifiable(_parents);
-
 
   Graph({
     required this.root,
@@ -68,9 +68,11 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     }
 
     if (!containsNode(parent.key)) {
-      addNode(parent);
+      throw StateError('Parent node "${parent.key}" does not exist in graph');
     }
-    if (!containsNode(child.key)) {
+
+    final childIsNew = !containsNode(child.key);
+    if (childIsNew) {
       addNode(child);
     }
 
@@ -81,8 +83,10 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       );
     }
 
-    // Проверяем, не создаст ли новое ребро цикл
-    if (_wouldCreateCycle(parent, child)) {
+    // Cycle is only possible when child already existed in graph (floating node).
+    // A brand-new child cannot be ancestor of anything → skip check → O(1).
+    // Reconnecting a floating node (rare) requires O(depth) check.
+    if (!childIsNew && _wouldCreateCycle(parent, child)) {
       throw StateError('Cannot create cycle');
     }
 
@@ -92,7 +96,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   }
 
   bool _wouldCreateCycle(Node parent, Node child) {
-    // Проверяем, не является ли child предком parent
     Node? current = parent;
     while (current != null) {
       if (current == child) return true;
@@ -142,7 +145,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
     }
 
     if (!_edges.containsKey(parent) || !_edges[parent]!.contains(child)) {
-      throw StateError('Edge between "${parent.key}" and "${child.key}" does not exist');
+      throw StateError(
+          'Edge between "${parent.key}" and "${child.key}" does not exist');
     }
 
     _parents.remove(child);
@@ -384,7 +388,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
   Iterator<List<Node>> get backtrackIterator => BacktrackIterator(this);
 
   @override
-  Iterator<Node> pathIterator(Node start, Node end) => PathIterator(this, start, end);
+  Iterator<Node> pathIterator(Node start, Node end) =>
+      PathIterator(this, start, end);
 
   @override
   Iterator<Node> subtreeIterator(Node root) {
@@ -397,7 +402,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       FilteredIterator(source, predicate);
 
   @override
-  Iterator<R> mapped<R>(Iterator<T> source, R Function(T) mapper) => MappedIterator(source, mapper);
+  Iterator<R> mapped<R>(Iterator<T> source, R Function(T) mapper) =>
+      MappedIterator(source, mapper);
 
   /// Создает Iterable для пути между узлами
   Iterable<Node> pathBetween(Node start, Node end) {
@@ -492,7 +498,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       }
     }
   }
-
 
   // ==================================
   // МЕТОДЫ ДОСТУПА К СТРУКТУРЕ
@@ -784,7 +789,8 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
       }
 
       final childrenOfParent = _edges[canonicalParent];
-      if (childrenOfParent == null || !childrenOfParent.contains(canonicalChild)) {
+      if (childrenOfParent == null ||
+          !childrenOfParent.contains(canonicalChild)) {
         issues.add(
           GraphIntegrityIssue(
             type: GraphIntegrityIssueType.inconsistentParentLink,
@@ -800,7 +806,6 @@ class Graph<T> implements IGraph<T>, IGraphEditable<T>, IGraphIterable<T> {
         }
       }
     }
-
 
     return GraphIntegrityReport(issues: issues);
   }
@@ -839,4 +844,3 @@ class _NodeWithLevel {
   final int level;
   _NodeWithLevel(this.node, this.level);
 }
-
